@@ -25,10 +25,15 @@ help:
 	@echo "  linkcheck to check all external links for integrity"
 	@echo "  watch     build HTML docs, open in browser and watch for changes"
 
-
-build: 
+build-dirs:
 	mkdir -p build/$(BUILDER) build/doctrees
+
+build: build-dirs
 	sphinx-build $(ALLSPHINXOPTS)
+	@echo
+
+build-ignore-errors: build-dirs
+	-sphinx-build $(ALLSPHINXOPTS)
 	@echo
 
 
@@ -60,7 +65,8 @@ linkcheck: build
 	@echo "Link check complete; look for any errors in the above output " \
 	      "or in build/$(BUILDER)/output.txt"
 
-linkfix: linkcheck
+linkfix: BUILDER = linkcheck
+linkfix: build-ignore-errors
 	$(PYTHON) utils/linkfix.py
 	@echo "Fixing redirecting links in docs has finished; check all " \
 	      "replacements before committing them"
