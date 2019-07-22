@@ -232,7 +232,11 @@ class UtilsPythonTestCase(unittest.TestCase):
             self.assertEqual(get_func_args(operator.itemgetter(2)), [])
         else:
             self.assertEqual(
+<<<<<<< HEAD
                 get_func_args(str.split, True), ['sep', 'maxsplit'])
+=======
+                get_func_args(six.text_type.split, True), ['sep', 'maxsplit'])
+>>>>>>> Remove six.PY2 and six.PY3 conditionals.
             self.assertEqual(get_func_args(" ".join, True), ['list'])
             self.assertEqual(
                 get_func_args(operator.itemgetter(2), True), ['obj'])
