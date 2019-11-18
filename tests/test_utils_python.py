@@ -5,6 +5,7 @@ import unittest
 from itertools import count
 import platform
 import six
+from warnings import catch_warnings
 
 from scrapy.utils.python import (
     memoizemethod_noargs, binary_is_text, equal_attributes,
