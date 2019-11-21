@@ -283,3 +283,9 @@ intersphinx_mapping = {
     'sphinx': ('https://www.sphinx-doc.org/en/master', None),
     'twisted': ('https://twistedmatrix.com/documents/current', None),
 }
+
+
+# Options for sphinx-hoverxref options
+# ------------------------------------
+
+hoverxref_auto_ref = True
