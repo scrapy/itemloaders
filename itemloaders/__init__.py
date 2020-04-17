@@ -140,6 +140,7 @@ class ItemLoader:
         for field_name in tuple(self._values):
             value = self.get_output_value(field_name)
             if value is not None:
+                print(type(value))
                 item[field_name] = value
 
         return item

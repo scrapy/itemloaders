@@ -1,7 +1,10 @@
 """
-Copy/áste from scrapy source at the moment, to ensure tests are working.
+Copy/paste from scrapy source at the moment, to ensure tests are working.
 Refactoring to come later
 """
+from functools import partial
+import inspect
+
 
 _ITERABLE_SINGLE_VALUES = dict, str, bytes
 
@@ -125,3 +128,20 @@ def get_func_args(func, stripself=False):
     if stripself:
         func_args.pop(0)
     return func_args
+
+
+def _getargspec_py23(func):
+    """_getargspec_py23(function) -> named tuple ArgSpec(args, varargs, keywords,
+                                                        defaults)
+
+    Was identical to inspect.getargspec() in python2, but uses
+    inspect.getfullargspec() for python3 behind the scenes to avoid
+    DeprecationWarning.
+
+    >>> def f(a, b=2, *ar, **kw):
+    ...     pass
+
+    >>> _getargspec_py23(f)
+    ArgSpec(args=['a', 'b'], varargs='ar', keywords='kw', defaults=(2,))
+    """
+    return inspect.ArgSpec(*inspect.getfullargspec(func)[:4])
