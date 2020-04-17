@@ -403,3 +403,210 @@ class BasicItemLoaderTest(unittest.TestCase):
         il = TestItemLoader()
         self.assertRaises(ValueError, il.add_value, 'name',
                           ['marta', 'other'], Compose(float))
+
+
+class InitializationTestMixin:
+
+    item_class = None
+
+    def test_keep_single_value(self):
+        """Loaded item should contain values from the initial item"""
+        input_item = self.item_class(name='foo')
+        il = ItemLoader(item=input_item)
+        loaded_item = il.load_item()
+        self.assertIsInstance(loaded_item, self.item_class)
+        self.assertEqual(dict(loaded_item), {'name': ['foo']})
+
+    def test_keep_list(self):
+        """Loaded item should contain values from the initial item"""
+        input_item = self.item_class(name=['foo', 'bar'])
+        il = ItemLoader(item=input_item)
+        loaded_item = il.load_item()
+        self.assertIsInstance(loaded_item, self.item_class)
+        self.assertEqual(dict(loaded_item), {'name': ['foo', 'bar']})
+
+    def test_add_value_singlevalue_singlevalue(self):
+        """Values added after initialization should be appended"""
+        input_item = self.item_class(name='foo')
+        il = ItemLoader(item=input_item)
+        il.add_value('name', 'bar')
+        loaded_item = il.load_item()
+        self.assertIsInstance(loaded_item, self.item_class)
+        self.assertEqual(dict(loaded_item), {'name': ['foo', 'bar']})
+
+    def test_add_value_singlevalue_list(self):
+        """Values added after initialization should be appended"""
+        input_item = self.item_class(name='foo')
+        il = ItemLoader(item=input_item)
+        il.add_value('name', ['item', 'loader'])
+        loaded_item = il.load_item()
+        self.assertIsInstance(loaded_item, self.item_class)
+        self.assertEqual(dict(loaded_item), {'name': ['foo', 'item', 'loader']})
+
+    def test_add_value_list_singlevalue(self):
+        """Values added after initialization should be appended"""
+        input_item = self.item_class(name=['foo', 'bar'])
+        il = ItemLoader(item=input_item)
+        il.add_value('name', 'qwerty')
+        loaded_item = il.load_item()
+        self.assertIsInstance(loaded_item, self.item_class)
+        self.assertEqual(dict(loaded_item), {'name': ['foo', 'bar', 'qwerty']})
+
+    def test_add_value_list_list(self):
+        """Values added after initialization should be appended"""
+        input_item = self.item_class(name=['foo', 'bar'])
+        il = ItemLoader(item=input_item)
+        il.add_value('name', ['item', 'loader'])
+        loaded_item = il.load_item()
+        self.assertIsInstance(loaded_item, self.item_class)
+        self.assertEqual(dict(loaded_item), {'name': ['foo', 'bar', 'item', 'loader']})
+
+    def test_get_output_value_singlevalue(self):
+        """Getting output value must not remove value from item"""
+        input_item = self.item_class(name='foo')
+        il = ItemLoader(item=input_item)
+        self.assertEqual(il.get_output_value('name'), ['foo'])
+        loaded_item = il.load_item()
+        self.assertIsInstance(loaded_item, self.item_class)
+        self.assertEqual(loaded_item, dict({'name': ['foo']}))
+
+    def test_get_output_value_list(self):
+        """Getting output value must not remove value from item"""
+        input_item = self.item_class(name=['foo', 'bar'])
+        il = ItemLoader(item=input_item)
+        self.assertEqual(il.get_output_value('name'), ['foo', 'bar'])
+        loaded_item = il.load_item()
+        self.assertIsInstance(loaded_item, self.item_class)
+        self.assertEqual(loaded_item, dict({'name': ['foo', 'bar']}))
+
+    def test_values_single(self):
+        """Values from initial item must be added to loader._values"""
+        input_item = self.item_class(name='foo')
+        il = ItemLoader(item=input_item)
+        self.assertEqual(il._values.get('name'), ['foo'])
+
+    def test_values_list(self):
+        """Values from initial item must be added to loader._values"""
+        input_item = self.item_class(name=['foo', 'bar'])
+        il = ItemLoader(item=input_item)
+        self.assertEqual(il._values.get('name'), ['foo', 'bar'])
+
+
+class InitializationFromDictTest(InitializationTestMixin, unittest.TestCase):
+    item_class = dict
+
+
+class BaseNoInputReprocessingLoader(ItemLoader):
+    title_in = MapCompose(str.upper)
+    title_out = TakeFirst()
+
+
+class NoInputReprocessingDictLoader(BaseNoInputReprocessingLoader):
+    default_item_class = dict
+
+
+class NoInputReprocessingFromDictTest(unittest.TestCase):
+    """
+    Loaders initialized from loaded items must not reprocess fields (dict instances)
+    """
+    def test_avoid_reprocessing_with_initial_values_single(self):
+        il = NoInputReprocessingDictLoader(item=dict(title='foo'))
+        il_loaded = il.load_item()
+        self.assertEqual(il_loaded, dict(title='foo'))
+        self.assertEqual(NoInputReprocessingDictLoader(item=il_loaded).load_item(), dict(title='foo'))
+
+    def test_avoid_reprocessing_with_initial_values_list(self):
+        il = NoInputReprocessingDictLoader(item=dict(title=['foo', 'bar']))
+        il_loaded = il.load_item()
+        self.assertEqual(il_loaded, dict(title='foo'))
+        self.assertEqual(NoInputReprocessingDictLoader(item=il_loaded).load_item(), dict(title='foo'))
+
+    def test_avoid_reprocessing_without_initial_values_single(self):
+        il = NoInputReprocessingDictLoader()
+        il.add_value('title', 'foo')
+        il_loaded = il.load_item()
+        self.assertEqual(il_loaded, dict(title='FOO'))
+        self.assertEqual(NoInputReprocessingDictLoader(item=il_loaded).load_item(), dict(title='FOO'))
+
+    def test_avoid_reprocessing_without_initial_values_list(self):
+        il = NoInputReprocessingDictLoader()
+        il.add_value('title', ['foo', 'bar'])
+        il_loaded = il.load_item()
+        self.assertEqual(il_loaded, dict(title='FOO'))
+        self.assertEqual(NoInputReprocessingDictLoader(item=il_loaded).load_item(), dict(title='FOO'))
+
+
+class TestOutputProcessorDict(unittest.TestCase):
+    def test_output_processor(self):
+
+        class TempDict(dict):
+            def __init__(self, *args, **kwargs):
+                super(TempDict, self).__init__(self, *args, **kwargs)
+                self.setdefault('temp', 0.3)
+
+        class TempLoader(ItemLoader):
+            default_item_class = TempDict
+            default_input_processor = Identity()
+            default_output_processor = Compose(TakeFirst())
+
+        loader = TempLoader()
+        item = loader.load_item()
+        self.assertIsInstance(item, TempDict)
+        self.assertEqual(dict(item), {'temp': 0.3})
+
+
+class TestOutputProcessorItem(unittest.TestCase):
+    def test_output_processor(self):
+        class TempLoader(ItemLoader):
+            default_input_processor = Identity()
+            default_output_processor = Compose(TakeFirst())
+
+        item = dict()
+        item.setdefault('temp', 0.3)
+        loader = TempLoader(item=item)
+        item = loader.load_item()
+        self.assertIsInstance(item, dict)
+        self.assertEqual(dict(item), {'temp': 0.3})
+
+
+class ProcessorsTest(unittest.TestCase):
+
+    def test_take_first(self):
+        proc = TakeFirst()
+        self.assertEqual(proc([None, '', 'hello', 'world']), 'hello')
+        self.assertEqual(proc([None, '', 0, 'hello', 'world']), 0)
+
+    def test_identity(self):
+        proc = Identity()
+        self.assertEqual(proc([None, '', 'hello', 'world']),
+                         [None, '', 'hello', 'world'])
+
+    def test_join(self):
+        proc = Join()
+        self.assertRaises(TypeError, proc, [None, '', 'hello', 'world'])
+        self.assertEqual(proc(['', 'hello', 'world']), u' hello world')
+        self.assertEqual(proc(['hello', 'world']), u'hello world')
+        self.assertIsInstance(proc(['hello', 'world']), str)
+
+    def test_compose(self):
+        proc = Compose(lambda v: v[0], str.upper)
+        self.assertEqual(proc(['hello', 'world']), 'HELLO')
+        proc = Compose(str.upper)
+        self.assertEqual(proc(None), None)
+        proc = Compose(str.upper, stop_on_none=False)
+        self.assertRaises(ValueError, proc, None)
+        proc = Compose(str.upper, lambda x: x + 1)
+        self.assertRaises(ValueError, proc, 'hello')
+
+    def test_mapcompose(self):
+        def filter_world(x):
+            return None if x == 'world' else x
+        proc = MapCompose(filter_world, str.upper)
+        self.assertEqual(proc([u'hello', u'world', u'this', u'is', u'scrapy']),
+                         [u'HELLO', u'THIS', u'IS', u'SCRAPY'])
+        proc = MapCompose(filter_world, str.upper)
+        self.assertEqual(proc(None), [])
+        proc = MapCompose(filter_world, str.upper)
+        self.assertRaises(ValueError, proc, [1])
+        proc = MapCompose(filter_world, lambda x: x + 1)
+        self.assertRaises(ValueError, proc, 'hello')
