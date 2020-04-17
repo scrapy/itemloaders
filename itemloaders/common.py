@@ -1,7 +1,7 @@
 """Common functions used in Item Loaders code"""
 
 from functools import partial
-from scrapy.utils.python import get_func_args
+from itemloaders.utils import get_func_args
 
 
 def wrap_loader_context(function, context):

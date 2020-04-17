@@ -6,12 +6,21 @@ See documentation in docs/topics/loaders.rst
 from collections import defaultdict
 from contextlib import suppress
 
-from scrapy.item import Item
-from scrapy.loader.common import wrap_loader_context
-from scrapy.loader.processors import Identity
-from scrapy.selector import Selector
-from scrapy.utils.misc import arg_to_iter, extract_regex
-from scrapy.utils.python import flatten
+from itemloaders.common import wrap_loader_context
+from itemloaders.processors import Identity
+from itemloaders.utils import arg_to_iter, extract_regex, flatten
+
+
+class Item:
+    pass
+
+
+class Field:
+    pass
+
+
+class Selector:
+    pass
 
 
 def unbound_method(method):
