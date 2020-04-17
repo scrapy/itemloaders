@@ -1,31 +1,24 @@
 from functools import partial
 import unittest
 
-from itemloaders import ItemLoader, Item, Field, Selector
+from itemloaders import ItemLoader
 from itemloaders.processors import (Compose, Identity, Join,
                                       MapCompose, SelectJmes, TakeFirst)
 
 
-class NameItem:
-    name: str
-
-
-class UrlSummaryItem:
-    url: str
-    summary: str
-
-
-# test item loaders
-class NameItemLoader(ItemLoader):
-    default_item_class = UrlSummaryItem
-
-
-class TestItemLoader(NameItemLoader):
+class TestItemLoader(ItemLoader):
     name_in = MapCompose(lambda v: v.title())
 
 
-class DefaultedItemLoader(NameItemLoader):
+class DefaultedItemLoader(ItemLoader):
     default_input_processor = MapCompose(lambda v: v[:-1])
+
+
+# test processors
+def processor_with_args(value, other=None, loader_context=None):
+    if 'key' in loader_context:
+        return loader_context['key']
+    return value
 
 
 class BasicItemLoaderTest(unittest.TestCase):
@@ -33,399 +26,380 @@ class BasicItemLoaderTest(unittest.TestCase):
     def test_load_item_using_default_loader(self):
         i = dict(summary='lala')
         il = ItemLoader(item=i)
-        il.add_value('name', u'marta')
+        il.add_value('name', 'marta')
         item = il.load_item()
         assert item is i
         assert item['summary'] == ['lala']
         assert item['name'] == ['marta']
 
-    # def test_load_item_using_custom_loader(self):
-    #     il = TestItemLoader()
-    #     il.add_value('name', u'marta')
-    #     item = il.load_item()
-    #     self.assertEqual(item['name'], [u'Marta'])
+    def test_load_item_using_custom_loader(self):
+        il = TestItemLoader()
+        il.add_value('name', 'marta')
+        item = il.load_item()
+        assert item['name'] == ['Marta']
 
-    # def test_load_item_ignore_none_field_values(self):
-    #     def validate_sku(value):
-    #         # Let's assume a SKU is only digits.
-    #         if value.isdigit():
-    #             return value
+    def test_load_item_ignore_none_field_values(self):
+        def validate_sku(value):
+            # Let's assume a SKU is only digits.
+            if value.isdigit():
+                return value
 
-    #     class MyLoader(ItemLoader):
-    #         name_out = Compose(lambda vs: vs[0])  # take first which allows empty values
-    #         price_out = Compose(TakeFirst(), float)
-    #         sku_out = Compose(TakeFirst(), validate_sku)
+        class MyLoader(ItemLoader):
+            name_out = Compose(lambda vs: vs[0])  # take first which allows empty values
+            price_out = Compose(TakeFirst(), float)
+            sku_out = Compose(TakeFirst(), validate_sku)
 
-    #     valid_fragment = u'SKU: 1234'
-    #     invalid_fragment = u'SKU: not available'
-    #     sku_re = 'SKU: (.+)'
+        valid_fragment = 'SKU: 1234'
+        invalid_fragment = 'SKU: not available'
+        sku_re = 'SKU: (.+)'
 
-    #     il = MyLoader(item={})
-    #     # Should not return "sku: None".
-    #     il.add_value('sku', [invalid_fragment], re=sku_re)
-    #     # Should not ignore empty values.
-    #     il.add_value('name', u'')
-    #     il.add_value('price', [u'0'])
-    #     self.assertEqual(il.load_item(), {
-    #         'name': u'',
-    #         'price': 0.0,
-    #     })
+        il = MyLoader(item={})
+        # Should not return "sku: None".
+        il.add_value('sku', [invalid_fragment], re=sku_re)
+        # Should not ignore empty values.
+        il.add_value('name', '')
+        il.add_value('price', ['0'])
+        assert il.load_item() == {'name': '', 'price': 0.0}
 
-    #     il.replace_value('sku', [valid_fragment], re=sku_re)
-    #     self.assertEqual(il.load_item()['sku'], u'1234')
+        il.replace_value('sku', [valid_fragment], re=sku_re)
+        self.assertEqual(il.load_item()['sku'], '1234')
 
-    # def test_self_referencing_loader(self):
-    #     class MyLoader(ItemLoader):
-    #         url_out = TakeFirst()
+    def test_self_referencing_loader(self):
+        class MyLoader(ItemLoader):
+            url_out = TakeFirst()
 
-    #         def img_url_out(self, values):
-    #             return (self.get_output_value('url') or '') + values[0]
+            def img_url_out(self, values):
+                return (self.get_output_value('url') or '') + values[0]
 
-    #     il = MyLoader(item={})
-    #     il.add_value('url', 'http://example.com/')
-    #     il.add_value('img_url', '1234.png')
-    #     self.assertEqual(il.load_item(), {
-    #         'url': 'http://example.com/',
-    #         'img_url': 'http://example.com/1234.png',
-    #     })
+        il = MyLoader(item={})
+        il.add_value('url', 'http://example.com/')
+        il.add_value('img_url', '1234.png')
+        assert il.load_item() == {
+            'url': 'http://example.com/',
+            'img_url': 'http://example.com/1234.png',
+        }
 
-    #     il = MyLoader(item={})
-    #     il.add_value('img_url', '1234.png')
-    #     self.assertEqual(il.load_item(), {
-    #         'img_url': '1234.png',
-    #     })
+        il = MyLoader(item={})
+        il.add_value('img_url', '1234.png')
+        assert il.load_item() == {'img_url': '1234.png'}
 
-    # def test_add_value(self):
-    #     il = TestItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_collected_values('name'), [u'Marta'])
-    #     self.assertEqual(il.get_output_value('name'), [u'Marta'])
-    #     il.add_value('name', u'pepe')
-    #     self.assertEqual(il.get_collected_values('name'), [u'Marta', u'Pepe'])
-    #     self.assertEqual(il.get_output_value('name'), [u'Marta', u'Pepe'])
+    def test_add_value(self):
+        il = TestItemLoader()
+        il.add_value('name', 'marta')
+        assert il.get_collected_values('name') == ['Marta']
+        assert il.get_output_value('name') == ['Marta']
 
-    #     # test add object value
-    #     il.add_value('summary', {'key': 1})
-    #     self.assertEqual(il.get_collected_values('summary'), [{'key': 1}])
+        il.add_value('name', 'pepe')
+        assert il.get_collected_values('name') == ['Marta', 'Pepe']
+        assert il.get_output_value('name') == ['Marta', 'Pepe']
 
-    #     il.add_value(None, u'Jim', lambda x: {'name': x})
-    #     self.assertEqual(il.get_collected_values('name'), [u'Marta', u'Pepe', u'Jim'])
+        # test add object value
+        il.add_value('summary', {'key': 1})
+        assert il.get_collected_values('summary') == [{'key': 1}]
 
-    # def test_add_zero(self):
-    #     il = NameItemLoader()
-    #     il.add_value('name', 0)
-    #     self.assertEqual(il.get_collected_values('name'), [0])
+        il.add_value(None, 'Jim', lambda x: {'name': x})
+        assert il.get_collected_values('name') == ['Marta', 'Pepe', 'Jim']
 
-    # def test_replace_value(self):
-    #     il = TestItemLoader()
-    #     il.replace_value('name', u'marta')
-    #     self.assertEqual(il.get_collected_values('name'), [u'Marta'])
-    #     self.assertEqual(il.get_output_value('name'), [u'Marta'])
-    #     il.replace_value('name', u'pepe')
-    #     self.assertEqual(il.get_collected_values('name'), [u'Pepe'])
-    #     self.assertEqual(il.get_output_value('name'), [u'Pepe'])
+    def test_add_zero(self):
+        il = ItemLoader()
+        il.add_value('name', 0)
+        assert il.get_collected_values('name') == [0]
 
-    #     il.replace_value(None, u'Jim', lambda x: {'name': x})
-    #     self.assertEqual(il.get_collected_values('name'), [u'Jim'])
+    def test_replace_value(self):
+        il = TestItemLoader()
+        il.replace_value('name', 'marta')
+        self.assertEqual(il.get_collected_values('name'), ['Marta'])
+        self.assertEqual(il.get_output_value('name'), ['Marta'])
+        il.replace_value('name', 'pepe')
+        self.assertEqual(il.get_collected_values('name'), ['Pepe'])
+        self.assertEqual(il.get_output_value('name'), ['Pepe'])
 
-    # def test_get_value(self):
-    #     il = NameItemLoader()
-    #     self.assertEqual(u'FOO', il.get_value([u'foo', u'bar'], TakeFirst(), str.upper))
-    #     self.assertEqual([u'foo', u'bar'], il.get_value([u'name:foo', u'name:bar'], re=u'name:(.*)$'))
-    #     self.assertEqual(u'foo', il.get_value([u'name:foo', u'name:bar'], TakeFirst(), re=u'name:(.*)$'))
+        il.replace_value(None, 'Jim', lambda x: {'name': x})
+        self.assertEqual(il.get_collected_values('name'), ['Jim'])
 
-    #     il.add_value('name', [u'name:foo', u'name:bar'], TakeFirst(), re=u'name:(.*)$')
-    #     self.assertEqual([u'foo'], il.get_collected_values('name'))
-    #     il.replace_value('name', u'name:bar', re=u'name:(.*)$')
-    #     self.assertEqual([u'bar'], il.get_collected_values('name'))
+    def test_get_value(self):
+        il = ItemLoader()
+        self.assertEqual('FOO', il.get_value(['foo', 'bar'], TakeFirst(), str.upper))
+        self.assertEqual(['foo', 'bar'], il.get_value(['name:foo', 'name:bar'], re='name:(.*)$'))
+        self.assertEqual('foo', il.get_value(['name:foo', 'name:bar'], TakeFirst(), re='name:(.*)$'))
 
-    # def test_iter_on_input_processor_input(self):
-    #     class NameFirstItemLoader(NameItemLoader):
-    #         name_in = TakeFirst()
+        il.add_value('name', ['name:foo', 'name:bar'], TakeFirst(), re='name:(.*)$')
+        self.assertEqual(['foo'], il.get_collected_values('name'))
+        il.replace_value('name', 'name:bar', re='name:(.*)$')
+        self.assertEqual(['bar'], il.get_collected_values('name'))
 
-    #     il = NameFirstItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_collected_values('name'), [u'marta'])
-    #     il = NameFirstItemLoader()
-    #     il.add_value('name', [u'marta', u'jose'])
-    #     self.assertEqual(il.get_collected_values('name'), [u'marta'])
+    def test_iter_on_input_processor_input(self):
+        class NameFirstItemLoader(ItemLoader):
+            name_in = TakeFirst()
 
-    #     il = NameFirstItemLoader()
-    #     il.replace_value('name', u'marta')
-    #     self.assertEqual(il.get_collected_values('name'), [u'marta'])
-    #     il = NameFirstItemLoader()
-    #     il.replace_value('name', [u'marta', u'jose'])
-    #     self.assertEqual(il.get_collected_values('name'), [u'marta'])
+        il = NameFirstItemLoader()
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_collected_values('name'), ['marta'])
+        il = NameFirstItemLoader()
+        il.add_value('name', ['marta', 'jose'])
+        self.assertEqual(il.get_collected_values('name'), ['marta'])
 
-    #     il = NameFirstItemLoader()
-    #     il.add_value('name', u'marta')
-    #     il.add_value('name', [u'jose', u'pedro'])
-    #     self.assertEqual(il.get_collected_values('name'), [u'marta', u'jose'])
+        il = NameFirstItemLoader()
+        il.replace_value('name', 'marta')
+        self.assertEqual(il.get_collected_values('name'), ['marta'])
+        il = NameFirstItemLoader()
+        il.replace_value('name', ['marta', 'jose'])
+        self.assertEqual(il.get_collected_values('name'), ['marta'])
 
-    # def test_map_compose_filter(self):
-    #     def filter_world(x):
-    #         return None if x == 'world' else x
+        il = NameFirstItemLoader()
+        il.add_value('name', 'marta')
+        il.add_value('name', ['jose', 'pedro'])
+        self.assertEqual(il.get_collected_values('name'), ['marta', 'jose'])
 
-    #     proc = MapCompose(filter_world, str.upper)
-    #     self.assertEqual(proc(['hello', 'world', 'this', 'is', 'scrapy']),
-    #                      ['HELLO', 'THIS', 'IS', 'SCRAPY'])
+    def test_map_compose_filter(self):
+        def filter_world(x):
+            return None if x == 'world' else x
 
-    # def test_map_compose_filter_multil(self):
-    #     class TestItemLoader(NameItemLoader):
-    #         name_in = MapCompose(lambda v: v.title(), lambda v: v[:-1])
+        proc = MapCompose(filter_world, str.upper)
+        self.assertEqual(proc(['hello', 'world', 'this', 'is', 'scrapy']),
+                         ['HELLO', 'THIS', 'IS', 'SCRAPY'])
 
-    #     il = TestItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'Mart'])
-    #     item = il.load_item()
-    #     self.assertEqual(item['name'], [u'Mart'])
+    def test_map_compose_filter_multil(self):
+        class TestItemLoader(ItemLoader):
+            name_in = MapCompose(lambda v: v.title(), lambda v: v[:-1])
 
-    # def test_default_input_processor(self):
-    #     il = DefaultedItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'mart'])
+        il = TestItemLoader()
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['Mart'])
+        item = il.load_item()
+        self.assertEqual(item['name'], ['Mart'])
 
-    # def test_inherited_default_input_processor(self):
-    #     class InheritDefaultedItemLoader(DefaultedItemLoader):
-    #         pass
+    def test_default_input_processor(self):
+        il = DefaultedItemLoader()
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['mart'])
 
-    #     il = InheritDefaultedItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'mart'])
+    def test_inherited_default_input_processor(self):
+        class InheritDefaultedItemLoader(DefaultedItemLoader):
+            pass
 
-    # def test_input_processor_inheritance(self):
-    #     class ChildItemLoader(TestItemLoader):
-    #         url_in = MapCompose(lambda v: v.lower())
+        il = InheritDefaultedItemLoader()
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['mart'])
 
-    #     il = ChildItemLoader()
-    #     il.add_value('url', u'HTTP://scrapy.ORG')
-    #     self.assertEqual(il.get_output_value('url'), [u'http://scrapy.org'])
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'Marta'])
+    def test_input_processor_inheritance(self):
+        class ChildItemLoader(TestItemLoader):
+            url_in = MapCompose(lambda v: v.lower())
 
-    #     class ChildChildItemLoader(ChildItemLoader):
-    #         url_in = MapCompose(lambda v: v.upper())
-    #         summary_in = MapCompose(lambda v: v)
+        il = ChildItemLoader()
+        il.add_value('url', 'HTTP://scrapy.ORG')
+        self.assertEqual(il.get_output_value('url'), ['http://scrapy.org'])
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['Marta'])
 
-    #     il = ChildChildItemLoader()
-    #     il.add_value('url', u'http://scrapy.org')
-    #     self.assertEqual(il.get_output_value('url'), [u'HTTP://SCRAPY.ORG'])
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'Marta'])
+        class ChildChildItemLoader(ChildItemLoader):
+            url_in = MapCompose(lambda v: v.upper())
+            summary_in = MapCompose(lambda v: v)
 
-    # def test_empty_map_compose(self):
-    #     class IdentityDefaultedItemLoader(DefaultedItemLoader):
-    #         name_in = MapCompose()
+        il = ChildChildItemLoader()
+        il.add_value('url', 'http://scrapy.org')
+        self.assertEqual(il.get_output_value('url'), ['HTTP://SCRAPY.ORG'])
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['Marta'])
 
-    #     il = IdentityDefaultedItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'marta'])
+    def test_empty_map_compose(self):
+        class IdentityDefaultedItemLoader(DefaultedItemLoader):
+            name_in = MapCompose()
 
-    # def test_identity_input_processor(self):
-    #     class IdentityDefaultedItemLoader(DefaultedItemLoader):
-    #         name_in = Identity()
+        il = IdentityDefaultedItemLoader()
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['marta'])
 
-    #     il = IdentityDefaultedItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'marta'])
+    def test_identity_input_processor(self):
+        class IdentityDefaultedItemLoader(DefaultedItemLoader):
+            name_in = Identity()
 
-    # def test_extend_custom_input_processors(self):
-    #     class ChildItemLoader(TestItemLoader):
-    #         name_in = MapCompose(TestItemLoader.name_in, str.swapcase)
+        il = IdentityDefaultedItemLoader()
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['marta'])
 
-    #     il = ChildItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'mARTA'])
+    def test_extend_custom_input_processors(self):
+        class ChildItemLoader(TestItemLoader):
+            name_in = MapCompose(TestItemLoader.name_in, str.swapcase)
 
-    # def test_extend_default_input_processors(self):
-    #     class ChildDefaultedItemLoader(DefaultedItemLoader):
-    #         name_in = MapCompose(DefaultedItemLoader.default_input_processor, str.swapcase)
+        il = ChildItemLoader()
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['mARTA'])
 
-    #     il = ChildDefaultedItemLoader()
-    #     il.add_value('name', u'marta')
-    #     self.assertEqual(il.get_output_value('name'), [u'MART'])
+    def test_extend_default_input_processors(self):
+        class ChildDefaultedItemLoader(DefaultedItemLoader):
+            name_in = MapCompose(DefaultedItemLoader.default_input_processor, str.swapcase)
 
-    # def test_output_processor_using_function(self):
-    #     il = TestItemLoader()
-    #     il.add_value('name', [u'mar', u'ta'])
-    #     self.assertEqual(il.get_output_value('name'), [u'Mar', u'Ta'])
+        il = ChildDefaultedItemLoader()
+        il.add_value('name', 'marta')
+        self.assertEqual(il.get_output_value('name'), ['MART'])
 
-    #     class TakeFirstItemLoader(TestItemLoader):
-    #         name_out = u" ".join
+    def test_output_processor_using_function(self):
+        il = TestItemLoader()
+        il.add_value('name', ['mar', 'ta'])
+        self.assertEqual(il.get_output_value('name'), ['Mar', 'Ta'])
 
-    #     il = TakeFirstItemLoader()
-    #     il.add_value('name', [u'mar', u'ta'])
-    #     self.assertEqual(il.get_output_value('name'), u'Mar Ta')
+        class TakeFirstItemLoader(TestItemLoader):
+            name_out = u" ".join
 
-    # def test_output_processor_error(self):
-    #     class TestItemLoader(ItemLoader):
-    #         default_item_class = TestItem
-    #         name_out = MapCompose(float)
+        il = TakeFirstItemLoader()
+        il.add_value('name', ['mar', 'ta'])
+        self.assertEqual(il.get_output_value('name'), 'Mar Ta')
 
-    #     il = TestItemLoader()
-    #     il.add_value('name', [u'$10'])
-    #     try:
-    #         float(u'$10')
-    #     except Exception as e:
-    #         expected_exc_str = str(e)
+    def test_output_processor_error(self):
+        class TestItemLoader(ItemLoader):
+            name_out = MapCompose(float)
 
-    #     exc = None
-    #     try:
-    #         il.load_item()
-    #     except Exception as e:
-    #         exc = e
-    #     assert isinstance(exc, ValueError)
-    #     s = str(exc)
-    #     assert 'name' in s, s
-    #     assert '$10' in s, s
-    #     assert 'ValueError' in s, s
-    #     assert expected_exc_str in s, s
+        il = TestItemLoader()
+        il.add_value('name', ['$10'])
+        try:
+            float('$10')
+        except Exception as e:
+            expected_exc_str = str(e)
 
-    # def test_output_processor_using_classes(self):
-    #     il = TestItemLoader()
-    #     il.add_value('name', [u'mar', u'ta'])
-    #     self.assertEqual(il.get_output_value('name'), [u'Mar', u'Ta'])
+        exc = None
+        try:
+            il.load_item()
+        except Exception as e:
+            exc = e
+        assert isinstance(exc, ValueError)
+        s = str(exc)
+        assert 'name' in s, s
+        assert '$10' in s, s
+        assert 'ValueError' in s, s
+        assert expected_exc_str in s, s
 
-    #     class TakeFirstItemLoader(TestItemLoader):
-    #         name_out = Join()
+    def test_output_processor_using_classes(self):
+        il = TestItemLoader()
+        il.add_value('name', ['mar', 'ta'])
+        self.assertEqual(il.get_output_value('name'), ['Mar', 'Ta'])
 
-    #     il = TakeFirstItemLoader()
-    #     il.add_value('name', [u'mar', u'ta'])
-    #     self.assertEqual(il.get_output_value('name'), u'Mar Ta')
+        class TakeFirstItemLoader(TestItemLoader):
+            name_out = Join()
 
-    #     class TakeFirstItemLoader(TestItemLoader):
-    #         name_out = Join("<br>")
+        il = TakeFirstItemLoader()
+        il.add_value('name', ['mar', 'ta'])
+        self.assertEqual(il.get_output_value('name'), 'Mar Ta')
 
-    #     il = TakeFirstItemLoader()
-    #     il.add_value('name', [u'mar', u'ta'])
-    #     self.assertEqual(il.get_output_value('name'), u'Mar<br>Ta')
+        class TakeFirstItemLoader(TestItemLoader):
+            name_out = Join("<br>")
 
-    # def test_default_output_processor(self):
-    #     il = TestItemLoader()
-    #     il.add_value('name', [u'mar', u'ta'])
-    #     self.assertEqual(il.get_output_value('name'), [u'Mar', u'Ta'])
+        il = TakeFirstItemLoader()
+        il.add_value('name', ['mar', 'ta'])
+        self.assertEqual(il.get_output_value('name'), 'Mar<br>Ta')
 
-    #     class LalaItemLoader(TestItemLoader):
-    #         default_output_processor = Identity()
+    def test_default_output_processor(self):
+        il = TestItemLoader()
+        il.add_value('name', ['mar', 'ta'])
+        self.assertEqual(il.get_output_value('name'), ['Mar', 'Ta'])
 
-    #     il = LalaItemLoader()
-    #     il.add_value('name', [u'mar', u'ta'])
-    #     self.assertEqual(il.get_output_value('name'), [u'Mar', u'Ta'])
+        class LalaItemLoader(TestItemLoader):
+            default_output_processor = Identity()
 
-    # def test_loader_context_on_declaration(self):
-    #     class ChildItemLoader(TestItemLoader):
-    #         url_in = MapCompose(processor_with_args, key=u'val')
+        il = LalaItemLoader()
+        il.add_value('name', ['mar', 'ta'])
+        self.assertEqual(il.get_output_value('name'), ['Mar', 'Ta'])
 
-    #     il = ChildItemLoader()
-    #     il.add_value('url', u'text')
-    #     self.assertEqual(il.get_output_value('url'), ['val'])
-    #     il.replace_value('url', u'text2')
-    #     self.assertEqual(il.get_output_value('url'), ['val'])
+    def test_loader_context_on_declaration(self):
+        class ChildItemLoader(TestItemLoader):
+            url_in = MapCompose(processor_with_args, key='val')
 
-    # def test_loader_context_on_instantiation(self):
-    #     class ChildItemLoader(TestItemLoader):
-    #         url_in = MapCompose(processor_with_args)
+        il = ChildItemLoader()
+        il.add_value('url', 'text')
+        self.assertEqual(il.get_output_value('url'), ['val'])
+        il.replace_value('url', 'text2')
+        self.assertEqual(il.get_output_value('url'), ['val'])
 
-    #     il = ChildItemLoader(key=u'val')
-    #     il.add_value('url', u'text')
-    #     self.assertEqual(il.get_output_value('url'), ['val'])
-    #     il.replace_value('url', u'text2')
-    #     self.assertEqual(il.get_output_value('url'), ['val'])
+    def test_loader_context_on_instantiation(self):
+        class ChildItemLoader(TestItemLoader):
+            url_in = MapCompose(processor_with_args)
 
-    # def test_loader_context_on_assign(self):
-    #     class ChildItemLoader(TestItemLoader):
-    #         url_in = MapCompose(processor_with_args)
+        il = ChildItemLoader(key='val')
+        il.add_value('url', 'text')
+        self.assertEqual(il.get_output_value('url'), ['val'])
+        il.replace_value('url', 'text2')
+        self.assertEqual(il.get_output_value('url'), ['val'])
 
-    #     il = ChildItemLoader()
-    #     il.context['key'] = u'val'
-    #     il.add_value('url', u'text')
-    #     self.assertEqual(il.get_output_value('url'), ['val'])
-    #     il.replace_value('url', u'text2')
-    #     self.assertEqual(il.get_output_value('url'), ['val'])
+    def test_loader_context_on_assign(self):
+        class ChildItemLoader(TestItemLoader):
+            url_in = MapCompose(processor_with_args)
 
-    # def test_item_passed_to_input_processor_functions(self):
-    #     def processor(value, loader_context):
-    #         return loader_context['item']['name']
+        il = ChildItemLoader()
+        il.context['key'] = 'val'
+        il.add_value('url', 'text')
+        self.assertEqual(il.get_output_value('url'), ['val'])
+        il.replace_value('url', 'text2')
+        self.assertEqual(il.get_output_value('url'), ['val'])
 
-    #     class ChildItemLoader(TestItemLoader):
-    #         url_in = MapCompose(processor)
+    def test_item_passed_to_input_processor_functions(self):
+        def processor(value, loader_context):
+            return loader_context['item']['name']
 
-    #     it = TestItem(name='marta')
-    #     il = ChildItemLoader(item=it)
-    #     il.add_value('url', u'text')
-    #     self.assertEqual(il.get_output_value('url'), ['marta'])
-    #     il.replace_value('url', u'text2')
-    #     self.assertEqual(il.get_output_value('url'), ['marta'])
+        class ChildItemLoader(TestItemLoader):
+            url_in = MapCompose(processor)
+
+        it = dict(name='marta')
+        il = ChildItemLoader(item=it)
+        il.add_value('url', 'text')
+        self.assertEqual(il.get_output_value('url'), ['marta'])
+        il.replace_value('url', 'text2')
+        self.assertEqual(il.get_output_value('url'), ['marta'])
 
     # def test_add_value_on_unknown_field(self):
     #     il = TestItemLoader()
-    #     self.assertRaises(KeyError, il.add_value, 'wrong_field', [u'lala', u'lolo'])
+    #     self.assertRaises(KeyError, il.add_value, 'wrong_field', ['lala', 'lolo'])
 
-    # def test_compose_processor(self):
-    #     class TestItemLoader(NameItemLoader):
-    #         name_out = Compose(lambda v: v[0], lambda v: v.title(), lambda v: v[:-1])
+    def test_compose_processor(self):
+        class TestItemLoader(ItemLoader):
+            name_out = Compose(lambda v: v[0], lambda v: v.title(), lambda v: v[:-1])
 
-    #     il = TestItemLoader()
-    #     il.add_value('name', [u'marta', u'other'])
-    #     self.assertEqual(il.get_output_value('name'), u'Mart')
-    #     item = il.load_item()
-    #     self.assertEqual(item['name'], u'Mart')
+        il = TestItemLoader()
+        il.add_value('name', ['marta', 'other'])
+        self.assertEqual(il.get_output_value('name'), 'Mart')
+        item = il.load_item()
+        self.assertEqual(item['name'], 'Mart')
 
-    # def test_partial_processor(self):
-    #     def join(values, sep=None, loader_context=None, ignored=None):
-    #         if sep is not None:
-    #             return sep.join(values)
-    #         elif loader_context and 'sep' in loader_context:
-    #             return loader_context['sep'].join(values)
-    #         else:
-    #             return ''.join(values)
+    def test_partial_processor(self):
+        def join(values, sep=None, loader_context=None, ignored=None):
+            if sep is not None:
+                return sep.join(values)
+            elif loader_context and 'sep' in loader_context:
+                return loader_context['sep'].join(values)
+            else:
+                return ''.join(values)
 
-    #     class TestItemLoader(NameItemLoader):
-    #         name_out = Compose(partial(join, sep='+'))
-    #         url_out = Compose(partial(join, loader_context={'sep': '.'}))
-    #         summary_out = Compose(partial(join, ignored='foo'))
+        class TestItemLoader(ItemLoader):
+            name_out = Compose(partial(join, sep='+'))
+            url_out = Compose(partial(join, loader_context={'sep': '.'}))
+            summary_out = Compose(partial(join, ignored='foo'))
 
-    #     il = TestItemLoader()
-    #     il.add_value('name', [u'rabbit', u'hole'])
-    #     il.add_value('url', [u'rabbit', u'hole'])
-    #     il.add_value('summary', [u'rabbit', u'hole'])
-    #     item = il.load_item()
-    #     self.assertEqual(item['name'], u'rabbit+hole')
-    #     self.assertEqual(item['url'], u'rabbit.hole')
-    #     self.assertEqual(item['summary'], u'rabbithole')
+        il = TestItemLoader()
+        il.add_value('name', ['rabbit', 'hole'])
+        il.add_value('url', ['rabbit', 'hole'])
+        il.add_value('summary', ['rabbit', 'hole'])
+        item = il.load_item()
+        self.assertEqual(item['name'], 'rabbit+hole')
+        self.assertEqual(item['url'], 'rabbit.hole')
+        self.assertEqual(item['summary'], 'rabbithole')
 
-    # def test_error_input_processor(self):
-    #     class TestItem(Item):
-    #         name = Field()
+    def test_error_input_processor(self):
+        class TestItemLoader(ItemLoader):
+            name_in = MapCompose(float)
 
-    #     class TestItemLoader(ItemLoader):
-    #         default_item_class = TestItem
-    #         name_in = MapCompose(float)
+        il = TestItemLoader()
+        self.assertRaises(ValueError, il.add_value, 'name',
+                          ['marta', 'other'])
 
-    #     il = TestItemLoader()
-    #     self.assertRaises(ValueError, il.add_value, 'name',
-    #                       [u'marta', u'other'])
+    def test_error_output_processor(self):
+        class TestItemLoader(ItemLoader):
+            name_out = Compose(Join(), float)
 
-    # def test_error_output_processor(self):
-    #     class TestItem(Item):
-    #         name = Field()
+        il = TestItemLoader()
+        il.add_value('name', 'marta')
+        with self.assertRaises(ValueError):
+            il.load_item()
 
-    #     class TestItemLoader(ItemLoader):
-    #         default_item_class = TestItem
-    #         name_out = Compose(Join(), float)
-
-    #     il = TestItemLoader()
-    #     il.add_value('name', u'marta')
-    #     with self.assertRaises(ValueError):
-    #         il.load_item()
-
-    # def test_error_processor_as_argument(self):
-    #     class TestItem(Item):
-    #         name = Field()
-
-    #     class TestItemLoader(ItemLoader):
-    #         default_item_class = TestItem
-
-    #     il = TestItemLoader()
-    #     self.assertRaises(ValueError, il.add_value, 'name',
-    #                       [u'marta', u'other'], Compose(float))
+    def test_error_processor_as_argument(self):
+        il = TestItemLoader()
+        self.assertRaises(ValueError, il.add_value, 'name',
+                          ['marta', 'other'], Compose(float))

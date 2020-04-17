@@ -11,18 +11,6 @@ from itemloaders.processors import Identity
 from itemloaders.utils import arg_to_iter, extract_regex, flatten
 
 
-class Item:
-    pass
-
-
-class Field:
-    pass
-
-
-class Selector:
-    pass
-
-
 def unbound_method(method):
     """
     Allow to use single-argument functions as input or output processors
@@ -36,16 +24,11 @@ def unbound_method(method):
 
 class ItemLoader:
 
-    default_item_class = Item
+    default_item_class = dict
     default_input_processor = Identity()
     default_output_processor = Identity()
-    default_selector_class = Selector
 
-    def __init__(self, item=None, selector=None, response=None, parent=None, **context):
-        if selector is None and response is not None:
-            selector = self.default_selector_class(response)
-        self.selector = selector
-        context.update(selector=selector, response=response)
+    def __init__(self, item=None, parent=None, **context):
         if item is None:
             item = self.default_item_class()
         self.context = context
@@ -184,11 +167,12 @@ class ItemLoader:
                                     value, type(e).__name__, str(e)))
 
     def _get_item_field_attr(self, field_name, key, default=None):
-        if isinstance(self.item, Item):
-            value = self.item.fields[field_name].get(key, default)
-        else:
-            value = default
-        return value
+        # if isinstance(self.item, Item):
+        #     value = self.item.fields[field_name].get(key, default)
+        # else:
+        #     value = default
+        # return value
+        return default
 
     def _check_selector_method(self):
         if self.selector is None:

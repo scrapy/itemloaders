@@ -4,6 +4,9 @@ Refactoring to come later
 """
 from functools import partial
 import inspect
+import re
+
+from w3lib.html import replace_entities
 
 
 _ITERABLE_SINGLE_VALUES = dict, str, bytes
