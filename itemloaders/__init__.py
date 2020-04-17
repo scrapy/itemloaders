@@ -53,22 +53,6 @@ class ItemLoader:
         else:
             return self._local_item
 
-    def nested_xpath(self, xpath, **context):
-        selector = self.selector.xpath(xpath)
-        context.update(selector=selector)
-        subloader = self.__class__(
-            item=self.item, parent=self, **context
-        )
-        return subloader
-
-    def nested_css(self, css, **context):
-        selector = self.selector.css(css)
-        context.update(selector=selector)
-        subloader = self.__class__(
-            item=self.item, parent=self, **context
-        )
-        return subloader
-
     def add_value(self, field_name, value, *processors, **kw):
         value = self.get_value(value, *processors, **kw)
         if value is None:
@@ -173,43 +157,3 @@ class ItemLoader:
         #     value = default
         # return value
         return default
-
-    def _check_selector_method(self):
-        if self.selector is None:
-            raise RuntimeError("To use XPath or CSS selectors, "
-                               "%s must be instantiated with a selector "
-                               "or a response" % self.__class__.__name__)
-
-    def add_xpath(self, field_name, xpath, *processors, **kw):
-        values = self._get_xpathvalues(xpath, **kw)
-        self.add_value(field_name, values, *processors, **kw)
-
-    def replace_xpath(self, field_name, xpath, *processors, **kw):
-        values = self._get_xpathvalues(xpath, **kw)
-        self.replace_value(field_name, values, *processors, **kw)
-
-    def get_xpath(self, xpath, *processors, **kw):
-        values = self._get_xpathvalues(xpath, **kw)
-        return self.get_value(values, *processors, **kw)
-
-    def _get_xpathvalues(self, xpaths, **kw):
-        self._check_selector_method()
-        xpaths = arg_to_iter(xpaths)
-        return flatten(self.selector.xpath(xpath).getall() for xpath in xpaths)
-
-    def add_css(self, field_name, css, *processors, **kw):
-        values = self._get_cssvalues(css, **kw)
-        self.add_value(field_name, values, *processors, **kw)
-
-    def replace_css(self, field_name, css, *processors, **kw):
-        values = self._get_cssvalues(css, **kw)
-        self.replace_value(field_name, values, *processors, **kw)
-
-    def get_css(self, css, *processors, **kw):
-        values = self._get_cssvalues(css, **kw)
-        return self.get_value(values, *processors, **kw)
-
-    def _get_cssvalues(self, csss, **kw):
-        self._check_selector_method()
-        csss = arg_to_iter(csss)
-        return flatten(self.selector.css(css).getall() for css in csss)
