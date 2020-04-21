@@ -6,6 +6,8 @@ See documentation in docs/topics/loaders.rst
 from collections import defaultdict
 from contextlib import suppress
 
+from parsel import Selector
+
 from itemloaders.common import wrap_loader_context
 from itemloaders.processors import Identity
 from itemloaders.utils import arg_to_iter, extract_regex, flatten
@@ -27,8 +29,11 @@ class ItemLoader:
     default_item_class = dict
     default_input_processor = Identity()
     default_output_processor = Identity()
+    default_selector_class = Selector
 
-    def __init__(self, item=None, parent=None, **context):
+    def __init__(self, item=None, selector=None, parent=None, **context):
+        self.selector = selector
+        context.update(selector=selector)
         if item is None:
             item = self.default_item_class()
         self.context = context
