@@ -149,16 +149,21 @@ class ItemLoader:
     def get_input_processor(self, field_name):
         proc = getattr(self, '%s_in' % field_name, None)
         if not proc:
-            proc = self._get_item_field_attr(field_name, 'input_processor',
-                                             self.default_input_processor)
+            proc = self.get_default_input_processor_for_field(field_name)
         return unbound_method(proc)
+
+    def get_default_input_processor_for_field(self, field_name):
+        return self.default_input_processor
 
     def get_output_processor(self, field_name):
         proc = getattr(self, '%s_out' % field_name, None)
         if not proc:
-            proc = self._get_item_field_attr(field_name, 'output_processor',
-                                             self.default_output_processor)
+            proc = self.get_default_output_processor_for_field(field_name)
+
         return unbound_method(proc)
+
+    def get_default_output_processor_for_field(self, field_name):
+        return self.default_output_processor
 
     def _process_input_value(self, field_name, value):
         proc = self.get_input_processor(field_name)
@@ -171,14 +176,6 @@ class ItemLoader:
                 "Error with input processor %s: field=%r value=%r "
                 "error='%s: %s'" % (_proc.__class__.__name__, field_name,
                                     value, type(e).__name__, str(e)))
-
-    def _get_item_field_attr(self, field_name, key, default=None):
-        # if isinstance(self.item, Item):
-        #     value = self.item.fields[field_name].get(key, default)
-        # else:
-        #     value = default
-        # return value
-        return default
 
     def _check_selector_method(self):
         if self.selector is None:
