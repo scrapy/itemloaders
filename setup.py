@@ -4,7 +4,7 @@ setup(
     name='itemloaders',
     version='0.1',
     url='---',
-    project_urls = {
+    project_urls={
         'Documentation': '---',
         'Source': '---',
         'Tracker': '---',
