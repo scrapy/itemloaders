@@ -1,11 +1,8 @@
 from functools import partial
 import unittest
 
-from parsel import Selector
-
 from itemloaders import ItemLoader
-from itemloaders.processors import (Compose, Identity, Join,
-                                      MapCompose, SelectJmes, TakeFirst)
+from itemloaders.processors import Compose, Identity, Join, MapCompose, TakeFirst
 
 
 class TestItemLoader(ItemLoader):
