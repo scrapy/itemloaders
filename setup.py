@@ -37,7 +37,7 @@ setup(
     install_requires=[
         'w3lib==1.21.0',
         'parsel==1.5.2',
-        'jmespath==0.9.5''
+        'jmespath==0.9.5'
     ],
     # extras_require=extras_require,
 )
