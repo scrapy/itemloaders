@@ -18,7 +18,6 @@ from os import path
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
-sys.path.append(path.join(path.dirname(__file__), "_ext"))
 sys.path.insert(0, path.dirname(path.dirname(__file__)))
 
 
@@ -49,8 +48,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Scrapy'
-copyright = '2008–{}, Scrapy developers'.format(datetime.now().year)
+project = 'itemloaders'
+copyright = '2020–{}, Scrapinghub'.format(datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -174,7 +173,7 @@ html_copy_source = True
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Scrapydoc'
+htmlhelp_basename = 'itemloadersdoc'
 
 
 # Options for LaTeX output
