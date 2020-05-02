@@ -84,10 +84,10 @@ Contents
 --------
 
 .. toctree::
+    declaring-loaders
     processors
-    declaring-processors
     loaders-context
-    api-reference
     nested-loaders
     extending-loaders
     built-in processors
+    api-reference
