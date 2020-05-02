@@ -9,7 +9,7 @@ received (through the :meth:`~ItemLoader.add_xpath`, :meth:`~ItemLoader.add_css`
 :meth:`~ItemLoader.add_value` methods) and the result of the input processor is
 collected and kept inside the ItemLoader. After collecting all data, the
 :meth:`ItemLoader.load_item` method is called to populate and get the populated
-:class:`~scrapy.item.Item` object.  That's when the output processor is
+item object.  That's when the output processor is
 called with the data previously collected (and processed using the input
 processor). The result of the output processor is the final value that gets
 assigned to the item.
@@ -17,7 +17,7 @@ assigned to the item.
 Let's see an example to illustrate how the input and output processors are
 called for a particular field (the same applies for any other field)::
 
-    l = ItemLoader(Product(), some_selector)
+    l = ItemLoader(selector=some_selector)
     l.add_xpath('name', xpath1) # (1)
     l.add_xpath('name', xpath2) # (2)
     l.add_css('name', css) # (3)
@@ -57,9 +57,6 @@ with the data to be parsed, and return a parsed value. So you can use any
 function as input or output processor. The only requirement is that they must
 accept one (and only one) positional argument, which will be an iterable.
 
-.. versionchanged:: 2.0
-   Processors no longer need to be methods.
-
 .. note:: Both input and output processors must receive an iterable as their
    first argument. The output of those functions can be anything. The result of
    input processors will be appended to an internal list (in the Loader)
@@ -70,17 +67,16 @@ The other thing you need to keep in mind is that the values returned by input
 processors are collected internally (in lists) and then passed to output
 processors to populate the fields.
 
-Last, but not least, Scrapy comes with some :ref:`commonly used processors
-<topics-loaders-available-processors>` built-in for convenience.
+Last, but not least, ``itemloaders`` comes with some :ref:`commonly used processors
+<built-in processors>` built-in for convenience.
 
 Declaring Item Loaders
 ======================
 
-Item Loaders are declared like Items, by using a class definition syntax. Here
-is an example::
+Item Loaders are declared by using a class definition syntax. Here is an example::
 
-    from scrapy.loader import ItemLoader
-    from scrapy.loader.processors import TakeFirst, MapCompose, Join
+    from itemloaders import ItemLoader
+    from itemloaders.processors import TakeFirst, MapCompose, Join
 
     class ProductLoader(ItemLoader):
 
@@ -98,3 +94,12 @@ output processors are declared using the ``_out`` suffix. And you can also
 declare a default input/output processors using the
 :attr:`ItemLoader.default_input_processor` and
 :attr:`ItemLoader.default_output_processor` attributes.
+
+The precedence order, for both input and output processors, is as follows:
+
+1. Item Loader field-specific attributes: ``field_in`` and ``field_out`` (most
+   precedence)
+2. Item Loader defaults: :meth:`ItemLoader.default_input_processor` and
+   :meth:`ItemLoader.default_output_processor` (least precedence)
+
+See also: :ref:`extending-loaders`.
