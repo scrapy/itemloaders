@@ -3,11 +3,11 @@
 Available built-in processors
 =============================
 
-.. module:: scrapy.loader.processors
+.. module:: itemloaders.processors
    :synopsis: A collection of processors to use with Item Loaders
 
 Even though you can use any callable function as input and output processors,
-Scrapy provides some commonly used processors, which are described below. Some
+``itemloaders`` provides some commonly used processors, which are described below. Some
 of them, like the :class:`MapCompose` (which is typically used as input
 processor) compose the output of several functions executed in order, to
 produce the final parsed value.
@@ -22,7 +22,7 @@ Here is a list of all built-in processors:
 
     Example:
 
-    >>> from scrapy.loader.processors import Identity
+    >>> from itemloaders.processors import Identity
     >>> proc = Identity()
     >>> proc(['one', 'two', 'three'])
     ['one', 'two', 'three']
@@ -35,7 +35,7 @@ Here is a list of all built-in processors:
 
     Example:
 
-    >>> from scrapy.loader.processors import TakeFirst
+    >>> from itemloaders.processors import TakeFirst
     >>> proc = TakeFirst()
     >>> proc(['', 'one', 'two', 'three'])
     'one'
@@ -50,7 +50,7 @@ Here is a list of all built-in processors:
 
     Examples:
 
-    >>> from scrapy.loader.processors import Join
+    >>> from itemloaders.processors import Join
     >>> proc = Join()
     >>> proc(['one', 'two', 'three'])
     'one two three'
@@ -71,14 +71,14 @@ Here is a list of all built-in processors:
 
     Example:
 
-    >>> from scrapy.loader.processors import Compose
+    >>> from itemloaders.processors import Compose
     >>> proc = Compose(lambda v: v[0], str.upper)
     >>> proc(['hello', 'world'])
     'HELLO'
 
     Each function can optionally receive a ``loader_context`` parameter. For
     those which do, this processor will pass the currently active :ref:`Loader
-    context <topics-loaders-context>` through that parameter.
+    context <loaders-context>` through that parameter.
 
     The keyword arguments passed in the ``__init__`` method are used as the default
     Loader context values passed to each function call. However, the final
@@ -110,18 +110,18 @@ Here is a list of all built-in processors:
     work with single values (instead of iterables). For this reason the
     :class:`MapCompose` processor is typically used as input processor, since
     data is often extracted using the
-    :meth:`~scrapy.selector.Selector.extract` method of :ref:`selectors
-    <topics-selectors>`, which returns a list of unicode strings.
+    :meth:`~parsel.Selector.extract` method of `parsel selectors`_,
+    which returns a list of unicode strings.
 
     The example below should clarify how it works:
 
     >>> def filter_world(x):
     ...     return None if x == 'world' else x
     ...
-    >>> from scrapy.loader.processors import MapCompose
+    >>> from itemloaders.processors import MapCompose
     >>> proc = MapCompose(filter_world, str.upper)
-    >>> proc(['hello', 'world', 'this', 'is', 'scrapy'])
-    ['HELLO, 'THIS', 'IS', 'SCRAPY']
+    >>> proc(['hello', 'world', 'this', 'is', 'something'])
+    ['HELLO, 'THIS', 'IS', 'SOMETHING']
 
     As with the Compose processor, functions can receive Loader contexts, and
     ``__init__`` method keyword arguments are used as default context values. See
@@ -135,7 +135,7 @@ Here is a list of all built-in processors:
 
     Example:
 
-    >>> from scrapy.loader.processors import SelectJmes, Compose, MapCompose
+    >>> from itemloaders.processors import SelectJmes, Compose, MapCompose
     >>> proc = SelectJmes("foo") #for direct use on lists and dictionaries
     >>> proc({'foo': 'bar'})
     'bar'
@@ -151,3 +151,5 @@ Here is a list of all built-in processors:
     >>> proc_json_list = Compose(json.loads, MapCompose(SelectJmes('foo')))
     >>> proc_json_list('[{"foo":"bar"}, {"baz":"tar"}]')
     ['bar']
+
+.. _`parsel selectors`: https://parsel.readthedocs.io/en/latest/parsel.html#parsel.selector.Selector.extract
