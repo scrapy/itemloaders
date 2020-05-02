@@ -1,10 +1,10 @@
 :orphan:
 
 ======================================
-Scrapy documentation quick start guide
+itemloaders documentation quick start guide
 ======================================
 
-This file provides a quick guide on how to compile the Scrapy documentation.
+This file provides a quick guide on how to compile the itemloaders documentation.
 
 
 Setup the environment
