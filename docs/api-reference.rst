@@ -3,30 +3,25 @@
 API Reference
 ==================
 
-.. class:: ItemLoader([item, selector, response], \**kwargs)
+.. class:: ItemLoader([item, selector], \**kwargs)
 
-    Return a new Item Loader for populating the given Item. If no item is
+    Return a new Item Loader for populating the given item. If no item is
     given, one is instantiated automatically using the class in
     :attr:`default_item_class`.
 
-    When instantiated with a ``selector`` or a ``response`` parameters
-    the :class:`ItemLoader` class provides convenient mechanisms for extracting
-    data from web pages using :ref:`selectors <topics-selectors>`.
+    When instantiated with a ``selector`` parameter the :class:`ItemLoader` class
+    provides convenient mechanisms for extracting data from web pages
+    using parsel_ selectors.
 
     :param item: The item instance to populate using subsequent calls to
         :meth:`~ItemLoader.add_xpath`, :meth:`~ItemLoader.add_css`,
         or :meth:`~ItemLoader.add_value`.
-    :type item: :class:`~scrapy.item.Item` object
+    :type item: :class:`dict` object
 
     :param selector: The selector to extract data from, when using the
         :meth:`add_xpath` (resp. :meth:`add_css`) or :meth:`replace_xpath`
         (resp. :meth:`replace_css`) method.
     :type selector: :class:`~scrapy.selector.Selector` object
-
-    :param response: The response used to construct the selector using the
-        :attr:`default_selector_class`, unless the selector argument is given,
-        in which case this argument is ignored.
-    :type response: :class:`~scrapy.http.Response` object
 
     The item, selector, response and the remaining keyword arguments are
     assigned to the Loader context (accessible through the :attr:`context` attribute).
@@ -41,14 +36,14 @@ API Reference
         Available keyword arguments:
 
         :param re: a regular expression to use for extracting data from the
-            given value using :meth:`~scrapy.utils.misc.extract_regex` method,
+            given value using :meth:`~parsel.utils.extract_regex` method,
             applied before processors
         :type re: str or compiled regex
 
         Examples:
 
-        >>> from scrapy.loader.processors import TakeFirst
-        >>> loader.get_value(u'name: foo', TakeFirst(), unicode.upper, re='name: (.+)')
+        >>> from itemloaders.processors import TakeFirst
+        >>> loader.get_value('name: foo', TakeFirst(), str.upper, re='name: (.+)')
         'FOO`
 
     .. method:: add_value(field_name, value, \*processors, \**kwargs)
@@ -57,7 +52,7 @@ API Reference
 
         The value is first passed through :meth:`get_value` by giving the
         ``processors`` and ``kwargs``, and then passed through the
-        :ref:`field input processor <topics-loaders-processors>` and its result
+        :ref:`field input processor <loaders-processors>` and its result
         appended to the data collected for that field. If the field already
         contains collected data, the new data is added.
 
@@ -67,16 +62,17 @@ API Reference
 
         Examples::
 
-            loader.add_value('name', u'Color TV')
-            loader.add_value('colours', [u'white', u'blue'])
-            loader.add_value('length', u'100')
-            loader.add_value('name', u'name: foo', TakeFirst(), re='name: (.+)')
-            loader.add_value(None, {'name': u'foo', 'sex': u'male'})
+            loader.add_value('name', 'Color TV')
+            loader.add_value('colours', ['white', 'blue'])
+            loader.add_value('length', '100')
+            loader.add_value('name', 'name: foo', TakeFirst(), re='name: (.+)')
+            loader.add_value(None, {'name': 'foo', 'sex': 'male'})
 
     .. method:: replace_value(field_name, value, \*processors, \**kwargs)
 
         Similar to :meth:`add_value` but replaces the collected data with the
         new value instead of adding it.
+
     .. method:: get_xpath(xpath, \*processors, \**kwargs)
 
         Similar to :meth:`ItemLoader.get_value` but receives an XPath instead of a
@@ -167,14 +163,14 @@ API Reference
 
         Populate the item with the data collected so far, and return it. The
         data collected is first passed through the :ref:`output processors
-        <topics-loaders-processors>` to get the final value to assign to each
+        <loaders-processors>` to get the final value to assign to each
         item field.
 
     .. method:: nested_xpath(xpath)
 
         Create a nested loader with an xpath selector.
         The supplied selector is applied relative to selector associated
-        with this :class:`ItemLoader`. The nested loader shares the :class:`Item`
+        with this :class:`ItemLoader`. The nested loader shares the item
         with the parent :class:`ItemLoader` so calls to :meth:`add_xpath`,
         :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
 
@@ -182,7 +178,7 @@ API Reference
 
         Create a nested loader with a css selector.
         The supplied selector is applied relative to selector associated
-        with this :class:`ItemLoader`. The nested loader shares the :class:`Item`
+        with this :class:`ItemLoader`. The nested loader shares the item
         with the parent :class:`ItemLoader` so calls to :meth:`add_xpath`,
         :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
 
@@ -207,13 +203,13 @@ API Reference
 
     .. attribute:: item
 
-        The :class:`~scrapy.item.Item` object being parsed by this Item Loader.
+        The item object being parsed by this Item Loader.
         This is mostly used as a property so when attempting to override this
         value, you may want to check out :attr:`default_item_class` first.
 
     .. attribute:: context
 
-        The currently active :ref:`Context <topics-loaders-context>` of this
+        The currently active :ref:`Context <loaders-context>` of this
         Item Loader.
 
     .. attribute:: default_item_class
@@ -240,8 +236,11 @@ API Reference
 
     .. attribute:: selector
 
-        The :class:`~scrapy.selector.Selector` object to extract data from.
+        The :class:`~parsel.Selector` object to extract data from.
         It's either the selector given in the ``__init__`` method or one created from
         the response given in the ``__init__`` method using the
         :attr:`default_selector_class`. This attribute is meant to be
         read-only.
+
+
+.. _parsel: https://parsel.readthedocs.io/en/latest/
