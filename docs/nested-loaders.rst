@@ -20,7 +20,7 @@ that you wish to extract.
 
 Example::
 
-    loader = ItemLoader(item=Item())
+    loader = ItemLoader()
     # load stuff not in the footer
     loader.add_xpath('social', '//footer/a[@class = "social"]/@href')
     loader.add_xpath('email', '//footer/a[@class = "email"]/@href')
@@ -32,7 +32,7 @@ the footer selector.
 
 Example::
 
-    loader = ItemLoader(item=Item())
+    loader = ItemLoader()
     # load stuff not in the footer
     footer_loader = loader.nested_xpath('//footer')
     footer_loader.add_xpath('social', 'a[@class = "social"]/@href')
