@@ -17,7 +17,7 @@ matrix:
 
   - env: TOXENV=pypy3
 
-    install:
+install:
 - pip install -U tox codecov
 
 script: tox
