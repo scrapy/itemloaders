@@ -17,7 +17,7 @@ Here's how you can remove those dashes by reusing and extending the default
 Product Item Loader (``ProductLoader``)::
 
     from itemloaders.processors import MapCompose
-    from myproject.ItemLoaders import ProductLoader
+    from myproject.loaders import ProductLoader
 
     def strip_dashes(x):
         return x.strip('-')

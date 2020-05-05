@@ -1,4 +1,4 @@
-.. _built-in processors:
+.. _built-in-processors:
 
 Available built-in processors
 =============================
@@ -40,13 +40,13 @@ Here is a list of all built-in processors:
     >>> proc(['', 'one', 'two', 'three'])
     'one'
 
-.. class:: Join(separator=u' ')
+.. class:: Join(separator=' ')
 
     Returns the values joined with the separator given in the ``__init__`` method, which
-    defaults to ``u' '``. It doesn't accept Loader contexts.
+    defaults to ``' '``. It doesn't accept Loader contexts.
 
     When using the default separator, this processor is equivalent to the
-    function: ``u' '.join``
+    function: ``' '.join``
 
     Examples:
 

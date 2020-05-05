@@ -23,7 +23,7 @@ API Reference
         (resp. :meth:`replace_css`) method.
     :type selector: :class:`~scrapy.selector.Selector` object
 
-    The item, selector, response and the remaining keyword arguments are
+    The item, selector and the remaining keyword arguments are
     assigned to the Loader context (accessible through the :attr:`context` attribute).
 
     :class:`ItemLoader` instances have the following methods:
@@ -209,8 +209,8 @@ API Reference
 
     .. attribute:: context
 
-        The currently active :ref:`Context <loaders-context>` of this
-        Item Loader.
+        The currently active :ref:`Context <loaders-context>` of this Item Loader.
+        Refer to <loaders-context> for more information about the Loader Context.
 
     .. attribute:: default_item_class
 
@@ -237,10 +237,8 @@ API Reference
     .. attribute:: selector
 
         The :class:`~parsel.Selector` object to extract data from.
-        It's either the selector given in the ``__init__`` method or one created from
-        the response given in the ``__init__`` method using the
-        :attr:`default_selector_class`. This attribute is meant to be
-        read-only.
+        It's the selector given in the ``__init__`` method.
+        This attribute is meant to be read-only.
 
 
 .. _parsel: https://parsel.readthedocs.io/en/latest/

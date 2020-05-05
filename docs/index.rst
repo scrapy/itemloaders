@@ -5,7 +5,7 @@ itemloaders
 ============
 
 ``itemloaders`` provide a convenient mechanism for populating data records.
-It's design provide a flexible, efficient and easy mechanism
+Its design provides a flexible, efficient and easy mechanism
 for extending and overriding different field parsing rules, either by raw data,
 or by source format (HTML, XML, etc) without becoming a nightmare to maintain.
 
@@ -89,5 +89,5 @@ Contents
     loaders-context
     nested-loaders
     extending-loaders
-    built-in processors
+    built-in-processors
     api-reference

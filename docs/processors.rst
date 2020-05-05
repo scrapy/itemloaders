@@ -68,4 +68,4 @@ processors are collected internally (in lists) and then passed to output
 processors to populate the fields.
 
 Last, but not least, ``itemloaders`` comes with some :ref:`commonly used processors
-<built-in processors>` built-in for convenience.
+<built-in-processors>` built-in for convenience.
