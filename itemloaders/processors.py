@@ -5,8 +5,8 @@ See documentation in docs/topics/loaders.rst
 """
 from collections import ChainMap
 
-from scrapy.utils.misc import arg_to_iter
-from scrapy.loader.common import wrap_loader_context
+from itemloaders.utils import arg_to_iter
+from itemloaders.common import wrap_loader_context
 
 
 class MapCompose:

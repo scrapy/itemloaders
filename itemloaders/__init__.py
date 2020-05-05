@@ -6,12 +6,12 @@ See documentation in docs/topics/loaders.rst
 from collections import defaultdict
 from contextlib import suppress
 
-from scrapy.item import Item
-from scrapy.loader.common import wrap_loader_context
-from scrapy.loader.processors import Identity
-from scrapy.selector import Selector
-from scrapy.utils.misc import arg_to_iter, extract_regex
-from scrapy.utils.python import flatten
+from parsel import Selector
+from parsel.utils import extract_regex, flatten
+
+from itemloaders.common import wrap_loader_context
+from itemloaders.processors import Identity
+from itemloaders.utils import arg_to_iter
 
 
 def unbound_method(method):
@@ -27,16 +27,14 @@ def unbound_method(method):
 
 class ItemLoader:
 
-    default_item_class = Item
+    default_item_class = dict
     default_input_processor = Identity()
     default_output_processor = Identity()
     default_selector_class = Selector
 
-    def __init__(self, item=None, selector=None, response=None, parent=None, **context):
-        if selector is None and response is not None:
-            selector = self.default_selector_class(response)
+    def __init__(self, item=None, selector=None, parent=None, **context):
         self.selector = selector
-        context.update(selector=selector, response=response)
+        context.update(selector=selector)
         if item is None:
             item = self.default_item_class()
         self.context = context
@@ -131,6 +129,7 @@ class ItemLoader:
         for field_name in tuple(self._values):
             value = self.get_output_value(field_name)
             if value is not None:
+                print(type(value))
                 item[field_name] = value
 
         return item
@@ -150,16 +149,21 @@ class ItemLoader:
     def get_input_processor(self, field_name):
         proc = getattr(self, '%s_in' % field_name, None)
         if not proc:
-            proc = self._get_item_field_attr(field_name, 'input_processor',
-                                             self.default_input_processor)
+            proc = self.get_default_input_processor_for_field(field_name)
         return unbound_method(proc)
+
+    def get_default_input_processor_for_field(self, field_name):
+        return self.default_input_processor
 
     def get_output_processor(self, field_name):
         proc = getattr(self, '%s_out' % field_name, None)
         if not proc:
-            proc = self._get_item_field_attr(field_name, 'output_processor',
-                                             self.default_output_processor)
+            proc = self.get_default_output_processor_for_field(field_name)
+
         return unbound_method(proc)
+
+    def get_default_output_processor_for_field(self, field_name):
+        return self.default_output_processor
 
     def _process_input_value(self, field_name, value):
         proc = self.get_input_processor(field_name)
@@ -172,13 +176,6 @@ class ItemLoader:
                 "Error with input processor %s: field=%r value=%r "
                 "error='%s: %s'" % (_proc.__class__.__name__, field_name,
                                     value, type(e).__name__, str(e)))
-
-    def _get_item_field_attr(self, field_name, key, default=None):
-        if isinstance(self.item, Item):
-            value = self.item.fields[field_name].get(key, default)
-        else:
-            value = default
-        return value
 
     def _check_selector_method(self):
         if self.selector is None:
