@@ -1,3 +1,5 @@
+docs/build
+
 /.vagrant
 /scrapy.iml
 *.pyc
