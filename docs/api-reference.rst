@@ -52,7 +52,7 @@ API Reference
 
         The value is first passed through :meth:`get_value` by giving the
         ``processors`` and ``kwargs``, and then passed through the
-        :ref:`field input processor <loaders-processors>` and its result
+        :ref:`field input processor <processors>` and its result
         appended to the data collected for that field. If the field already
         contains collected data, the new data is added.
 
@@ -163,7 +163,7 @@ API Reference
 
         Populate the item with the data collected so far, and return it. The
         data collected is first passed through the :ref:`output processors
-        <loaders-processors>` to get the final value to assign to each
+        <processors>` to get the final value to assign to each
         item field.
 
     .. method:: nested_xpath(xpath)
