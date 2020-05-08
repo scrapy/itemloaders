@@ -20,6 +20,16 @@ from os import path
 # absolute, like shown here.
 sys.path.insert(0, path.dirname(path.dirname(__file__)))
 
+def setup(app):
+    app.connect('autodoc-skip-member', maybe_skip_member)
+
+
+def maybe_skip_member(app, what, name, obj, skip, options):
+    if not skip:
+        # autodocs was generating a text "alias of" for the following members
+        # https://github.com/sphinx-doc/sphinx/issues/4422
+        return name in {'default_item_class', 'default_selector_class'}
+    return skip
 
 # General configuration
 # ---------------------
