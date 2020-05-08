@@ -44,7 +44,7 @@ class MapCompose:
     >>> from itemloaders.processors import MapCompose
     >>> proc = MapCompose(filter_world, str.upper)
     >>> proc(['hello', 'world', 'this', 'is', 'something'])
-    ['HELLO, 'THIS', 'IS', 'SOMETHING']
+    ['HELLO', 'THIS', 'IS', 'SOMETHING']
 
     As with the Compose processor, functions can receive Loader contexts, and
     ``__init__`` method keyword arguments are used as default context values.

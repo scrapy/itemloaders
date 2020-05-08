@@ -221,9 +221,11 @@ class ItemLoader:
 
         Examples:
 
+        >>> from itemloaders import ItemLoader
         >>> from itemloaders.processors import TakeFirst
+        >>> loader = ItemLoader()
         >>> loader.get_value('name: foo', TakeFirst(), str.upper, re='name: (.+)')
-        'FOO`
+        'FOO'
         """
         regex = kw.get('re', None)
         if regex:
