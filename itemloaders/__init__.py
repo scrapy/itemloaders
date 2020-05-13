@@ -422,13 +422,11 @@ class ItemLoader:
         values = self.get_selector_values(None, css, 'css', **kw)
         return self.get_value(values, *processors, **kw)
 
-    def get_selector_values(self, field_name, selector_rules, selector_name, **kw):
-
-        selector = getattr(self.selector, selector_name, None)
+    def get_selector_values(self, field_name, selector_rules, selector_type, **kw):
 
         self._check_selector_method()
 
-        selector_type = selector.__name__  # either 'css' or 'xpath'
+        selector = getattr(self.selector, selector_type or '', None)
 
         # The optional arg in methods like `add_css()` for context in stats
         name = kw.get("name")
