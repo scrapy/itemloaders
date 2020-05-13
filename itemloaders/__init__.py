@@ -336,14 +336,14 @@ class ItemLoader:
 
         """
         self.field_tracker[f"{field_name}_xpath"] += 1
-        values = self._get_xpathvalues(field_name, xpath, **kw)
+        values = self.get_selector_values(field_name, xpath, 'xpath', **kw)
         self.add_value(field_name, values, *processors, **kw)
 
     def replace_xpath(self, field_name, xpath, *processors, **kw):
         """
         Similar to :meth:`add_xpath` but replaces collected data instead of adding it.
         """
-        values = self._get_xpathvalues(field_name, xpath, **kw)
+        values = self.get_selector_values(field_name, xpath, 'xpath', **kw)
         self.replace_value(field_name, values, *processors, **kw)
 
     def get_xpath(self, xpath, *processors, **kw):
@@ -367,11 +367,8 @@ class ItemLoader:
             loader.get_xpath('//p[@id="price"]', TakeFirst(), re='the price is (.*)')
 
         """
-        values = self._get_xpathvalues(None, xpath, **kw)
+        values = self.get_selector_values(None, xpath, 'xpath', **kw)
         return self.get_value(values, *processors, **kw)
-
-    def _get_xpathvalues(self, field_name, xpaths, **kw):
-        return self.get_selector_values(field_name, xpaths, self.selector.xpath, **kw)
 
     def add_css(self, field_name, css, *processors, **kw):
         """
@@ -392,14 +389,14 @@ class ItemLoader:
             loader.add_css('price', 'p#price', re='the price is (.*)')
         """
         self.field_tracker[f"{field_name}_css"] += 1
-        values = self._get_cssvalues(field_name, css, **kw)
+        values = self.get_selector_values(field_name, css, 'css', **kw)
         self.add_value(field_name, values, *processors, **kw)
 
     def replace_css(self, field_name, css, *processors, **kw):
         """
         Similar to :meth:`add_css` but replaces collected data instead of adding it.
         """
-        values = self._get_cssvalues(field_name, css, **kw)
+        values = self.get_selector_values(field_name, css, 'css', **kw)
         self.replace_value(field_name, values, *processors, **kw)
 
     def get_css(self, css, *processors, **kw):
@@ -422,16 +419,12 @@ class ItemLoader:
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.get_css('p#price', TakeFirst(), re='the price is (.*)')
         """
-        values = self._get_cssvalues(None, css, **kw)
+        values = self.get_selector_values(None, css, 'css', **kw)
         return self.get_value(values, *processors, **kw)
 
-    def _get_cssvalues(self, field_name, csss, **kw):
-        return self.get_selector_values(field_name, csss, self.selector.css, **kw)
+    def get_selector_values(self, field_name, selector_rules, selector_name, **kw):
 
-    def get_selector_values(self, field_name, selector_rules, selector, **kw):
-        """Provides an abstraction to _get_xpathvalues() and _get_cssvalues()
-        since they share the same components.
-        """
+        selector = getattr(self.selector, selector_name, None)
 
         self._check_selector_method()
 
