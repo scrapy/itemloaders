@@ -6,7 +6,6 @@ See documentation in docs/topics/loaders.rst
 from collections import defaultdict
 from contextlib import suppress
 
-from parsel import Selector
 from parsel.utils import extract_regex, flatten
 
 from itemloaders.common import wrap_loader_context
@@ -43,7 +42,7 @@ class ItemLoader:
     :param selector: The selector to extract data from, when using the
         :meth:`add_xpath` (resp. :meth:`add_css`) or :meth:`replace_xpath`
         (resp. :meth:`replace_css`) method.
-    :type selector: :class:`~scrapy.selector.Selector` object
+    :type selector: :class:`~parsel.Selector` object
 
     The item, selector and the remaining keyword arguments are
     assigned to the Loader context (accessible through the :attr:`context` attribute).
@@ -74,13 +73,6 @@ class ItemLoader:
         The default output processor to use for those fields which don't specify
         one.
 
-    .. attribute:: default_selector_class
-
-        The class used to construct the :attr:`selector` of this
-        :class:`ItemLoader`, if only a response is given in the ``__init__`` method.
-        If a selector is given in the ``__init__`` method this attribute is ignored.
-        This attribute is sometimes overridden in subclasses.
-
     .. attribute:: selector
 
         The :class:`~parsel.Selector` object to extract data from.
@@ -93,7 +85,6 @@ class ItemLoader:
     default_item_class = dict
     default_input_processor = Identity()
     default_output_processor = Identity()
-    default_selector_class = Selector
 
     def __init__(self, item=None, selector=None, parent=None, **context):
         self.selector = selector
@@ -312,9 +303,10 @@ class ItemLoader:
 
     def _check_selector_method(self):
         if self.selector is None:
-            raise RuntimeError("To use XPath or CSS selectors, "
-                               "%s must be instantiated with a selector "
-                               "or a response" % self.__class__.__name__)
+            raise RuntimeError(
+                f"To use XPath or CSS selectors, {self.__class__.__name__}"
+                "must be instantiated with a selector "
+            )
 
     def add_xpath(self, field_name, xpath, *processors, **kw):
         """
