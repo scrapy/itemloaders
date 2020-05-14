@@ -304,8 +304,8 @@ class ItemLoader:
     def _check_selector_method(self):
         if self.selector is None:
             raise RuntimeError(
-                f"To use XPath or CSS selectors, {self.__class__.__name__}"
-                "must be instantiated with a selector "
+                "To use XPath or CSS selectors, %s"
+                "must be instantiated with a selector" % self.__class__.__name__
             )
 
     def add_xpath(self, field_name, xpath, *processors, **kw):
