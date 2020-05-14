@@ -449,15 +449,10 @@ class ItemLoader:
     ):
         """Responsible for logging the parser rules usage.
 
-        NOTES: It's hard to easily denote which parser rule hasn't produced any
-          data for the entire crawl, since ItemLoaders essentially don't know
-          when the spider is going to be closed, as well as it has many
-          instantiations all throughout the code.
-
         The implementation below where each missing parsed_data is being logged
         to the stat is clunky, but necessary. With this, we can only surmise
         that it's safe to remove parser fallback parser if it's all just
-        '*/missing' in the stats.
+        '.../missing' in the stats.
         """
 
         if not self.stats or not field_name:
