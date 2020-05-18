@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='itemloaders',
-    version='0.1',
+    version='1.0.0',
     url='https://github.com/scrapy/itemloaders',
     project_urls={
         'Documentation': 'https://itemloaders.readthedocs.io/',
@@ -13,6 +13,7 @@ setup(
     },
     description="Base library for scrapy's ItemLoader",
     long_description=long_description,
+    long_description_content_type="text/x-rst",
     author='Scrapinghub',
     author_email='info@scrapinghub.com',
     license='BSD',
