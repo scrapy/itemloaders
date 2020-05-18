@@ -15,14 +15,14 @@ class UtilsPythonTestCase(unittest.TestCase):
         def f2(a, b=None, c=None):
             pass
 
-        class A:
+        class A(object):
             def __init__(self, a, b, c):
                 pass
 
             def method(self, a, b, c):
                 pass
 
-        class Callable:
+        class Callable(object):
 
             def __call__(self, a, b, c):
                 pass
