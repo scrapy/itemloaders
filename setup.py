@@ -6,10 +6,10 @@ with open('README.md') as f:
 setup(
     name='itemloaders',
     version='0.1',
-    url='https://github.com/ejulio/itemloaders',
+    url='https://github.com/scrapy/itemloaders',
     project_urls={
-        # 'Documentation': '---',
-        'Source': 'https://github.com/ejulio/itemloaders',
+        'Documentation': 'https://itemloaders.readthedocs.io/',
+        'Source': 'https://github.com/scrapy/itemloaders',
     },
     description="Base library for scrapy's ItemLoader",
     long_description=long_description,
