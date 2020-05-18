@@ -30,7 +30,7 @@ deploy:
     branch: master
     tags: true
     condition: "$TOXENV == py38"
-    repo: ejulio/itemloaders
+    repo: scrapy/itemloaders
   provider: pypi
   distributions: "sdist bdist_wheel"
   user: __token__
