@@ -78,7 +78,8 @@ All contributions are welcome!
 Maintaining
 ===========
 
-* New versions are published automatically to PyPi
+New versions are published automatically to PyPi
+
 * ``master`` branch must succeed in Travis CI
 * Update ``setup.py`` with the new version
 * Tag the commit
