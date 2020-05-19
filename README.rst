@@ -58,24 +58,28 @@ Here is an example to get you started::
 
 For more information, check out the `documentation <https://itemloaders.readthedocs.io/en/latest/>`_.
 
-========================
-Contributing/Maintaining
-========================
+============
+Contributing
+============
 
 All contributions are welcome!
 
 * If you can to review some code, check open
-`Pull Requests here <https://github.com/scrapy/itemloaders/pulls>`_
-
+  `Pull Requests here <https://github.com/scrapy/itemloaders/pulls>`_
 
 * If you want to submit a code change
-* File an `issue here <https://github.com/scrapy/itemloaders/issues>`_, if there isn't one yet
+* File an `issue here <https://github.com/scrapy/itemloaders/issues>`_,
+  if there isn't one yet
 * Fork this repository
 * Create a branch to work on your changes
 * Push your local branch and submit a Pull Request
 
+===========
+Maintaining
+===========
+
 * New versions are published automatically to PyPi
-    * The ``master`` branch must succeed in Travis CI
-    * Update ``setup.py`` with the new version
-    * Tag the commit
-    * Push tags
+* ``master`` branch must succeed in Travis CI
+* Update ``setup.py`` with the new version
+* Tag the commit
+* Push tags
