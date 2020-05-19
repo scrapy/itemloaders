@@ -15,7 +15,7 @@ itemloaders
    :alt: Build Status
 
 .. image:: https://codecov.io/github/scrapy/itemloaders/coverage.svg?branch=master
-   :target: https://codecov.io/gh/scrapy/scrapy
+   :target: https://codecov.io/gh/scrapy/itemloaders
    :alt: Coverage report
 
 .. image:: https://readthedocs.org/projects/itemloaders/badge/?version=latest
