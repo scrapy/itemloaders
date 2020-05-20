@@ -36,8 +36,10 @@ setup(
     ],
     python_requires='>=3.5',
     install_requires=[
-        'w3lib>=1.21.0',
-        'parsel>=1.5.2',
+        # before updating these versions, be sure they are not higher than
+        # scrapy's requirements
+        'w3lib>=1.17.0',
+        'parsel>=1.5.0',
         'jmespath>=0.9.5'
     ],
     # extras_require=extras_require,
