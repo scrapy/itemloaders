@@ -73,14 +73,3 @@ All contributions are welcome!
 * Fork this repository
 * Create a branch to work on your changes
 * Push your local branch and submit a Pull Request
-
-===========
-Maintaining
-===========
-
-New versions are published automatically to PyPi
-
-* ``master`` branch must succeed in Travis CI
-* Update ``setup.py`` with the new version
-* Tag the commit
-* Push tags
