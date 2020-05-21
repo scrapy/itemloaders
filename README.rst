@@ -47,12 +47,12 @@ Here is an example to get you started::
         </body>
     </html>
     '''
-    l = ItemLoader(selector=Selector(html_data))
-    l.add_xpath('name', '//div[@class="product_name"]/text()')
-    l.add_xpath('name', '//div[@class="product_title"]/text()')
-    l.add_css('price', '#price::text')
-    l.add_value('last_updated', 'today') # you can also use literal values
-    item = l.load_item()
+    loader = ItemLoader(selector=Selector(html_data))
+    loader.add_xpath('name', '//div[@class="product_name"]/text()')
+    loader.add_xpath('name', '//div[@class="product_title"]/text()')
+    loader.add_css('price', '#price::text')
+    loader.add_value('last_updated', 'today') # you can also use literal values
+    item = loader.load_item()
     item
     # {'name': ['Some random product page'], 'price': ['$ 100.12'], 'last_updated': ['today']}
 
