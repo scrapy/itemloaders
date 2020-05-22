@@ -24,9 +24,11 @@ itemloaders
 
 
 ``itemloaders`` is a library that helps you collect data into models.
+
 It's specially useful when you need to standardize the data from many sources.
 For example, it allows you to have all your casting and parsing rules in a
 single place.
+
 Also, it comes in handy to extract data from web pages, as it supports
 data extraction using CSS and XPath Selectors.
 
