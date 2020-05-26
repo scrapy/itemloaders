@@ -186,7 +186,7 @@ def test_get_selector_values():
     loader.write_to_stats = mock.Mock()
 
     # This wasn't actually initialized so it will return 0 by default otherwise.
-    loader.field_tracker["field_css"] = 1
+    loader.field_position_tracker["field_css"] = 1
 
     result = loader.get_selector_values(field_name, selector_rules, "css")
 

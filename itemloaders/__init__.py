@@ -105,7 +105,7 @@ class ItemLoader:
 
         # This keeps track of the position of the 'field' name that is being
         # loaded for a more accurate logging in the stats.
-        self.field_tracker = defaultdict(int)
+        self.field_position_tracker = defaultdict(int)
 
     @property
     def _values(self):
@@ -335,7 +335,7 @@ class ItemLoader:
             loader.add_xpath('price', '//p[@id="price"]', re='the price is (.*)')
 
         """
-        self.field_tracker[f"{field_name}_xpath"] += 1
+        self.field_position_tracker[f"{field_name}_xpath"] += 1
         values = self.get_selector_values(field_name, xpath, 'xpath', **kw)
         self.add_value(field_name, values, *processors, **kw)
 
@@ -388,7 +388,7 @@ class ItemLoader:
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.add_css('price', 'p#price', re='the price is (.*)')
         """
-        self.field_tracker[f"{field_name}_css"] += 1
+        self.field_position_tracker[f"{field_name}_css"] += 1
         values = self.get_selector_values(field_name, css, 'css', **kw)
         self.add_value(field_name, values, *processors, **kw)
 
@@ -433,7 +433,7 @@ class ItemLoader:
 
         # For every call of `add_css()` and `add_xpath()` this is incremented.
         # We'll use it as the base index of the position of the logged stats.
-        index = self.field_tracker[f"{field_name}_{selector_type}"]
+        index = self.field_position_tracker[f"{field_name}_{selector_type}"]
 
         values = []
         for position, rule in enumerate(arg_to_iter(selector_rules), index):
