@@ -13,6 +13,10 @@ To install ``itemloaders``, run::
 
     pip install itemloaders
 
+.. note:: Under the hood, ``itemloaders`` uses
+    `itemadapter <https://github.com/scrapy/itemadapter>`_ as a common interface.
+    This means you can use any of the types supported by ``itemadapter`` here.
+
 
 Getting Started with ``itemloaders``
 ====================================
