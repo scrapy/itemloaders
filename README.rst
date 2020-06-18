@@ -66,11 +66,10 @@ Contributing
 
 All contributions are welcome!
 
-* If you can to review some code, check open
+* If you want to review some code, check open
   `Pull Requests here <https://github.com/scrapy/itemloaders/pulls>`_
-
-* If you want to submit a code change
-* File an `issue here <https://github.com/scrapy/itemloaders/issues>`_, if there isn't one yet
-* Fork this repository
-* Create a branch to work on your changes
-* Push your local branch and submit a Pull Request
+* If you want to submit a code change:
+   * File an `issue here <https://github.com/scrapy/itemloaders/issues>`_, if there isn't one yet
+   * Fork this repository
+   * Create a branch to work on your changes
+   * Push your local branch and submit a Pull Request
