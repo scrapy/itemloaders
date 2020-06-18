@@ -40,7 +40,8 @@ setup(
         # scrapy's requirements
         'w3lib>=1.17.0',
         'parsel>=1.5.0',
-        'jmespath>=0.9.5'
+        'jmespath>=0.9.5',
+        'itemadapter>=0.1.0'
     ],
     # extras_require=extras_require,
 )
