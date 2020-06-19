@@ -6,8 +6,8 @@ See documentation in docs/topics/loaders.rst
 from collections import defaultdict
 from contextlib import suppress
 
-from parsel.utils import extract_regex, flatten
 from itemadapter import ItemAdapter
+from parsel.utils import extract_regex, flatten
 
 from itemloaders.common import wrap_loader_context
 from itemloaders.processors import Identity
