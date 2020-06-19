@@ -64,6 +64,11 @@ class ItemLoader:
         An Item class (or factory), used to instantiate items when not given in
         the ``__init__`` method.
 
+        .. warning:: This factory/class needs to be callable/instantiated without
+            any arguments.
+            When working with ``dataclass`` you may need to decorate your
+            classes using ``@dataclass(init=False)``.
+
     .. attribute:: default_input_processor
 
         The default input processor to use for those fields which don't specify
