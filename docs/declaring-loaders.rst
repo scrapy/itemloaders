@@ -20,7 +20,7 @@ Item Loaders are declared by using a class definition syntax. Here is an example
       name: str
       price: float = field(
          metadata={
-               'output_processor': price_out
+            'output_processor': price_out
          }
       )
 
