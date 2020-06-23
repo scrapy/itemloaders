@@ -5,40 +5,40 @@ Declaring Item Loaders
 
 Item Loaders are declared by using a class definition syntax. Here is an example::
 
-   from dataclasses import dataclass, field
+    from dataclasses import dataclass, field
 
-   from itemloaders import ItemLoader
-   from itemloaders.processors import TakeFirst
-
-
-   def price_out(values):
-      return float(values[0])
+    from itemloaders import ItemLoader
+    from itemloaders.processors import TakeFirst
 
 
-   @dataclass(init=False)
-   class Product:
-      name: str
-      price: float = field(
-         metadata={
+    def price_out(values):
+        return float(values[0])
+
+
+    @dataclass(init=False)
+    class Product:
+        name: str
+        price: float = field(
+            metadata={
             'output_processor': price_out
-         }
-      )
+            }
+        )
 
 
-   class ProductLoader(ItemLoader):
-      default_item_class = Product
+    class ProductLoader(ItemLoader):
+        default_item_class = Product
 
-      # using a built-in processor
-      default_output_processor = TakeFirst()
+        # using a built-in processor
+        default_output_processor = TakeFirst()
 
-      # using a function
-      def name_in(self, values):
-         return values[0].title()
+        # using a function
+        def name_in(self, values):
+            return values[0].title()
 
-   loader = ProductLoader()
-   loader.add_value('name', 'plasma TV')
-   loader.add_value('price', '999.98')
-   # Product(name='Plasma Tv', price=999.98)
+    loader = ProductLoader()
+    loader.add_value('name', 'plasma TV')
+    loader.add_value('price', '999.98')
+    # Product(name='Plasma Tv', price=999.98)
 
 As you can see, input processors are declared using the ``_in`` suffix while
 output processors are declared using the ``_out`` suffix. And you can also
