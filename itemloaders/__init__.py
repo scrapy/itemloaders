@@ -66,8 +66,25 @@ class ItemLoader:
 
         .. warning:: Currently, this factory/class needs to be
             callable/instantiated without any arguments.
-            When working with ``dataclass`` you may need to decorate your
-            classes using ``@dataclass(init=False)``.
+            If you are using ``dataclasses``, please consider one of the
+            following alternatives.
+
+            Set default values to fields::
+
+                from dataclasses import dataclass, field
+
+                @dataclass
+                class Product:
+                    name: str = field(default=None)
+                    price: float = field(default=None)
+
+            Decorate with ``@dataclass(init=False)``::
+
+                from dataclasses import dataclass
+
+                @dataclass(init=False)
+                class Product:
+                    pass
 
     .. attribute:: default_input_processor
 
