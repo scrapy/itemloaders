@@ -6,6 +6,7 @@ Declaring Item Loaders
 Item Loaders are declared by using a class definition syntax. Here is an example::
 
     from dataclasses import dataclass, field
+    from typing import Optional
 
     from itemloaders import ItemLoader
     from itemloaders.processors import TakeFirst
@@ -15,13 +16,12 @@ Item Loaders are declared by using a class definition syntax. Here is an example
         return float(values[0])
 
 
-    @dataclass(init=False)
+    @dataclass
     class Product:
-        name: str
-        price: float = field(
-            metadata={
-            'output_processor': price_out
-            }
+        name: Optional[str] = field(default=None)
+        price: Optional[float] = field(
+            default=None,
+            metadata={'output_processor': price_out}
         )
 
 
@@ -38,6 +38,7 @@ Item Loaders are declared by using a class definition syntax. Here is an example
     loader = ProductLoader()
     loader.add_value('name', 'plasma TV')
     loader.add_value('price', '999.98')
+    loader.load_item()
     # Product(name='Plasma Tv', price=999.98)
 
 As you can see, input processors are declared using the ``_in`` suffix while
