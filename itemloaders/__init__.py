@@ -72,19 +72,12 @@ class ItemLoader:
             Set default values to fields::
 
                 from dataclasses import dataclass, field
+                from typing import Optional
 
                 @dataclass
                 class Product:
-                    name: str = field(default=None)
-                    price: float = field(default=None)
-
-            Decorate with ``@dataclass(init=False)``::
-
-                from dataclasses import dataclass
-
-                @dataclass(init=False)
-                class Product:
-                    pass
+                    name: Optional[str] = field(default=None)
+                    price: Optional[float] = field(default=None)
 
     .. attribute:: default_input_processor
 
