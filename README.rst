@@ -23,7 +23,7 @@ itemloaders
    :alt: Documentation Status
 
 
-``itemloaders`` is a library that helps you collect data from XML and HTML sources into models.
+``itemloaders`` is a library that helps you collect data from HTML and XML sources.
 
 It comes in handy to extract data from web pages, as it supports
 data extraction using CSS and XPath Selectors.
