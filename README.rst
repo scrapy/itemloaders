@@ -60,7 +60,6 @@ Here is an example to get you started::
 
 For more information, check out the `documentation <https://itemloaders.readthedocs.io/en/latest/>`_.
 
-============
 Contributing
 ============
 
