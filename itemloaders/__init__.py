@@ -66,10 +66,8 @@ class ItemLoader:
 
         .. warning:: Currently, this factory/class needs to be
             callable/instantiated without any arguments.
-            If you are using ``dataclasses``, please consider one of the
-            following alternatives.
-
-            Set default values to fields::
+            If you are using ``dataclasses``, please consider the following
+            alternative::
 
                 from dataclasses import dataclass, field
                 from typing import Optional

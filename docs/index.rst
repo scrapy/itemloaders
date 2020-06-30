@@ -17,6 +17,10 @@ To install ``itemloaders``, run::
     `itemadapter <https://github.com/scrapy/itemadapter>`_ as a common interface.
     This means you can use any of the types supported by ``itemadapter`` here.
 
+.. warning:: ``dataclasses`` and ``attrs`` support is still experimental.
+    Please, refer to :attr:`~ItemLoader.default_item_classes` in the
+    :ref:`api-reference` for more information.
+
 
 Getting Started with ``itemloaders``
 ====================================
