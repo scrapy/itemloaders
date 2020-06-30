@@ -104,15 +104,7 @@ class ItemLoader:
         self.selector = selector
         context.update(selector=selector)
         if item is None:
-            try:
-                item = self.default_item_class()
-            except TypeError:
-                raise TypeError(
-                    'Currently, ItemLoader requires default_item_class '
-                    'to be a callable with no arguments. For more information, '
-                    'visit the API Reference in the Documentation.'
-                )
-
+            item = self.default_item_class()
         self._local_item = item
         context['item'] = item
         self.context = context
