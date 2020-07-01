@@ -6,6 +6,7 @@ See documentation in docs/topics/loaders.rst
 from collections import defaultdict
 from contextlib import suppress
 
+from itemadapter import ItemAdapter
 from parsel.utils import extract_regex, flatten
 
 from itemloaders.common import wrap_loader_context
@@ -63,6 +64,19 @@ class ItemLoader:
         An Item class (or factory), used to instantiate items when not given in
         the ``__init__`` method.
 
+        .. warning:: Currently, this factory/class needs to be
+            callable/instantiated without any arguments.
+            If you are using ``dataclasses``, please consider the following
+            alternative::
+
+                from dataclasses import dataclass, field
+                from typing import Optional
+
+                @dataclass
+                class Product:
+                    name: Optional[str] = field(default=None)
+                    price: Optional[float] = field(default=None)
+
     .. attribute:: default_input_processor
 
         The default input processor to use for those fields which don't specify
@@ -91,12 +105,13 @@ class ItemLoader:
         context.update(selector=selector)
         if item is None:
             item = self.default_item_class()
+        self._local_item = item
+        context['item'] = item
         self.context = context
         self.parent = parent
-        self._local_item = context['item'] = item
         self._local_values = defaultdict(list)
         # values from initial item
-        for field_name, value in item.items():
+        for field_name, value in ItemAdapter(item).items():
             self._values[field_name] += arg_to_iter(value)
 
     @property
@@ -242,14 +257,13 @@ class ItemLoader:
         data collected is first passed through the :ref:`output processors
         <processors>` to get the final value to assign to each item field.
         """
-        item = self.item
+        adapter = ItemAdapter(self.item)
         for field_name in tuple(self._values):
             value = self.get_output_value(field_name)
             if value is not None:
-                print(type(value))
-                item[field_name] = value
+                adapter[field_name] = value
 
-        return item
+        return adapter.item
 
     def get_output_value(self, field_name):
         """
@@ -269,25 +283,28 @@ class ItemLoader:
         return self._values[field_name]
 
     def get_input_processor(self, field_name):
-        """Return the input processor for the given field."""
         proc = getattr(self, '%s_in' % field_name, None)
         if not proc:
-            proc = self.get_default_input_processor_for_field(field_name)
+            proc = self._get_item_field_attr(
+                field_name,
+                'input_processor',
+                self.default_input_processor
+            )
         return unbound_method(proc)
-
-    def get_default_input_processor_for_field(self, field_name):
-        return self.default_input_processor
 
     def get_output_processor(self, field_name):
-        """Return the output processor for the given field."""
         proc = getattr(self, '%s_out' % field_name, None)
         if not proc:
-            proc = self.get_default_output_processor_for_field(field_name)
-
+            proc = self._get_item_field_attr(
+                field_name,
+                'output_processor',
+                self.default_output_processor
+            )
         return unbound_method(proc)
 
-    def get_default_output_processor_for_field(self, field_name):
-        return self.default_output_processor
+    def _get_item_field_attr(self, field_name, key, default=None):
+        field_meta = ItemAdapter(self.item).get_field_meta(field_name)
+        return field_meta.get(key, default)
 
     def _process_input_value(self, field_name, value):
         proc = self.get_input_processor(field_name)

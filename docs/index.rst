@@ -13,6 +13,14 @@ To install ``itemloaders``, run::
 
     pip install itemloaders
 
+.. note:: Under the hood, ``itemloaders`` uses
+    `itemadapter <https://github.com/scrapy/itemadapter>`_ as a common interface.
+    This means you can use any of the types supported by ``itemadapter`` here.
+
+.. warning:: ``dataclasses`` and ``attrs`` support is still experimental.
+    Please, refer to :attr:`~ItemLoader.default_item_class` in the
+    :ref:`api-reference` for more information.
+
 
 Getting Started with ``itemloaders``
 ====================================
@@ -28,7 +36,7 @@ CSS or XPath Selectors. You can add more than one value to
 the same item field; the Item Loader will know how to "join" those values later
 using a proper processing function.
 
-.. note:: Collected data is internally stored as lists,
+.. note:: Collected data is stored internally as lists,
    allowing to add several values to the same field.
    If an ``item`` argument is passed when creating a loader,
    each of the item's values will be stored as-is if it's already
