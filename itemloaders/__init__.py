@@ -328,7 +328,7 @@ class ItemLoader:
     def add_xpath(self, field_name, xpath, *processors, **kw):
         """
         Similar to :meth:`ItemLoader.add_value` but receives an XPath instead of a
-        value, which is used to extract a list of unicode strings from the
+        value, which is used to extract a list of strings from the
         selector associated with this :class:`ItemLoader`.
 
         See :meth:`get_xpath` for ``kwargs``.
