@@ -226,7 +226,7 @@ class Join:
     'one<br>two<br>three'
     """
 
-    def __init__(self, separator=u' '):
+    def __init__(self, separator=' '):
         self.separator = separator
 
     def __call__(self, values):
