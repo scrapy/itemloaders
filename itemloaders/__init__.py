@@ -3,7 +3,6 @@ Item Loader
 
 See documentation in docs/topics/loaders.rst
 """
-from collections import defaultdict
 from contextlib import suppress
 
 from itemadapter import ItemAdapter
