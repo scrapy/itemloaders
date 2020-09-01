@@ -5,7 +5,7 @@ from itemloaders import ItemLoader
 from itemloaders.processors import Compose, Identity, Join, MapCompose, TakeFirst
 
 
-class TestItemLoader(ItemLoader):
+class CustomItemLoader(ItemLoader):
     name_in = MapCompose(lambda v: v.title())
 
 
@@ -32,7 +32,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         assert item['name'] == ['marta']
 
     def test_load_item_using_custom_loader(self):
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', 'marta')
         item = il.load_item()
         assert item['name'] == ['Marta']
@@ -83,7 +83,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         assert il.load_item() == {'img_url': '1234.png'}
 
     def test_add_value(self):
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', 'marta')
         assert il.get_collected_values('name') == ['Marta']
         assert il.get_output_value('name') == ['Marta']
@@ -105,7 +105,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         assert il.get_collected_values('name') == [0]
 
     def test_replace_value(self):
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.replace_value('name', 'marta')
         self.assertEqual(il.get_collected_values('name'), ['Marta'])
         self.assertEqual(il.get_output_value('name'), ['Marta'])
@@ -159,10 +159,10 @@ class BasicItemLoaderTest(unittest.TestCase):
                          ['HELLO', 'THIS', 'IS', 'SCRAPY'])
 
     def test_map_compose_filter_multil(self):
-        class TestItemLoader(ItemLoader):
+        class CustomItemLoader(ItemLoader):
             name_in = MapCompose(lambda v: v.title(), lambda v: v[:-1])
 
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', 'marta')
         self.assertEqual(il.get_output_value('name'), ['Mart'])
         item = il.load_item()
@@ -182,7 +182,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('name'), ['mart'])
 
     def test_input_processor_inheritance(self):
-        class ChildItemLoader(TestItemLoader):
+        class ChildItemLoader(CustomItemLoader):
             url_in = MapCompose(lambda v: v.lower())
 
         il = ChildItemLoader()
@@ -218,8 +218,8 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('name'), ['marta'])
 
     def test_extend_custom_input_processors(self):
-        class ChildItemLoader(TestItemLoader):
-            name_in = MapCompose(TestItemLoader.name_in, str.swapcase)
+        class ChildItemLoader(CustomItemLoader):
+            name_in = MapCompose(CustomItemLoader.name_in, str.swapcase)
 
         il = ChildItemLoader()
         il.add_value('name', 'marta')
@@ -234,11 +234,11 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('name'), ['MART'])
 
     def test_output_processor_using_function(self):
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', ['mar', 'ta'])
         self.assertEqual(il.get_output_value('name'), ['Mar', 'Ta'])
 
-        class TakeFirstItemLoader(TestItemLoader):
+        class TakeFirstItemLoader(CustomItemLoader):
             name_out = u" ".join
 
         il = TakeFirstItemLoader()
@@ -246,10 +246,10 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('name'), 'Mar Ta')
 
     def test_output_processor_error(self):
-        class TestItemLoader(ItemLoader):
+        class CustomItemLoader(ItemLoader):
             name_out = MapCompose(float)
 
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', ['$10'])
         try:
             float('$10')
@@ -269,18 +269,18 @@ class BasicItemLoaderTest(unittest.TestCase):
         assert expected_exc_str in s, s
 
     def test_output_processor_using_classes(self):
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', ['mar', 'ta'])
         self.assertEqual(il.get_output_value('name'), ['Mar', 'Ta'])
 
-        class TakeFirstItemLoader(TestItemLoader):
+        class TakeFirstItemLoader(CustomItemLoader):
             name_out = Join()
 
         il = TakeFirstItemLoader()
         il.add_value('name', ['mar', 'ta'])
         self.assertEqual(il.get_output_value('name'), 'Mar Ta')
 
-        class TakeFirstItemLoader(TestItemLoader):
+        class TakeFirstItemLoader(CustomItemLoader):
             name_out = Join("<br>")
 
         il = TakeFirstItemLoader()
@@ -288,11 +288,11 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('name'), 'Mar<br>Ta')
 
     def test_default_output_processor(self):
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', ['mar', 'ta'])
         self.assertEqual(il.get_output_value('name'), ['Mar', 'Ta'])
 
-        class LalaItemLoader(TestItemLoader):
+        class LalaItemLoader(CustomItemLoader):
             default_output_processor = Identity()
 
         il = LalaItemLoader()
@@ -300,7 +300,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('name'), ['Mar', 'Ta'])
 
     def test_loader_context_on_declaration(self):
-        class ChildItemLoader(TestItemLoader):
+        class ChildItemLoader(CustomItemLoader):
             url_in = MapCompose(processor_with_args, key='val')
 
         il = ChildItemLoader()
@@ -310,7 +310,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('url'), ['val'])
 
     def test_loader_context_on_instantiation(self):
-        class ChildItemLoader(TestItemLoader):
+        class ChildItemLoader(CustomItemLoader):
             url_in = MapCompose(processor_with_args)
 
         il = ChildItemLoader(key='val')
@@ -320,7 +320,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('url'), ['val'])
 
     def test_loader_context_on_assign(self):
-        class ChildItemLoader(TestItemLoader):
+        class ChildItemLoader(CustomItemLoader):
             url_in = MapCompose(processor_with_args)
 
         il = ChildItemLoader()
@@ -334,7 +334,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         def processor(value, loader_context):
             return loader_context['item']['name']
 
-        class ChildItemLoader(TestItemLoader):
+        class ChildItemLoader(CustomItemLoader):
             url_in = MapCompose(processor)
 
         it = dict(name='marta')
@@ -345,14 +345,14 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(il.get_output_value('url'), ['marta'])
 
     # def test_add_value_on_unknown_field(self):
-    #     il = TestItemLoader()
+    #     il = CustomItemLoader()
     #     self.assertRaises(KeyError, il.add_value, 'wrong_field', ['lala', 'lolo'])
 
     def test_compose_processor(self):
-        class TestItemLoader(ItemLoader):
+        class CustomItemLoader(ItemLoader):
             name_out = Compose(lambda v: v[0], lambda v: v.title(), lambda v: v[:-1])
 
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', ['marta', 'other'])
         self.assertEqual(il.get_output_value('name'), 'Mart')
         item = il.load_item()
@@ -367,12 +367,12 @@ class BasicItemLoaderTest(unittest.TestCase):
             else:
                 return ''.join(values)
 
-        class TestItemLoader(ItemLoader):
+        class CustomItemLoader(ItemLoader):
             name_out = Compose(partial(join, sep='+'))
             url_out = Compose(partial(join, loader_context={'sep': '.'}))
             summary_out = Compose(partial(join, ignored='foo'))
 
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', ['rabbit', 'hole'])
         il.add_value('url', ['rabbit', 'hole'])
         il.add_value('summary', ['rabbit', 'hole'])
@@ -382,24 +382,24 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertEqual(item['summary'], 'rabbithole')
 
     def test_error_input_processor(self):
-        class TestItemLoader(ItemLoader):
+        class CustomItemLoader(ItemLoader):
             name_in = MapCompose(float)
 
-        il = TestItemLoader()
+        il = CustomItemLoader()
         self.assertRaises(ValueError, il.add_value, 'name',
                           ['marta', 'other'])
 
     def test_error_output_processor(self):
-        class TestItemLoader(ItemLoader):
+        class CustomItemLoader(ItemLoader):
             name_out = Compose(Join(), float)
 
-        il = TestItemLoader()
+        il = CustomItemLoader()
         il.add_value('name', 'marta')
         with self.assertRaises(ValueError):
             il.load_item()
 
     def test_error_processor_as_argument(self):
-        il = TestItemLoader()
+        il = CustomItemLoader()
         self.assertRaises(ValueError, il.add_value, 'name',
                           ['marta', 'other'], Compose(float))
 
