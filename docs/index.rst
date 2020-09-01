@@ -1,3 +1,5 @@
+.. currentmodule:: itemloaders
+
 .. _topics-index:
 
 ============

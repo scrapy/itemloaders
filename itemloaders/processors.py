@@ -33,7 +33,7 @@ class MapCompose:
     work with single values (instead of iterables). For this reason the
     :class:`MapCompose` processor is typically used as input processor, since
     data is often extracted using the
-    :meth:`~parsel.Selector.extract` method of `parsel selectors`_,
+    :meth:`~parsel.selector.Selector.extract` method of `parsel selectors`_,
     which returns a list of unicode strings.
 
     The example below should clarify how it works:
@@ -103,8 +103,8 @@ class Compose:
     The keyword arguments passed in the ``__init__`` method are used as the default
     Loader context values passed to each function call. However, the final
     Loader context values passed to functions are overridden with the currently
-    active Loader context accessible through the :meth:`ItemLoader.context`
-    attribute.
+    active Loader context accessible through the :attr:`ItemLoader.context
+    <itemloaders.ItemLoader.context>` attribute.
     """
 
     def __init__(self, *functions, **default_loader_context):
