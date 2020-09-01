@@ -403,6 +403,12 @@ class BasicItemLoaderTest(unittest.TestCase):
         self.assertRaises(ValueError, il.add_value, 'name',
                           ['marta', 'other'], Compose(float))
 
+    def test_get_unset_value(self):
+        loader = ItemLoader()
+        self.assertEqual(loader.load_item(), {})
+        self.assertEqual(loader.get_output_value('foo'), [])
+        self.assertEqual(loader.load_item(), {})
+
 
 class BaseNoInputReprocessingLoader(ItemLoader):
     title_in = MapCompose(str.upper)

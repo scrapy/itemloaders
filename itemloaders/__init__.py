@@ -3,7 +3,6 @@ Item Loader
 
 See documentation in docs/topics/loaders.rst
 """
-from collections import defaultdict
 from contextlib import suppress
 
 from itemadapter import ItemAdapter
@@ -109,9 +108,10 @@ class ItemLoader:
         context['item'] = item
         self.context = context
         self.parent = parent
-        self._local_values = defaultdict(list)
+        self._local_values = {}
         # values from initial item
         for field_name, value in ItemAdapter(item).items():
+            self._values.setdefault(field_name, [])
             self._values[field_name] += arg_to_iter(value)
 
     @property
@@ -207,6 +207,7 @@ class ItemLoader:
         value = arg_to_iter(value)
         processed_value = self._process_input_value(field_name, value)
         if processed_value:
+            self._values.setdefault(field_name, [])
             self._values[field_name] += arg_to_iter(processed_value)
 
     def _replace_value(self, field_name, value):
@@ -272,15 +273,16 @@ class ItemLoader:
         """
         proc = self.get_output_processor(field_name)
         proc = wrap_loader_context(proc, self.context)
+        value = self._values.get(field_name, [])
         try:
-            return proc(self._values[field_name])
+            return proc(value)
         except Exception as e:
             raise ValueError("Error with output processor: field=%r value=%r error='%s: %s'" %
-                             (field_name, self._values[field_name], type(e).__name__, str(e)))
+                             (field_name, value, type(e).__name__, str(e)))
 
     def get_collected_values(self, field_name):
         """Return the collected values for the given field."""
-        return self._values[field_name]
+        return self._values.get(field_name, [])
 
     def get_input_processor(self, field_name):
         proc = getattr(self, '%s_in' % field_name, None)
