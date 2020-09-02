@@ -42,7 +42,7 @@ class ItemLoader:
     :param selector: The selector to extract data from, when using the
         :meth:`add_xpath` (resp. :meth:`add_css`) or :meth:`replace_xpath`
         (resp. :meth:`replace_css`) method.
-    :type selector: :class:`~parsel.Selector` object
+    :type selector: :class:`~parsel.selector.Selector` object
 
     The item, selector and the remaining keyword arguments are
     assigned to the Loader context (accessible through the :attr:`context` attribute).
@@ -88,7 +88,7 @@ class ItemLoader:
 
     .. attribute:: selector
 
-        The :class:`~parsel.Selector` object to extract data from.
+        The :class:`~parsel.selector.Selector` object to extract data from.
         It's the selector given in the ``__init__`` method.
         This attribute is meant to be read-only.
 
@@ -222,7 +222,7 @@ class ItemLoader:
         Available keyword arguments:
 
         :param re: a regular expression to use for extracting data from the
-            given value using :meth:`~parsel.utils.extract_regex` method,
+            given value using :func:`~parsel.utils.extract_regex` method,
             applied before processors
         :type re: str or typing.Pattern
 

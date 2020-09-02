@@ -1,3 +1,5 @@
+.. currentmodule:: itemloaders
+
 .. _loaders-context:
 
 Item Loader Context
@@ -36,7 +38,7 @@ There are several ways to modify Item Loader context values:
       loader = ItemLoader(product, unit='cm')
 
 3. On Item Loader declaration, for those input/output processors that support
-   instantiating them with an Item Loader context. :class:`~processor.MapCompose` is one of
+   instantiating them with an Item Loader context. :class:`~processors.MapCompose` is one of
    them::
 
        class ProductLoader(ItemLoader):

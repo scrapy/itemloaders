@@ -1,3 +1,5 @@
+.. currentmodule:: itemloaders
+
 .. _declaring-loaders:
 
 Declaring Item Loaders

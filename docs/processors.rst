@@ -1,3 +1,5 @@
+.. currentmodule:: itemloaders
+
 .. _processors:
 
 Input and Output processors
