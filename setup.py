@@ -5,7 +5,7 @@ with open('README.rst') as f:
 
 setup(
     name='itemloaders',
-    version='1.0.2',
+    version='1.0.3',
     url='https://github.com/scrapy/itemloaders',
     project_urls={
         'Documentation': 'https://itemloaders.readthedocs.io/',
