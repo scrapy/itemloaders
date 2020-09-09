@@ -38,12 +38,17 @@ declare a default input/output processors using the
 
 The precedence order, for both input and output processors, is as follows:
 
-1. Item Loader field-specific attributes: ``field_in`` and ``field_out`` (most
-   precedence)
-2. Field metadata (``input_processor`` and ``output_processor`` keys).
-   Check out
-   `itemadapter field metadata <https://github.com/scrapy/itemadapter#metadata-support>`_
-   for more information.
+1.  Item Loader field-specific attributes: ``field_in`` and ``field_out`` (most
+    precedence)
+
+2.  Field metadata (``input_processor`` and ``output_processor`` keys).
+
+    Check out `itemadapter field metadata
+    <https://github.com/scrapy/itemadapter#metadata-support>`_ for more
+    information.
+
+    .. versionadded:: 1.0.1
+
 3. Item Loader defaults: :meth:`ItemLoader.default_input_processor` and
    :meth:`ItemLoader.default_output_processor` (least precedence)
 

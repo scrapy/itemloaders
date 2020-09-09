@@ -101,3 +101,4 @@ Contents
     extending-loaders
     built-in-processors
     api-reference
+    release-notes
