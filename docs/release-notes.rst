@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.0.3:
 
-itemloaders 1.0.3 (2020-09-NN)
+itemloaders 1.0.3 (2020-09-09)
 ------------------------------
 
 -   Calls to :meth:`ItemLoader.get_output_value` no longer affect the output of
