@@ -104,6 +104,11 @@ class BasicItemLoaderTest(unittest.TestCase):
         il.add_value('name', 0)
         assert il.get_collected_values('name') == [0]
 
+    def test_add_none(self):
+        il = ItemLoader()
+        il.add_value('name', None)
+        assert il.get_collected_values('name') == []
+
     def test_replace_value(self):
         il = CustomItemLoader()
         il.replace_value('name', 'marta')
@@ -116,11 +121,22 @@ class BasicItemLoaderTest(unittest.TestCase):
         il.replace_value(None, 'Jim', lambda x: {'name': x})
         self.assertEqual(il.get_collected_values('name'), ['Jim'])
 
+    def test_replace_value_none(self):
+        il = CustomItemLoader()
+        il.replace_value('name', None)
+        self.assertEqual(il.get_collected_values('name'), [])
+        il.replace_value('name', 'marta')
+        self.assertEqual(il.get_collected_values('name'), ['Marta'])
+        il.replace_value('name', None)  # when replacing with `None` nothing should happen
+        self.assertEqual(il.get_collected_values('name'), ['Marta'])
+
     def test_get_value(self):
         il = ItemLoader()
         self.assertEqual('FOO', il.get_value(['foo', 'bar'], TakeFirst(), str.upper))
         self.assertEqual(['foo', 'bar'], il.get_value(['name:foo', 'name:bar'], re='name:(.*)$'))
         self.assertEqual('foo', il.get_value(['name:foo', 'name:bar'], TakeFirst(), re='name:(.*)$'))
+        self.assertEqual(None, il.get_value(['foo', 'bar'], TakeFirst(), re='name:(.*)$'))
+        self.assertEqual(None, il.get_value(None, TakeFirst()))
 
         il.add_value('name', ['name:foo', 'name:bar'], TakeFirst(), re='name:(.*)$')
         self.assertEqual(['foo'], il.get_collected_values('name'))
