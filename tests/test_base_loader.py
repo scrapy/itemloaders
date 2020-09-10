@@ -68,7 +68,7 @@ class BasicItemLoaderTest(unittest.TestCase):
             url_out = TakeFirst()
 
             def img_url_out(self, values):
-                return (self.get_output_value('url') or '') + values[0]
+                return self.get_output_value('url', '') + values[0]
 
         il = MyLoader(item={})
         il.add_value('url', 'http://example.com/')
