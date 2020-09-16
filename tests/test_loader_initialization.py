@@ -116,6 +116,7 @@ class InitializationTestMixin:
         il = ItemLoader(item=input_item)
         il.add_value('name', [])
         self.assertEqual(il.get_output_value('name'), [])
+        self.assertEqual(il.get_output_value('name', ['foo']), ['foo'])
         self.assertEqual(il.get_output_value('name', 'foo'), 'foo')
         self.assertEqual(il.load_item(), {})
 
