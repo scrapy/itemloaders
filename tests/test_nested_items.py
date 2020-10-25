@@ -1,5 +1,4 @@
 import unittest
-from dataclasses import dataclass
 
 from itemloaders import ItemLoader
 
@@ -23,6 +22,11 @@ class NestedItemTest(unittest.TestCase):
         self.assertEqual(il.load_item(), {'item_list': [item]})
 
     def test_dataclass(self):
+        try:
+            from dataclasses import dataclass
+        except ImportError:
+            self.skipTest("Cannot import dataclasses.dataclass")
+
         @dataclass
         class TestItem:
             foo: str
