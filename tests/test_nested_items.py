@@ -1,13 +1,7 @@
 import unittest
 from dataclasses import dataclass
 
-from itemloaders import ItemLoader as BaseItemLoader
-from itemloaders.processors import Identity
-
-
-class ItemLoader(BaseItemLoader):
-    item_list_in = Identity()
-    item_list_out = Identity()
+from itemloaders import ItemLoader
 
 
 class NestedItemTest(unittest.TestCase):
