@@ -10,19 +10,19 @@ matrix:
   - python: 3.7
     env: TOXENV=docs
 
-  - python: 3.5
-    env: TOXENV=py35
   - python: 3.6
-    env: TOXENV=py36
+    env: TOXENV=py
   - python: 3.7
-    env: TOXENV=py37
+    env: TOXENV=py
   - python: 3.8
-    env: TOXENV=py38
+    env: TOXENV=py
+  - python: 3.9
+    env: TOXENV=py
 
   - python: pypy3
     env: TOXENV=pypy3
 
-  - python: 3.8
+  - python: 3.9
     env: TOXENV=extra-deps
 
 install:
