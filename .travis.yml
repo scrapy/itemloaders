@@ -7,6 +7,9 @@ branches:
 
 matrix:
   include:
+  - python: 3.7
+    env: TOXENV=docs
+
   - python: 3.5
     env: TOXENV=py35
   - python: 3.6
@@ -19,8 +22,8 @@ matrix:
   - python: pypy3
     env: TOXENV=pypy3
 
-  - python: 3.7
-    env: TOXENV=docs
+  - python: 3.8
+    env: TOXENV=extra-deps
 
 install:
 - pip install -U tox codecov

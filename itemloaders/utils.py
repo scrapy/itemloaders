@@ -2,11 +2,13 @@
 Copy/paste from scrapy source at the moment, to ensure tests are working.
 Refactoring to come later
 """
-from functools import partial
 import inspect
+from functools import partial
+
+from itemadapter import is_item
 
 
-_ITERABLE_SINGLE_VALUES = dict, str, bytes
+_ITERABLE_SINGLE_VALUES = str, bytes
 
 
 def arg_to_iter(arg):
@@ -17,7 +19,11 @@ def arg_to_iter(arg):
     """
     if arg is None:
         return []
-    elif not isinstance(arg, _ITERABLE_SINGLE_VALUES) and hasattr(arg, '__iter__'):
+    elif (
+        hasattr(arg, '__iter__')
+        and not isinstance(arg, _ITERABLE_SINGLE_VALUES)
+        and not is_item(arg)
+    ):
         return arg
     else:
         return [arg]
