@@ -6,6 +6,11 @@ from itemloaders import ItemLoader
 class NestedItemTest(unittest.TestCase):
     """Test that adding items as values works as expected."""
 
+    def _test_item(self, item):
+        il = ItemLoader()
+        il.add_value('item_list', item)
+        self.assertEqual(il.load_item(), {'item_list': [item]})
+
     def test_attrs(self):
         try:
             import attr
@@ -16,10 +21,7 @@ class NestedItemTest(unittest.TestCase):
         class TestItem:
             foo = attr.ib()
 
-        item = TestItem(foo='bar')
-        il = ItemLoader()
-        il.add_value('item_list', item)
-        self.assertEqual(il.load_item(), {'item_list': [item]})
+        self._test_item(TestItem(foo='bar'))
 
     def test_dataclass(self):
         try:
@@ -31,16 +33,10 @@ class NestedItemTest(unittest.TestCase):
         class TestItem:
             foo: str
 
-        item = TestItem(foo='bar')
-        il = ItemLoader()
-        il.add_value('item_list', item)
-        self.assertEqual(il.load_item(), {'item_list': [item]})
+        self._test_item(TestItem(foo='bar'))
 
     def test_dict(self):
-        item = {'foo': 'bar'}
-        il = ItemLoader()
-        il.add_value('item_list', item)
-        self.assertEqual(il.load_item(), {'item_list': [item]})
+        self._test_item({'foo': 'bar'})
 
     def test_scrapy_item(self):
         try:
@@ -51,7 +47,4 @@ class NestedItemTest(unittest.TestCase):
         class TestItem(Item):
             foo = Field()
 
-        item = TestItem(foo='bar')
-        il = ItemLoader()
-        il.add_value('item_list', item)
-        self.assertEqual(il.load_item(), {'item_list': [item]})
+        self._test_item(TestItem(foo='bar'))
