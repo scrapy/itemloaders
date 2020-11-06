@@ -6,7 +6,7 @@ See documentation in docs/topics/loaders.rst
 from collections import defaultdict
 from contextlib import suppress
 
-from itemadapter import ItemAdapter
+from itemadapter import get_field_meta_from_class, ItemAdapter
 from parsel.utils import extract_regex, flatten
 
 from itemloaders.common import wrap_loader_context
@@ -131,17 +131,14 @@ class ItemLoader:
         else:
             return self._local_values
 
-    def _get_item(self):
-        if self._item is None:
-            self._item = self.default_item_class(**self._values)
-        return self._item
-
     @property
     def item(self):
         if self.parent is not None:
             return self.parent.item
         else:
-            return self._get_item()
+            if self._item is None:
+                self._item = self.default_item_class(**self._values)
+            return self._item
 
     def nested_xpath(self, xpath, **context):
         """
@@ -308,7 +305,15 @@ class ItemLoader:
         return unbound_method(proc)
 
     def _get_item_field_attr(self, field_name, key, default=None):
-        field_meta = ItemAdapter(self.item).get_field_meta(field_name)
+        if self.parent is not None and self.parent._item is not None:
+            item_adapter = ItemAdapter(self.parent._item)
+            field_meta = item_adapter.get_field_meta(field_name)
+        if self._item is not None:
+            item_adapter = ItemAdapter(self._item)
+            field_meta = item_adapter.get_field_meta(field_name)
+        else:
+            item_class = self.default_item_class
+            field_meta = get_field_meta_from_class(item_class, field_name)
         return field_meta.get(key, default)
 
     def _process_input_value(self, field_name, value):

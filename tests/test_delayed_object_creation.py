@@ -6,10 +6,13 @@ from parsel import Selector
 from itemloaders import ItemLoader
 
 
-class UninitializableItem(MutableMapping):
-    """Cannot be initialized due to undefined abstract methods, raises
-    TypeError during initialization."""
-    pass
+EXPECTED_ERROR = RuntimeError
+
+
+class UninitializableItem(dict):
+
+    def __init__(self, *args, **kwargs):
+        raise EXPECTED_ERROR
 
 
 class UninitializableItemLoader(ItemLoader):
@@ -31,12 +34,12 @@ class DelayedObjectCreationTestCase(TestCase):
     def test_context(self):
         il = UninitializableItemLoader()
         context = il.context
-        with self.assertRaises(TypeError):
+        with self.assertRaises(EXPECTED_ERROR):
             context['item']
 
     def test_load_item(self):
         il = UninitializableItemLoader()
-        with self.assertRaises(TypeError):
+        with self.assertRaises(EXPECTED_ERROR):
             il.load_item()
 
     def test_nested_loader_creation(self):
@@ -50,9 +53,9 @@ class DelayedObjectCreationTestCase(TestCase):
         il = UninitializableItemLoader(selector=selector)
 
         css_il = il.nested_css('html')
-        with self.assertRaises(TypeError):
+        with self.assertRaises(EXPECTED_ERROR):
             css_il.load_item()
 
         xpath_il = il.nested_xpath('//html')
-        with self.assertRaises(TypeError):
+        with self.assertRaises(EXPECTED_ERROR):
             xpath_il.load_item()
