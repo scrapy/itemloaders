@@ -3,7 +3,6 @@ Item Loader
 
 See documentation in docs/topics/loaders.rst
 """
-from collections import defaultdict
 from contextlib import suppress
 
 from itemadapter import get_field_meta_from_class, ItemAdapter
@@ -55,7 +54,7 @@ class ItemLoader:
     :param selector: The selector to extract data from, when using the
         :meth:`add_xpath` (resp. :meth:`add_css`) or :meth:`replace_xpath`
         (resp. :meth:`replace_css`) method.
-    :type selector: :class:`~parsel.Selector` object
+    :type selector: :class:`~parsel.selector.Selector` object
 
     The item, selector and the remaining keyword arguments are
     assigned to the Loader context (accessible through the :attr:`context` attribute).
@@ -101,7 +100,7 @@ class ItemLoader:
 
     .. attribute:: selector
 
-        The :class:`~parsel.Selector` object to extract data from.
+        The :class:`~parsel.selector.Selector` object to extract data from.
         It's the selector given in the ``__init__`` method.
         This attribute is meant to be read-only.
 
@@ -119,9 +118,10 @@ class ItemLoader:
         context['item'] = item
         self.context = _Context(parent or self, **context)
         self.parent = parent
-        self._local_values = defaultdict(list)
+        self._local_values = {}
         if item is not None:
             for field_name, value in ItemAdapter(item).items():
+                self._values.setdefault(field_name, [])
                 self._values[field_name] += arg_to_iter(value)
 
     @property
@@ -209,6 +209,7 @@ class ItemLoader:
         value = arg_to_iter(value)
         processed_value = self._process_input_value(field_name, value)
         if processed_value:
+            self._values.setdefault(field_name, [])
             self._values[field_name] += arg_to_iter(processed_value)
 
     def _replace_value(self, field_name, value):
@@ -223,9 +224,9 @@ class ItemLoader:
         Available keyword arguments:
 
         :param re: a regular expression to use for extracting data from the
-            given value using :meth:`~parsel.utils.extract_regex` method,
+            given value using :func:`~parsel.utils.extract_regex` method,
             applied before processors
-        :type re: str or compiled regex
+        :type re: str or typing.Pattern
 
         Examples:
 
@@ -274,15 +275,16 @@ class ItemLoader:
         """
         proc = self.get_output_processor(field_name)
         proc = wrap_loader_context(proc, self.context)
+        value = self._values.get(field_name, [])
         try:
-            return proc(self._values[field_name])
+            return proc(value)
         except Exception as e:
             raise ValueError("Error with output processor: field=%r value=%r error='%s: %s'" %
-                             (field_name, self._values[field_name], type(e).__name__, str(e)))
+                             (field_name, value, type(e).__name__, str(e)))
 
     def get_collected_values(self, field_name):
         """Return the collected values for the given field."""
-        return self._values[field_name]
+        return self._values.get(field_name, [])
 
     def get_input_processor(self, field_name):
         proc = getattr(self, '%s_in' % field_name, None)
@@ -375,7 +377,7 @@ class ItemLoader:
 
         :param re: a regular expression to use for extracting data from the
             selected XPath region
-        :type re: str or compiled regex
+        :type re: str or typing.Pattern
 
         Examples::
 
@@ -432,7 +434,7 @@ class ItemLoader:
 
         :param re: a regular expression to use for extracting data from the
             selected CSS region
-        :type re: str or compiled regex
+        :type re: str or typing.Pattern
 
         Examples::
 

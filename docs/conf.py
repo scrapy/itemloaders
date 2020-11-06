@@ -18,6 +18,7 @@ from os import path
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
+sys.path.append(path.dirname(__file__))
 sys.path.insert(0, path.dirname(path.dirname(__file__)))
 
 # General configuration
@@ -26,8 +27,10 @@ sys.path.insert(0, path.dirname(path.dirname(__file__)))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
+    '_ext.github',
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
 ]
 
@@ -218,3 +221,13 @@ def maybe_skip_member(app, what, name, obj, skip, options):
         # https://github.com/sphinx-doc/sphinx/issues/4422
         return name in {'default_item_class', 'default_selector_class'}
     return skip
+
+
+nitpicky = True
+
+intersphinx_mapping = {
+    'parsel': ('https://parsel.readthedocs.io/en/stable/', None),
+    'python': ('https://docs.python.org/3', None),
+    'scrapy': ('https://docs.scrapy.org/en/latest/', None),
+    'w3lib': ('https://w3lib.readthedocs.io/en/latest', None),
+}

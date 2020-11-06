@@ -1,3 +1,5 @@
+.. currentmodule:: itemloaders
+
 .. _topics-index:
 
 ============
@@ -99,3 +101,4 @@ Contents
     extending-loaders
     built-in-processors
     api-reference
+    release-notes

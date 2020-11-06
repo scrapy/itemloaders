@@ -42,6 +42,8 @@ class UtilsPythonTestCase(unittest.TestCase):
         self.assertEqual(get_func_args(partial_f3), ['c'])
         self.assertEqual(get_func_args(cal), ['a', 'b', 'c'])
         self.assertEqual(get_func_args(object), [])
+        with self.assertRaises(TypeError):
+            get_func_args(None)
 
         if platform.python_implementation() == 'CPython':
             # TODO: how do we fix this to return the actual argument names?
