@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.0.4:
 
-itemloaders 1.0.4 (2020-11-NN)
+itemloaders 1.0.4 (2020-11-12)
 ------------------------------
 
 -   When adding a :class:`scrapy.item.Item` object as a value into an
