@@ -15,7 +15,7 @@ matrix:
   - python: 3.7
     env: TOXENV=py
   - python: 3.8
-    env: TOXENV=py
+    env: TOXENV=py PYPI_RELEASE_JOB=true
 
   - python: pypy3
     env: TOXENV=pypy3
@@ -35,7 +35,7 @@ deploy:
   on:
     branch: master
     tags: true
-    condition: "$TOXENV == py38"
+    condition: "$PYPI_RELEASE_JOB == true"
     repo: scrapy/itemloaders
   provider: pypi
   distributions: "sdist bdist_wheel"
