@@ -5,6 +5,19 @@
 Release notes
 =============
 
+.. _release-1.0.4:
+
+itemloaders 1.0.4 (2020-11-NN)
+------------------------------
+
+-   When adding a :class:`scrapy.item.Item` object as a value into an
+    :class:`ItemLoader` object, that item is now added *as is*, instead of
+    becoming a :class:`list` of keys from its :attr:`~scrapy.item.Item.fields`
+    (:gh:`28`, :gh:`29`)
+
+-   Increased test coverage (:gh:`27`)
+
+
 .. _release-1.0.3:
 
 itemloaders 1.0.3 (2020-09-09)
