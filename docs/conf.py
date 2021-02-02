@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'itemloaders'
-copyright = '2020–{}, Scrapinghub'.format(datetime.now().year)
+copyright = '2020–{}, Zyte'.format(datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -187,7 +187,7 @@ htmlhelp_basename = 'itemloadersdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'itemloaders.tex', 'itemloaders Documentation', 'Scrapinghub', 'manual'),
+  ('index', 'itemloaders.tex', 'itemloaders Documentation', 'Zyte', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
