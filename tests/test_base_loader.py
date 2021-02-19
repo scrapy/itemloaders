@@ -84,6 +84,9 @@ class BasicItemLoaderTest(unittest.TestCase):
 
     def test_add_value(self):
         il = CustomItemLoader()
+        til = CustomItemLoader()
+        til.add_value('test_item','scx')
+
         il.add_value('name', 'marta')
         assert il.get_collected_values('name') == ['Marta']
         assert il.get_output_value('name') == ['Marta']
@@ -98,6 +101,9 @@ class BasicItemLoaderTest(unittest.TestCase):
 
         il.add_value(None, 'Jim', lambda x: {'name': x})
         assert il.get_collected_values('name') == ['Marta', 'Pepe', 'Jim']
+
+        il.add_value('item', til)
+        assert il.get_collected_values('item') == til
 
     def test_add_zero(self):
         il = ItemLoader()
