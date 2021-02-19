@@ -8,9 +8,9 @@ from contextlib import suppress
 from itemadapter import ItemAdapter
 from parsel.utils import extract_regex, flatten
 
-from itemloaders.common import wrap_loader_context
-from itemloaders.processors import Identity
-from itemloaders.utils import arg_to_iter
+from jay.itemloaders.common import wrap_loader_context
+from jay.itemloaders.processors import Identity
+from jay.itemloaders.utils import arg_to_iter
 
 
 def unbound_method(method):
@@ -208,7 +208,10 @@ class ItemLoader:
         processed_value = self._process_input_value(field_name, value)
         if processed_value:
             self._values.setdefault(field_name, [])
-            self._values[field_name] += arg_to_iter(processed_value)
+            if type(arg_to_iter(processed_value)) == list:
+                self._values[field_name] += arg_to_iter(processed_value)
+            else:
+                self._values[field_name].append(arg_to_iter(processed_value))
 
     def _replace_value(self, field_name, value):
         self._values.pop(field_name, None)
