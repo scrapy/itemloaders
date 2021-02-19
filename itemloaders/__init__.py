@@ -8,9 +8,9 @@ from contextlib import suppress
 from itemadapter import ItemAdapter
 from parsel.utils import extract_regex, flatten
 
-from jay.itemloaders.common import wrap_loader_context
-from jay.itemloaders.processors import Identity
-from jay.itemloaders.utils import arg_to_iter
+from itemloaders.common import wrap_loader_context
+from itemloaders.processors import Identity
+from itemloaders.utils import arg_to_iter
 
 
 def unbound_method(method):
