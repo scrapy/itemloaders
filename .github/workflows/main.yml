@@ -43,6 +43,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade tox codecov
       - name: Run tests
+        env: ${{ matrix.env }}
         run: tox
       - name: Publish coverage data
         uses: codecov/codecov-action@v1
