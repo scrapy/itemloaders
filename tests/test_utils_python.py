@@ -1,8 +1,8 @@
-import datetime
 import functools
 import operator
 import platform
 import unittest
+from datetime import datetime
 
 from itemloaders.utils import get_func_args
 
