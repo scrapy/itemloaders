@@ -10,9 +10,9 @@ itemloaders
    :target: https://pypi.python.org/pypi/itemloaders
    :alt: Supported Python Versions
 
-.. image:: https://travis-ci.com/scrapy/itemloaders.svg?branch=master
-   :target: https://travis-ci.com/scrapy/itemloaders
-   :alt: Build Status
+.. image:: https://github.com/scrapy/itemloaders/workflows/CI/badge.svg?branch=master
+   :target: https://github.com/scrapy/itemloaders/actions?workflow=CI
+   :alt: CI Status
 
 .. image:: https://codecov.io/github/scrapy/itemloaders/coverage.svg?branch=master
    :target: https://codecov.io/gh/scrapy/itemloaders
