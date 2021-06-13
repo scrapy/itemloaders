@@ -1,6 +1,9 @@
 import unittest
+import pytest
+from unittest import mock
 
 from parsel import Selector
+from parsel.utils import flatten
 
 from itemloaders import ItemLoader
 from itemloaders.processors import MapCompose, TakeFirst
@@ -151,3 +154,59 @@ class SelectortemLoaderTest(unittest.TestCase):
         self.assertEqual(loader.get_output_value('url'), ['http://www.scrapy.org'])
         loader.replace_css('url', 'a::attr(href)', re=r'http://www\.(.+)')
         self.assertEqual(loader.get_output_value('url'), ['scrapy.org'])
+
+
+def test_get_selector_values_with_no_selector():
+    """It should raise an error if it's not configured with any Selector."""
+
+    loader = ItemLoader()
+
+    with pytest.raises(RuntimeError) as err:
+        loader.get_selector_values("field_name", [], None)
+
+
+def test_get_selector_values():
+    """Selectors must be properly called as well as correctly flatten the data.
+
+    For this test, we're testing 'css', but it should also work the same for 'xpath'.
+    """
+
+    selector_rules = ["#rule1", "#rule2", "#rule3"]
+    field_name = "field"
+    parsed_data = ["data1", "data2"]
+
+    mock_css_selector = mock.Mock()
+    mock_css_selector().getall.return_value = parsed_data
+    mock_css_selector.__name__ = "css"
+
+    mock_selector = mock.Mock()
+    mock_selector.css = mock_css_selector
+
+    loader = ItemLoader(selector=mock_selector)
+    loader.write_to_stats = mock.Mock()
+
+    # This wasn't actually initialized so it will return 0 by default otherwise.
+    loader.field_position_tracker["field_css"] = 1
+
+    result = loader.get_selector_values(field_name, selector_rules, "css")
+
+    assert result == flatten([parsed_data] * len(selector_rules))
+
+    mock_selector.assert_has_calls(
+        [
+            mock.call.css(selector_rules[0]),
+            mock.call.css().getall(),
+            mock.call.css(selector_rules[1]),
+            mock.call.css().getall(),
+            mock.call.css(selector_rules[2]),
+            mock.call.css().getall(),
+        ]
+    )
+
+    loader.write_to_stats.assert_has_calls(
+        [
+            mock.call(field_name, parsed_data, 1, "css", name=None),
+            mock.call(field_name, parsed_data, 2, "css", name=None),
+            mock.call(field_name, parsed_data, 3, "css", name=None),
+        ]
+    )

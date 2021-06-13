@@ -99,7 +99,7 @@ class ItemLoader:
     default_input_processor = Identity()
     default_output_processor = Identity()
 
-    def __init__(self, item=None, selector=None, parent=None, **context):
+    def __init__(self, item=None, selector=None, parent=None, stats=None, **context):
         self.selector = selector
         context.update(selector=selector)
         if item is None:
@@ -113,6 +113,14 @@ class ItemLoader:
         for field_name, value in ItemAdapter(item).items():
             self._values.setdefault(field_name, [])
             self._values[field_name] += arg_to_iter(value)
+
+        # This is the new injected dependency that we'll be using as the main
+        # functionality of this tool.
+        self.stats = stats
+
+        # This keeps track of the position of the 'field' name that is being
+        # loaded for a more accurate logging in the stats.
+        self.field_position_tracker = defaultdict(int)
 
     @property
     def _values(self):
@@ -346,14 +354,15 @@ class ItemLoader:
             loader.add_xpath('price', '//p[@id="price"]', re='the price is (.*)')
 
         """
-        values = self._get_xpathvalues(xpath, **kw)
+        self.field_position_tracker[f"{field_name}_xpath"] += 1
+        values = self.get_selector_values(field_name, xpath, 'xpath', **kw)
         self.add_value(field_name, values, *processors, **kw)
 
     def replace_xpath(self, field_name, xpath, *processors, **kw):
         """
         Similar to :meth:`add_xpath` but replaces collected data instead of adding it.
         """
-        values = self._get_xpathvalues(xpath, **kw)
+        values = self.get_selector_values(field_name, xpath, 'xpath', **kw)
         self.replace_value(field_name, values, *processors, **kw)
 
     def get_xpath(self, xpath, *processors, **kw):
@@ -377,13 +386,8 @@ class ItemLoader:
             loader.get_xpath('//p[@id="price"]', TakeFirst(), re='the price is (.*)')
 
         """
-        values = self._get_xpathvalues(xpath, **kw)
+        values = self.get_selector_values(None, xpath, 'xpath', **kw)
         return self.get_value(values, *processors, **kw)
-
-    def _get_xpathvalues(self, xpaths, **kw):
-        self._check_selector_method()
-        xpaths = arg_to_iter(xpaths)
-        return flatten(self.selector.xpath(xpath).getall() for xpath in xpaths)
 
     def add_css(self, field_name, css, *processors, **kw):
         """
@@ -403,14 +407,15 @@ class ItemLoader:
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.add_css('price', 'p#price', re='the price is (.*)')
         """
-        values = self._get_cssvalues(css, **kw)
+        self.field_position_tracker[f"{field_name}_css"] += 1
+        values = self.get_selector_values(field_name, css, 'css', **kw)
         self.add_value(field_name, values, *processors, **kw)
 
     def replace_css(self, field_name, css, *processors, **kw):
         """
         Similar to :meth:`add_css` but replaces collected data instead of adding it.
         """
-        values = self._get_cssvalues(css, **kw)
+        values = self.get_selector_values(field_name, css, 'css', **kw)
         self.replace_value(field_name, values, *processors, **kw)
 
     def get_css(self, css, *processors, **kw):
@@ -433,10 +438,57 @@ class ItemLoader:
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.get_css('p#price', TakeFirst(), re='the price is (.*)')
         """
-        values = self._get_cssvalues(css, **kw)
+        values = self.get_selector_values(None, css, 'css', **kw)
         return self.get_value(values, *processors, **kw)
 
-    def _get_cssvalues(self, csss, **kw):
+    def get_selector_values(self, field_name, selector_rules, selector_type, **kw):
+
         self._check_selector_method()
-        csss = arg_to_iter(csss)
-        return flatten(self.selector.css(css).getall() for css in csss)
+
+        selector = getattr(self.selector, selector_type or '', None)
+
+        # The optional arg in methods like `add_css()` for context in stats
+        name = kw.get("name")
+
+        # For every call of `add_css()` and `add_xpath()` this is incremented.
+        # We'll use it as the base index of the position of the logged stats.
+        index = self.field_position_tracker[f"{field_name}_{selector_type}"]
+
+        values = []
+        for position, rule in enumerate(arg_to_iter(selector_rules), index):
+            parsed_data = selector(rule).getall()
+            values.append(parsed_data)
+            self.write_to_stats(
+                field_name, parsed_data, position, selector_type, name=name
+            )
+        return flatten(values)
+
+    def write_to_stats(
+        self, field_name, parsed_data, position, selector_type, name=None
+    ):
+        """Responsible for logging the parser rules usage.
+
+        The implementation below where each missing parsed_data is being logged
+        to the stat is clunky, but necessary. With this, we can only surmise
+        that it's safe to remove parser fallback parser if it's all just
+        '.../missing' in the stats.
+        """
+
+        if not self.stats or not field_name:
+            return
+
+        parser_label = (
+            f"parser/{self.loader_name}/{field_name}/{selector_type}/{position}"
+        )
+
+        if name:
+            parser_label += f"/{name}"
+
+        if parsed_data in (None, []):
+            parser_label += "/missing"
+
+        self.stats.inc_value(parser_label)
+
+    @property
+    def loader_name(self):
+        return self.__class__.__name__
