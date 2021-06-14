@@ -64,6 +64,14 @@ class SelectortemLoaderTest(unittest.TestCase):
         loader.add_xpath('name', '//div/text()', re='ma')
         self.assertEqual(loader.get_output_value('name'), ['Ma'])
 
+    def test_add_xpath_variables(self):
+        loader = CustomItemLoader(selector=self.selector)
+        loader.add_xpath('name', 'id($id)/text()', id="id")
+        self.assertEqual(loader.get_output_value('name'), ['Marta'])
+        loader = CustomItemLoader(selector=self.selector)
+        loader.add_xpath('name', 'id($id)/text()', id="id2")
+        self.assertEqual(loader.get_output_value('name'), [])
+
     def test_replace_xpath(self):
         loader = CustomItemLoader(selector=self.selector)
         self.assertTrue(loader.selector)

@@ -383,7 +383,7 @@ class ItemLoader:
     def _get_xpathvalues(self, xpaths, **kw):
         self._check_selector_method()
         xpaths = arg_to_iter(xpaths)
-        return flatten(self.selector.xpath(xpath).getall() for xpath in xpaths)
+        return flatten(self.selector.xpath(xpath, **kw).getall() for xpath in xpaths)
 
     def add_css(self, field_name, css, *processors, **kw):
         """
