@@ -6,8 +6,6 @@ import inspect
 from functools import partial
 from typing import Generator
 
-from itemadapter import is_item
-
 
 _ITERABLE_SINGLE_VALUES = str, bytes
 
