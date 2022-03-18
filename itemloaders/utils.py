@@ -7,9 +7,6 @@ from functools import partial
 from typing import Generator
 
 
-_ITERABLE_SINGLE_VALUES = str, bytes
-
-
 def arg_to_iter(arg):
     """Convert an argument to an iterable. The argument can be a None, single
     value, or an iterable.
