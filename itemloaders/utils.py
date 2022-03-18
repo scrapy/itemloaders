@@ -4,6 +4,7 @@ Refactoring to come later
 """
 import inspect
 from functools import partial
+from typing import Generator
 
 from itemadapter import is_item
 
@@ -19,14 +20,9 @@ def arg_to_iter(arg):
     """
     if arg is None:
         return []
-    elif (
-        hasattr(arg, '__iter__')
-        and not isinstance(arg, _ITERABLE_SINGLE_VALUES)
-        and not is_item(arg)
-    ):
+    if isinstance(arg, (list, tuple, Generator)):
         return arg
-    else:
-        return [arg]
+    return [arg]
 
 
 def get_func_args(func, stripself=False):
