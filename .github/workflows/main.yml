@@ -29,6 +29,9 @@ jobs:
         - python-version: 3.9
           env:
             TOXENV: extra-deps
+        - python-version: '3.10'
+          env:
+            TOXENV: py
     steps:
       - uses: actions/checkout@v2
       - name: Install system libraries
