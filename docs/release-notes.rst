@@ -5,6 +5,19 @@
 Release notes
 =============
 
+.. _release-1.0.5:
+
+itemloaders 1.0.5 (2022-08-NN)
+------------------------------
+
+-  Allow additional args to be passed when calling :meth:`ItemLoader.add_xpath` (:gh:`48`)
+
+-  Fixed missing space in exception message (:gh: `47`)
+
+-  Updated company name in author and copyright sections (:gh: `42`)
+
+-  Added official support for python 3.9
+
 .. _release-1.0.4:
 
 itemloaders 1.0.4 (2020-11-12)
