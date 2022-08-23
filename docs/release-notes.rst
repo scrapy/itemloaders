@@ -16,7 +16,9 @@ itemloaders 1.0.5 (2022-08-NN)
 
 -  Updated company name in author and copyright sections (:gh: `42`)
 
--  Added support for python 3.9 and python 3.10 (:gh: `53`)
+-  Added official support for python 3.9 and improve PyPy compatibility (:gh: `44`)
+
+-  Added official support for python 3.10 (:gh: `53`)
 
 .. _release-1.0.4:
 
