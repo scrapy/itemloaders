@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.0.5:
 
-itemloaders 1.0.5 (2022-08-NN)
+itemloaders 1.0.5 (2022-08-25)
 ------------------------------
 
 -  Allow additional args to be passed when calling :meth:`ItemLoader.add_xpath` (:gh:`48`)
