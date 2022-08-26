@@ -1,3 +1,4 @@
+import re
 import unittest
 
 from parsel import Selector
@@ -64,6 +65,11 @@ class SelectortemLoaderTest(unittest.TestCase):
         loader.add_xpath('name', '//div/text()', re='ma')
         self.assertEqual(loader.get_output_value('name'), ['Ma'])
 
+        loader = CustomItemLoader(selector=self.selector)
+        loader.add_xpath('name', '//div/text()', re=re.compile('ma'))
+        self.assertEqual(loader.get_output_value('name'), ['Ma'])
+
+
     def test_add_xpath_variables(self):
         loader = CustomItemLoader(selector=self.selector)
         loader.add_xpath('name', 'id($id)/text()', id="id")
@@ -112,6 +118,13 @@ class SelectortemLoaderTest(unittest.TestCase):
         self.assertEqual(loader.get_output_value('name'), ['Ma'])
 
         loader.add_css('url', 'a::attr(href)', re='http://(.+)')
+        self.assertEqual(loader.get_output_value('url'), ['www.scrapy.org'])
+
+        loader = CustomItemLoader(selector=self.selector)
+        loader.add_css('name', 'div::text', re=re.compile('ma'))
+        self.assertEqual(loader.get_output_value('name'), ['Ma'])
+
+        loader.add_css('url', 'a::attr(href)', re=re.compile('http://(.+)'))
         self.assertEqual(loader.get_output_value('url'), ['www.scrapy.org'])
 
     def test_replace_css(self):
