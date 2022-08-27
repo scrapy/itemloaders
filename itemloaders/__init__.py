@@ -158,7 +158,7 @@ class ItemLoader:
         )
         return subloader
 
-    def add_value(self, field_name, value, *processors, **kw):
+    def add_value(self, field_name, value, *processors, re=None, **kw):
         """
         Process and then add the given ``value`` for the given field.
 
@@ -180,7 +180,7 @@ class ItemLoader:
             loader.add_value('name', 'name: foo', TakeFirst(), re='name: (.+)')
             loader.add_value(None, {'name': 'foo', 'sex': 'male'})
         """
-        value = self.get_value(value, *processors, **kw)
+        value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
             return
         if not field_name:
@@ -189,12 +189,12 @@ class ItemLoader:
         else:
             self._add_value(field_name, value)
 
-    def replace_value(self, field_name, value, *processors, **kw):
+    def replace_value(self, field_name, value, *processors, re=None, **kw):
         """
         Similar to :meth:`add_value` but replaces the collected data with the
         new value instead of adding it.
         """
-        value = self.get_value(value, *processors, **kw)
+        value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
             return
         if not field_name:
@@ -214,7 +214,7 @@ class ItemLoader:
         self._values.pop(field_name, None)
         self._add_value(field_name, value)
 
-    def get_value(self, value, *processors, **kw):
+    def get_value(self, value, *processors, re=None, **kw):
         """
         Process the given ``value`` by the given ``processors`` and keyword
         arguments.
@@ -234,10 +234,9 @@ class ItemLoader:
         >>> loader.get_value('name: foo', TakeFirst(), str.upper, re='name: (.+)')
         'FOO'
         """
-        regex = kw.get('re', None)
-        if regex:
+        if re:
             value = arg_to_iter(value)
-            value = flatten(extract_regex(regex, x) for x in value)
+            value = flatten(extract_regex(re, x) for x in value)
 
         for proc in processors:
             if value is None:
@@ -327,7 +326,7 @@ class ItemLoader:
                 "must be instantiated with a selector" % self.__class__.__name__
             )
 
-    def add_xpath(self, field_name, xpath, *processors, **kw):
+    def add_xpath(self, field_name, xpath, *processors, re=None, **kw):
         """
         Similar to :meth:`ItemLoader.add_value` but receives an XPath instead of a
         value, which is used to extract a list of strings from the
@@ -347,16 +346,16 @@ class ItemLoader:
 
         """
         values = self._get_xpathvalues(xpath, **kw)
-        self.add_value(field_name, values, *processors, **kw)
+        self.add_value(field_name, values, *processors, re=re, **kw)
 
-    def replace_xpath(self, field_name, xpath, *processors, **kw):
+    def replace_xpath(self, field_name, xpath, *processors, re=None, **kw):
         """
         Similar to :meth:`add_xpath` but replaces collected data instead of adding it.
         """
         values = self._get_xpathvalues(xpath, **kw)
-        self.replace_value(field_name, values, *processors, **kw)
+        self.replace_value(field_name, values, *processors, re=re, **kw)
 
-    def get_xpath(self, xpath, *processors, **kw):
+    def get_xpath(self, xpath, *processors, re=None, **kw):
         """
         Similar to :meth:`ItemLoader.get_value` but receives an XPath instead of a
         value, which is used to extract a list of unicode strings from the
@@ -378,14 +377,14 @@ class ItemLoader:
 
         """
         values = self._get_xpathvalues(xpath, **kw)
-        return self.get_value(values, *processors, **kw)
+        return self.get_value(values, *processors, re=re, **kw)
 
     def _get_xpathvalues(self, xpaths, **kw):
         self._check_selector_method()
         xpaths = arg_to_iter(xpaths)
         return flatten(self.selector.xpath(xpath, **kw).getall() for xpath in xpaths)
 
-    def add_css(self, field_name, css, *processors, **kw):
+    def add_css(self, field_name, css, *processors, re=None, **kw):
         """
         Similar to :meth:`ItemLoader.add_value` but receives a CSS selector
         instead of a value, which is used to extract a list of unicode strings
@@ -404,16 +403,16 @@ class ItemLoader:
             loader.add_css('price', 'p#price', re='the price is (.*)')
         """
         values = self._get_cssvalues(css, **kw)
-        self.add_value(field_name, values, *processors, **kw)
+        self.add_value(field_name, values, *processors, re=re, **kw)
 
-    def replace_css(self, field_name, css, *processors, **kw):
+    def replace_css(self, field_name, css, *processors, re=None, **kw):
         """
         Similar to :meth:`add_css` but replaces collected data instead of adding it.
         """
         values = self._get_cssvalues(css, **kw)
-        self.replace_value(field_name, values, *processors, **kw)
+        self.replace_value(field_name, values, *processors, re=re, **kw)
 
-    def get_css(self, css, *processors, **kw):
+    def get_css(self, css, *processors, re=None, **kw):
         """
         Similar to :meth:`ItemLoader.get_value` but receives a CSS selector
         instead of a value, which is used to extract a list of unicode strings
@@ -434,7 +433,7 @@ class ItemLoader:
             loader.get_css('p#price', TakeFirst(), re='the price is (.*)')
         """
         values = self._get_cssvalues(css, **kw)
-        return self.get_value(values, *processors, **kw)
+        return self.get_value(values, *processors, re=re, **kw)
 
     def _get_cssvalues(self, csss, **kw):
         self._check_selector_method()
