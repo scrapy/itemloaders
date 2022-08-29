@@ -5,6 +5,16 @@
 Release notes
 =============
 
+.. _release-1.0.6:
+
+itemloaders 1.0.6 (to be released)
+----------------------------------
+
+Fixes a regression introduced in 1.0.5 that would cause the ``re`` parameter of
+:meth:`ItemLoader.add_xpath` and similar methods to be passed to lxml, which 
+would trigger an exception when the value of ``re`` was a compiled pattern and 
+not a string (:gh:`56`)
+
 .. _release-1.0.5:
 
 itemloaders 1.0.5 (2022-08-25)
