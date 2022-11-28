@@ -265,7 +265,7 @@ class ItemLoader:
 
         return adapter.item
 
-    def get_output_value(self, field_name):
+    def get_output_value(self, field_name, default=None):
         """
         Return the collected values parsed using the output processor, for the
         given field. This method doesn't populate or modify the item at all.
@@ -274,10 +274,13 @@ class ItemLoader:
         proc = wrap_loader_context(proc, self.context)
         value = self._values.get(field_name, [])
         try:
-            return proc(value)
+            result = proc(value)
         except Exception as e:
             raise ValueError("Error with output processor: field=%r value=%r error='%s: %s'" %
                              (field_name, value, type(e).__name__, str(e)))
+        if not result and default is not None:
+            return default
+        return result
 
     def get_collected_values(self, field_name):
         """Return the collected values for the given field."""
