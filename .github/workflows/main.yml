@@ -11,9 +11,6 @@ jobs:
         - python-version: 3
           env:
             TOXENV: docs
-        - python-version: 3.6
-          env:
-            TOXENV: py
         - python-version: 3.7
           env:
             TOXENV: py
@@ -32,7 +29,7 @@ jobs:
         - python-version: '3.10'
           env:
             TOXENV: py
-        - python-version: '3.11.0-rc.2'
+        - python-version: '3.11'
           env:
             TOXENV: py
     steps:
