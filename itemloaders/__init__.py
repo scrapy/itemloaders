@@ -402,14 +402,14 @@ class ItemLoader:
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.add_css('price', 'p#price', re='the price is (.*)')
         """
-        values = self._get_cssvalues(css, **kw)
+        values = self._get_cssvalues(css)
         self.add_value(field_name, values, *processors, re=re, **kw)
 
     def replace_css(self, field_name, css, *processors, re=None, **kw):
         """
         Similar to :meth:`add_css` but replaces collected data instead of adding it.
         """
-        values = self._get_cssvalues(css, **kw)
+        values = self._get_cssvalues(css)
         self.replace_value(field_name, values, *processors, re=re, **kw)
 
     def get_css(self, css, *processors, re=None, **kw):
@@ -432,10 +432,10 @@ class ItemLoader:
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.get_css('p#price', TakeFirst(), re='the price is (.*)')
         """
-        values = self._get_cssvalues(css, **kw)
+        values = self._get_cssvalues(css)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_cssvalues(self, csss, **kw):
+    def _get_cssvalues(self, csss):
         self._check_selector_method()
         csss = arg_to_iter(csss)
         return flatten(self.selector.css(css).getall() for css in csss)
