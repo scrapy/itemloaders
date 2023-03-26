@@ -5,7 +5,7 @@ See documentation in docs/topics/loaders.rst
 """
 from contextlib import suppress
 
-from itemadapter import ItemAdapter
+from itemadapter import get_field_meta_from_class, ItemAdapter
 from parsel.utils import extract_regex, flatten
 
 from itemloaders.common import wrap_loader_context
@@ -22,6 +22,18 @@ def unbound_method(method):
         if '.' not in method.__qualname__:
             return method.__func__
     return method
+
+
+class _Context(dict):
+    def __init__(self, item_loader, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._item_loader = item_loader
+
+    def __getitem__(self, key):
+        value = super().__getitem__(key)
+        if key == 'item' and value is None:
+            value = self[key] = self._item_loader.item
+        return value
 
 
 class ItemLoader:
@@ -102,17 +114,15 @@ class ItemLoader:
     def __init__(self, item=None, selector=None, parent=None, **context):
         self.selector = selector
         context.update(selector=selector)
-        if item is None:
-            item = self.default_item_class()
-        self._local_item = item
+        self._item = item
         context['item'] = item
-        self.context = context
+        self.context = _Context(parent or self, **context)
         self.parent = parent
         self._local_values = {}
-        # values from initial item
-        for field_name, value in ItemAdapter(item).items():
-            self._values.setdefault(field_name, [])
-            self._values[field_name] += arg_to_iter(value)
+        if item is not None:
+            for field_name, value in ItemAdapter(item).items():
+                self._values.setdefault(field_name, [])
+                self._values[field_name] += arg_to_iter(value)
 
     @property
     def _values(self):
@@ -126,37 +136,29 @@ class ItemLoader:
         if self.parent is not None:
             return self.parent.item
         else:
-            return self._local_item
+            if self._item is None:
+                self._item = self.default_item_class(**self._values)
+            return self._item
 
     def nested_xpath(self, xpath, **context):
         """
         Create a nested loader with an xpath selector.
         The supplied selector is applied relative to selector associated
-        with this :class:`ItemLoader`. The nested loader shares the item
-        with the parent :class:`ItemLoader` so calls to :meth:`add_xpath`,
-        :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
+        with this :class:`ItemLoader`.
         """
         selector = self.selector.xpath(xpath)
         context.update(selector=selector)
-        subloader = self.__class__(
-            item=self.item, parent=self, **context
-        )
-        return subloader
+        return self.__class__(parent=self, **context)
 
     def nested_css(self, css, **context):
         """
         Create a nested loader with a css selector.
         The supplied selector is applied relative to selector associated
-        with this :class:`ItemLoader`. The nested loader shares the item
-        with the parent :class:`ItemLoader` so calls to :meth:`add_xpath`,
-        :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
+        with this :class:`ItemLoader`.
         """
         selector = self.selector.css(css)
         context.update(selector=selector)
-        subloader = self.__class__(
-            item=self.item, parent=self, **context
-        )
-        return subloader
+        return self.__class__(parent=self, **context)
 
     def add_value(self, field_name, value, *processors, re=None, **kw):
         """
@@ -304,7 +306,15 @@ class ItemLoader:
         return unbound_method(proc)
 
     def _get_item_field_attr(self, field_name, key, default=None):
-        field_meta = ItemAdapter(self.item).get_field_meta(field_name)
+        if self.parent is not None and self.parent._item is not None:
+            item_adapter = ItemAdapter(self.parent._item)
+            field_meta = item_adapter.get_field_meta(field_name)
+        if self._item is not None:
+            item_adapter = ItemAdapter(self._item)
+            field_meta = item_adapter.get_field_meta(field_name)
+        else:
+            item_class = self.default_item_class
+            field_meta = get_field_meta_from_class(item_class, field_name)
         return field_meta.get(key, default)
 
     def _process_input_value(self, field_name, value):
