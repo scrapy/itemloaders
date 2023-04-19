@@ -23,6 +23,18 @@ class SelectortemLoaderTest(unittest.TestCase):
     </html>
     """)
 
+    jmes_selector = Selector(text="""
+    {
+      "name": "marta",
+      "description": "paragraph",
+      "website": {
+        "url": "http://www.scrapy.org",
+        "name": "homepage"
+      },
+      "logo": "/images/logo.png"
+    }
+    """)
+
     def test_init_method(self):
         loader = CustomItemLoader()
         self.assertEqual(loader.selector, None)
@@ -171,4 +183,69 @@ class SelectortemLoaderTest(unittest.TestCase):
         loader.add_css('url', 'a::attr(href)')
         self.assertEqual(loader.get_output_value('url'), ['http://www.scrapy.org'])
         loader.replace_css('url', 'a::attr(href)', re=r'http://www\.(.+)')
+        self.assertEqual(loader.get_output_value('url'), ['scrapy.org'])
+
+    def test_add_jmes_re(self):
+        loader = CustomItemLoader(selector=self.jmes_selector)
+        loader.add_jmes("name", "name", re="ma")
+        self.assertEqual(loader.get_output_value("name"), ["Ma"])
+
+        loader.add_jmes("url", "website.url", re="http://(.+)")
+        self.assertEqual(loader.get_output_value("url"), ["www.scrapy.org"])
+
+        loader = CustomItemLoader(selector=self.jmes_selector)
+        loader.add_jmes("name", "name", re=re.compile("ma"))
+        self.assertEqual(loader.get_output_value("name"), ["Ma"])
+
+        loader.add_jmes("url", "website.url", re=re.compile("http://(.+)"))
+        self.assertEqual(loader.get_output_value("url"), ["www.scrapy.org"])
+
+    def test_get_jmes(self):
+        loader = CustomItemLoader(selector=self.jmes_selector)
+        self.assertEqual(loader.get_jmes("description"), ["paragraph"])
+        self.assertEqual(loader.get_jmes("description", TakeFirst()), "paragraph")
+        self.assertEqual(loader.get_jmes("description", TakeFirst(), re="pa"), "pa")
+
+        self.assertEqual(
+            loader.get_jmes(["description", "name"]), ["paragraph", "marta"]
+        )
+        self.assertEqual(
+            loader.get_jmes(["website.url", "logo"]),
+            ["http://www.scrapy.org", "/images/logo.png"],
+        )
+
+    def test_replace_jmes(self):
+        loader = CustomItemLoader(selector=self.jmes_selector)
+        self.assertTrue(loader.selector)
+        loader.add_jmes("name", "name")
+        self.assertEqual(loader.get_output_value("name"), ["Marta"])
+        loader.replace_jmes("name", "description")
+        self.assertEqual(loader.get_output_value("name"), ["Paragraph"])
+
+        loader.replace_jmes("name", ["description", "name"])
+        self.assertEqual(loader.get_output_value("name"), ["Paragraph", "Marta"])
+
+        loader.add_jmes("url", "website.url", re="http://(.+)")
+        self.assertEqual(loader.get_output_value("url"), ["www.scrapy.org"])
+        loader.replace_jmes("url", "logo")
+        self.assertEqual(loader.get_output_value("url"), ["/images/logo.png"])
+
+    def test_replace_jmes_multi_fields(self):
+        loader = CustomItemLoader(selector=self.jmes_selector)
+        loader.add_jmes(None, 'name', TakeFirst(), lambda x: {'name': x})
+        self.assertEqual(loader.get_output_value('name'), ['Marta'])
+        loader.replace_jmes(None, 'description', TakeFirst(), lambda x: {'name': x})
+        self.assertEqual(loader.get_output_value('name'), ['Paragraph'])
+
+        loader.add_jmes(None, 'website.url', TakeFirst(), lambda x: {'url': x})
+        self.assertEqual(loader.get_output_value('url'), ['http://www.scrapy.org'])
+        loader.replace_jmes(None, 'logo', TakeFirst(), lambda x: {'url': x})
+        self.assertEqual(loader.get_output_value('url'), ['/images/logo.png'])
+
+    def test_replace_jmes_re(self):
+        loader = CustomItemLoader(selector=self.jmes_selector)
+        self.assertTrue(loader.selector)
+        loader.add_jmes('url', 'website.url')
+        self.assertEqual(loader.get_output_value('url'), ['http://www.scrapy.org'])
+        loader.replace_jmes('url', 'website.url', re=r'http://www\.(.+)')
         self.assertEqual(loader.get_output_value('url'), ['scrapy.org'])
