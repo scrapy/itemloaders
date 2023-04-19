@@ -458,14 +458,14 @@ class ItemLoader:
             # HTML snippet: {"price": the price is $1200"}
             loader.add_jmes('price', TakeFirst(), re='the price is (.*)')
         """
-        values = self._get_jmesvalues(jmes, **kw)
+        values = self._get_jmesvalues(jmes)
         self.add_value(field_name, values, *processors, re=re, **kw)
 
     def replace_jmes(self, field_name, jmes, *processors, re=None, **kw):
         """
         Similar to :meth:`add_jmes` but replaces collected data instead of adding it.
         """
-        values = self._get_jmesvalues(jmes, **kw)
+        values = self._get_jmesvalues(jmes)
         self.replace_value(field_name, values, *processors, re=re, **kw)
 
     def get_jmes(self, jmes, *processors, re=None, **kw):
@@ -488,10 +488,10 @@ class ItemLoader:
             # HTML snippet: {"price": the price is $1200"}
             loader.get_jmes('price', TakeFirst(), re='the price is (.*)')
         """
-        values = self._get_jmesvalues(jmes, **kw)
+        values = self._get_jmesvalues(jmes)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_jmesvalues(self, jmess, **kw):
+    def _get_jmesvalues(self, jmess):
         self._check_selector_method()
         jmess = arg_to_iter(jmess)
         return flatten(self.selector.jmespath(jmes).getall() for jmes in jmess)
