@@ -36,12 +36,12 @@ class ItemLoader:
 
     :param item: The item instance to populate using subsequent calls to
         :meth:`~ItemLoader.add_xpath`, :meth:`~ItemLoader.add_css`,
-        or :meth:`~ItemLoader.add_value`.
+        :meth:`~ItemLoader.add_jmes` or :meth:`~ItemLoader.add_value`.
     :type item: :class:`dict` object
 
     :param selector: The selector to extract data from, when using the
-        :meth:`add_xpath` (resp. :meth:`add_css`) or :meth:`replace_xpath`
-        (resp. :meth:`replace_css`) method.
+        :meth:`add_xpath` (resp. :meth:`add_css`, :meth:`add_jmes`) or :meth:`replace_xpath`
+        (resp. :meth:`replace_css`, :meth:`replace_jmes`) method.
     :type selector: :class:`~parsel.selector.Selector` object
 
     The item, selector and the remaining keyword arguments are
@@ -439,3 +439,59 @@ class ItemLoader:
         self._check_selector_method()
         csss = arg_to_iter(csss)
         return flatten(self.selector.css(css).getall() for css in csss)
+
+    def add_jmes(self, field_name, jmes, *processors, re=None, **kw):
+        """
+        Similar to :meth:`ItemLoader.add_value` but receives a JMESPath selector
+        instead of a value, which is used to extract a list of unicode strings
+        from the selector associated with this :class:`ItemLoader`.
+
+        See :meth:`get_jmes` for ``kwargs``.
+
+        :param jmes: the JMESPath selector to extract data from
+        :type jmes: str
+
+        Examples::
+
+            # HTML snippet: {"name": "Color TV"}
+            loader.add_jmes('name')
+            # HTML snippet: {"price": the price is $1200"}
+            loader.add_jmes('price', TakeFirst(), re='the price is (.*)')
+        """
+        values = self._get_jmesvalues(jmes, **kw)
+        self.add_value(field_name, values, *processors, re=re, **kw)
+
+    def replace_jmes(self, field_name, jmes, *processors, re=None, **kw):
+        """
+        Similar to :meth:`add_jmes` but replaces collected data instead of adding it.
+        """
+        values = self._get_jmesvalues(jmes, **kw)
+        self.replace_value(field_name, values, *processors, re=re, **kw)
+
+    def get_jmes(self, jmes, *processors, re=None, **kw):
+        """
+        Similar to :meth:`ItemLoader.get_value` but receives a JMESPath selector
+        instead of a value, which is used to extract a list of unicode strings
+        from the selector associated with this :class:`ItemLoader`.
+
+        :param jmes: the JMESPath selector to extract data from
+        :type jmes: str
+
+        :param re: a regular expression to use for extracting data from the
+            selected JMESPath
+        :type re: str or typing.Pattern
+
+        Examples::
+
+            # HTML snippet: {"name": "Color TV"}
+            loader.get_jmes('name')
+            # HTML snippet: {"price": the price is $1200"}
+            loader.get_jmes('price', TakeFirst(), re='the price is (.*)')
+        """
+        values = self._get_jmesvalues(jmes, **kw)
+        return self.get_value(values, *processors, re=re, **kw)
+
+    def _get_jmesvalues(self, jmess, **kw):
+        self._check_selector_method()
+        jmess = arg_to_iter(jmess)
+        return flatten(self.selector.jmespath(jmes).getall() for jmes in jmess)
