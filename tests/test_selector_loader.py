@@ -1,5 +1,6 @@
 import re
 import unittest
+from unittest.mock import MagicMock
 
 from parsel import Selector
 
@@ -184,6 +185,15 @@ class SelectortemLoaderTest(unittest.TestCase):
         self.assertEqual(loader.get_output_value('url'), ['http://www.scrapy.org'])
         loader.replace_css('url', 'a::attr(href)', re=r'http://www\.(.+)')
         self.assertEqual(loader.get_output_value('url'), ['scrapy.org'])
+
+    def test_jmes_not_installed(self):
+        selector = MagicMock(spec=Selector)
+        del selector.jmespath
+        loader = CustomItemLoader(selector=selector)
+        with self.assertRaises(AttributeError) as err:
+            loader.add_jmes("name", "name", re="ma")
+
+        self.assertEqual(str(err.exception), "Please install parsel >= 1.8.1 to get jmespath support")
 
     def test_add_jmes_re(self):
         loader = CustomItemLoader(selector=self.jmes_selector)
