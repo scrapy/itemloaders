@@ -19,7 +19,7 @@ def unbound_method(method):
     (no need to define an unused first 'self' argument)
     """
     with suppress(AttributeError):
-        if '.' not in method.__qualname__:
+        if "." not in method.__qualname__:
             return method.__func__
     return method
 
@@ -36,12 +36,12 @@ class ItemLoader:
 
     :param item: The item instance to populate using subsequent calls to
         :meth:`~ItemLoader.add_xpath`, :meth:`~ItemLoader.add_css`,
-        or :meth:`~ItemLoader.add_value`.
+        :meth:`~ItemLoader.add_jmes` or :meth:`~ItemLoader.add_value`.
     :type item: :class:`dict` object
 
     :param selector: The selector to extract data from, when using the
-        :meth:`add_xpath` (resp. :meth:`add_css`) or :meth:`replace_xpath`
-        (resp. :meth:`replace_css`) method.
+        :meth:`add_xpath` (resp. :meth:`add_css`, :meth:`add_jmes`) or :meth:`replace_xpath`
+        (resp. :meth:`replace_css`, :meth:`replace_jmes`) method.
     :type selector: :class:`~parsel.selector.Selector` object
 
     The item, selector and the remaining keyword arguments are
@@ -105,7 +105,7 @@ class ItemLoader:
         if item is None:
             item = self.default_item_class()
         self._local_item = item
-        context['item'] = item
+        context["item"] = item
         self.context = context
         self.parent = parent
         self._local_values = {}
@@ -138,9 +138,7 @@ class ItemLoader:
         """
         selector = self.selector.xpath(xpath)
         context.update(selector=selector)
-        subloader = self.__class__(
-            item=self.item, parent=self, **context
-        )
+        subloader = self.__class__(item=self.item, parent=self, **context)
         return subloader
 
     def nested_css(self, css, **context):
@@ -153,9 +151,7 @@ class ItemLoader:
         """
         selector = self.selector.css(css)
         context.update(selector=selector)
-        subloader = self.__class__(
-            item=self.item, parent=self, **context
-        )
+        subloader = self.__class__(item=self.item, parent=self, **context)
         return subloader
 
     def add_value(self, field_name, value, *processors, re=None, **kw):
@@ -246,9 +242,10 @@ class ItemLoader:
             try:
                 value = proc(value)
             except Exception as e:
-                raise ValueError("Error with processor %s value=%r error='%s: %s'" %
-                                 (_proc.__class__.__name__, value,
-                                  type(e).__name__, str(e)))
+                raise ValueError(
+                    "Error with processor %s value=%r error='%s: %s'"
+                    % (_proc.__class__.__name__, value, type(e).__name__, str(e))
+                )
         return value
 
     def load_item(self):
@@ -276,30 +273,28 @@ class ItemLoader:
         try:
             return proc(value)
         except Exception as e:
-            raise ValueError("Error with output processor: field=%r value=%r error='%s: %s'" %
-                             (field_name, value, type(e).__name__, str(e)))
+            raise ValueError(
+                "Error with output processor: field=%r value=%r error='%s: %s'"
+                % (field_name, value, type(e).__name__, str(e))
+            )
 
     def get_collected_values(self, field_name):
         """Return the collected values for the given field."""
         return self._values.get(field_name, [])
 
     def get_input_processor(self, field_name):
-        proc = getattr(self, '%s_in' % field_name, None)
+        proc = getattr(self, "%s_in" % field_name, None)
         if not proc:
             proc = self._get_item_field_attr(
-                field_name,
-                'input_processor',
-                self.default_input_processor
+                field_name, "input_processor", self.default_input_processor
             )
         return unbound_method(proc)
 
     def get_output_processor(self, field_name):
-        proc = getattr(self, '%s_out' % field_name, None)
+        proc = getattr(self, "%s_out" % field_name, None)
         if not proc:
             proc = self._get_item_field_attr(
-                field_name,
-                'output_processor',
-                self.default_output_processor
+                field_name, "output_processor", self.default_output_processor
             )
         return unbound_method(proc)
 
@@ -316,8 +311,15 @@ class ItemLoader:
         except Exception as e:
             raise ValueError(
                 "Error with input processor %s: field=%r value=%r "
-                "error='%s: %s'" % (_proc.__class__.__name__, field_name,
-                                    value, type(e).__name__, str(e)))
+                "error='%s: %s'"
+                % (
+                    _proc.__class__.__name__,
+                    field_name,
+                    value,
+                    type(e).__name__,
+                    str(e),
+                )
+            )
 
     def _check_selector_method(self):
         if self.selector is None:
@@ -439,3 +441,63 @@ class ItemLoader:
         self._check_selector_method()
         csss = arg_to_iter(csss)
         return flatten(self.selector.css(css).getall() for css in csss)
+
+    def add_jmes(self, field_name, jmes, *processors, re=None, **kw):
+        """
+        Similar to :meth:`ItemLoader.add_value` but receives a JMESPath selector
+        instead of a value, which is used to extract a list of unicode strings
+        from the selector associated with this :class:`ItemLoader`.
+
+        See :meth:`get_jmes` for ``kwargs``.
+
+        :param jmes: the JMESPath selector to extract data from
+        :type jmes: str
+
+        Examples::
+
+            # HTML snippet: {"name": "Color TV"}
+            loader.add_jmes('name')
+            # HTML snippet: {"price": the price is $1200"}
+            loader.add_jmes('price', TakeFirst(), re='the price is (.*)')
+        """
+        values = self._get_jmesvalues(jmes)
+        self.add_value(field_name, values, *processors, re=re, **kw)
+
+    def replace_jmes(self, field_name, jmes, *processors, re=None, **kw):
+        """
+        Similar to :meth:`add_jmes` but replaces collected data instead of adding it.
+        """
+        values = self._get_jmesvalues(jmes)
+        self.replace_value(field_name, values, *processors, re=re, **kw)
+
+    def get_jmes(self, jmes, *processors, re=None, **kw):
+        """
+        Similar to :meth:`ItemLoader.get_value` but receives a JMESPath selector
+        instead of a value, which is used to extract a list of unicode strings
+        from the selector associated with this :class:`ItemLoader`.
+
+        :param jmes: the JMESPath selector to extract data from
+        :type jmes: str
+
+        :param re: a regular expression to use for extracting data from the
+            selected JMESPath
+        :type re: str or typing.Pattern
+
+        Examples::
+
+            # HTML snippet: {"name": "Color TV"}
+            loader.get_jmes('name')
+            # HTML snippet: {"price": the price is $1200"}
+            loader.get_jmes('price', TakeFirst(), re='the price is (.*)')
+        """
+        values = self._get_jmesvalues(jmes)
+        return self.get_value(values, *processors, re=re, **kw)
+
+    def _get_jmesvalues(self, jmess):
+        self._check_selector_method()
+        jmess = arg_to_iter(jmess)
+        if not hasattr(self.selector, "jmespath"):
+            raise AttributeError(
+                "Please install parsel >= 1.8.1 to get jmespath support"
+            )
+        return flatten(self.selector.jmespath(jmes).getall() for jmes in jmess)
