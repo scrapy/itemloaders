@@ -8,8 +8,8 @@ class NestedItemTest(unittest.TestCase):
 
     def _test_item(self, item):
         il = ItemLoader()
-        il.add_value('item_list', item)
-        self.assertEqual(il.load_item(), {'item_list': [item]})
+        il.add_value("item_list", item)
+        self.assertEqual(il.load_item(), {"item_list": [item]})
 
     def test_attrs(self):
         try:
@@ -21,7 +21,7 @@ class NestedItemTest(unittest.TestCase):
         class TestItem:
             foo = attr.ib()
 
-        self._test_item(TestItem(foo='bar'))
+        self._test_item(TestItem(foo="bar"))
 
     def test_dataclass(self):
         try:
@@ -33,10 +33,10 @@ class NestedItemTest(unittest.TestCase):
         class TestItem:
             foo: str
 
-        self._test_item(TestItem(foo='bar'))
+        self._test_item(TestItem(foo="bar"))
 
     def test_dict(self):
-        self._test_item({'foo': 'bar'})
+        self._test_item({"foo": "bar"})
 
     def test_scrapy_item(self):
         try:
@@ -47,4 +47,4 @@ class NestedItemTest(unittest.TestCase):
         class TestItem(Item):
             foo = Field()
 
-        self._test_item(TestItem(foo='bar'))
+        self._test_item(TestItem(foo="bar"))

@@ -70,10 +70,11 @@ class MapCompose:
                 try:
                     next_values += arg_to_iter(func(v))
                 except Exception as e:
-                    raise ValueError("Error in MapCompose with "
-                                     "%s value=%r error='%s: %s'" %
-                                     (str(func), value, type(e).__name__,
-                                      str(e)))
+                    raise ValueError(
+                        "Error in MapCompose with "
+                        "%s value=%r error='%s: %s'"
+                        % (str(func), value, type(e).__name__, str(e))
+                    )
             values = next_values
         return values
 
@@ -109,7 +110,7 @@ class Compose:
 
     def __init__(self, *functions, **default_loader_context):
         self.functions = functions
-        self.stop_on_none = default_loader_context.get('stop_on_none', True)
+        self.stop_on_none = default_loader_context.get("stop_on_none", True)
         self.default_loader_context = default_loader_context
 
     def __call__(self, value, loader_context=None):
@@ -124,9 +125,11 @@ class Compose:
             try:
                 value = func(value)
             except Exception as e:
-                raise ValueError("Error in Compose with "
-                                 "%s value=%r error='%s: %s'" %
-                                 (str(func), value, type(e).__name__, str(e)))
+                raise ValueError(
+                    "Error in Compose with "
+                    "%s value=%r error='%s: %s'"
+                    % (str(func), value, type(e).__name__, str(e))
+                )
         return value
 
 
@@ -146,7 +149,7 @@ class TakeFirst:
 
     def __call__(self, values):
         for value in values:
-            if value is not None and value != '':
+            if value is not None and value != "":
                 return value
 
 
@@ -197,6 +200,7 @@ class SelectJmes:
     def __init__(self, json_path):
         self.json_path = json_path
         import jmespath
+
         self.compiled_path = jmespath.compile(self.json_path)
 
     def __call__(self, value):
@@ -226,7 +230,7 @@ class Join:
     'one<br>two<br>three'
     """
 
-    def __init__(self, separator=' '):
+    def __init__(self, separator=" "):
         self.separator = separator
 
     def __call__(self, values):

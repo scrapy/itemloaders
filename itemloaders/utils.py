@@ -20,7 +20,7 @@ def arg_to_iter(arg):
     if arg is None:
         return []
     elif (
-        hasattr(arg, '__iter__')
+        hasattr(arg, "__iter__")
         and not isinstance(arg, _ITERABLE_SINGLE_VALUES)
         and not is_item(arg)
     ):
