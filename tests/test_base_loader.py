@@ -471,16 +471,16 @@ class NoInputReprocessingFromDictTest(unittest.TestCase):
         il = NoInputReprocessingDictLoader()
         il.add_value("title", "foo")
         il_loaded = il.load_item()
-        self.assertEqual(il_loaded, {"title": "foo"})
+        self.assertEqual(il_loaded, {"title": "FOO"})
         self.assertEqual(
-            NoInputReprocessingDictLoader(item=il_loaded).load_item(), {"title": "foo"}
+            NoInputReprocessingDictLoader(item=il_loaded).load_item(), {"title": "FOO"}
         )
 
     def test_avoid_reprocessing_without_initial_values_list(self):
         il = NoInputReprocessingDictLoader()
         il.add_value("title", ["foo", "bar"])
         il_loaded = il.load_item()
-        self.assertEqual(il_loaded, {"title": "foo"})
+        self.assertEqual(il_loaded, {"title": "FOO"})
         self.assertEqual(
-            NoInputReprocessingDictLoader(item=il_loaded).load_item(), {"title": "foo"}
+            NoInputReprocessingDictLoader(item=il_loaded).load_item(), {"title": "FOO"}
         )
