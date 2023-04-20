@@ -65,7 +65,7 @@ class InitializationTestMixin:
         self.assertEqual(il.get_output_value("name"), ["foo"])
         loaded_item = il.load_item()
         self.assertIsInstance(loaded_item, self.item_class)
-        self.assertEqual(loaded_item, dict({"name": ["foo"]}))
+        self.assertEqual(loaded_item, {"name": ["foo"]})
 
     def test_get_output_value_list(self):
         """Getting output value must not remove value from item"""
@@ -74,7 +74,7 @@ class InitializationTestMixin:
         self.assertEqual(il.get_output_value("name"), ["foo", "bar"])
         loaded_item = il.load_item()
         self.assertIsInstance(loaded_item, self.item_class)
-        self.assertEqual(loaded_item, dict({"name": ["foo", "bar"]}))
+        self.assertEqual(loaded_item, {"name": ["foo", "bar"]})
 
     def test_values_single(self):
         """Values from initial item must be added to loader._values"""
