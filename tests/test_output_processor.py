@@ -1,7 +1,7 @@
 import unittest
 
 from itemloaders import ItemLoader
-from itemloaders.processors import Identity, Compose, TakeFirst
+from itemloaders.processors import Compose, Identity, TakeFirst
 
 
 class TestOutputProcessorDict(unittest.TestCase):
@@ -28,7 +28,7 @@ class TestOutputProcessorItem(unittest.TestCase):
             default_input_processor = Identity()
             default_output_processor = Compose(TakeFirst())
 
-        item = dict()
+        item = {}
         item.setdefault("temp", 0.3)
         loader = TempLoader(item=item)
         item = loader.load_item()

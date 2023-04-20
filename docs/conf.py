@@ -15,6 +15,8 @@ import sys
 from datetime import datetime
 from os import path
 
+import sphinx_rtd_theme
+
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
@@ -110,7 +112,6 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom themes here, relative to this directory.
 # Add path to the RTD explicitly to robustify builds (otherwise might
 # fail in a clean Debian build env)
-import sphinx_rtd_theme
 
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 

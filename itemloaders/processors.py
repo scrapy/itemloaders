@@ -5,8 +5,8 @@ See documentation in docs/topics/loaders.rst
 """
 from collections import ChainMap
 
-from itemloaders.utils import arg_to_iter
 from itemloaders.common import wrap_loader_context
+from itemloaders.utils import arg_to_iter
 
 
 class MapCompose:
@@ -51,7 +51,7 @@ class MapCompose:
     See :class:`Compose` processor for more info.
 
     .. _`parsel selectors`: https://parsel.readthedocs.io/en/latest/parsel.html#parsel.selector.Selector.extract
-    """
+    """  # noqa
 
     def __init__(self, *functions, **default_loader_context):
         self.functions = functions
@@ -74,7 +74,7 @@ class MapCompose:
                         "Error in MapCompose with "
                         "%s value=%r error='%s: %s'"
                         % (str(func), value, type(e).__name__, str(e))
-                    )
+                    ) from e
             values = next_values
         return values
 
@@ -129,7 +129,7 @@ class Compose:
                     "Error in Compose with "
                     "%s value=%r error='%s: %s'"
                     % (str(func), value, type(e).__name__, str(e))
-                )
+                ) from e
         return value
 
 

@@ -1,6 +1,7 @@
 """Common functions used in Item Loaders code"""
 
 from functools import partial
+
 from itemloaders.utils import get_func_args
 
 

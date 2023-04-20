@@ -7,7 +7,6 @@ from functools import partial
 
 from itemadapter import is_item
 
-
 _ITERABLE_SINGLE_VALUES = str, bytes
 
 
@@ -32,7 +31,7 @@ def arg_to_iter(arg):
 def get_func_args(func, stripself=False):
     """Return the argument name list of a callable object"""
     if not callable(func):
-        raise TypeError(f"func must be callable, got '{type(func).__name__}'")
+        raise TypeError(f"func must be callable, got {type(func).__name__!r}")
 
     args = []
     try:
