@@ -2,13 +2,11 @@ import functools
 import operator
 import platform
 import unittest
-from datetime import datetime
 
 from itemloaders.utils import get_func_args
 
 
 class UtilsPythonTestCase(unittest.TestCase):
-
     def test_get_func_args(self):
         def f1(a, b, c):
             pass
@@ -27,7 +25,6 @@ class UtilsPythonTestCase(unittest.TestCase):
                 pass
 
         class Callable:
-
             def __call__(self, a, b, c):
                 pass
 

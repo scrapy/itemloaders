@@ -245,7 +245,7 @@ class ItemLoader:
                 raise ValueError(
                     "Error with processor %s value=%r error='%s: %s'"
                     % (_proc.__class__.__name__, value, type(e).__name__, str(e))
-                )
+                ) from e
         return value
 
     def load_item(self):
@@ -276,7 +276,7 @@ class ItemLoader:
             raise ValueError(
                 "Error with output processor: field=%r value=%r error='%s: %s'"
                 % (field_name, value, type(e).__name__, str(e))
-            )
+            ) from e
 
     def get_collected_values(self, field_name):
         """Return the collected values for the given field."""
@@ -319,7 +319,7 @@ class ItemLoader:
                     type(e).__name__,
                     str(e),
                 )
-            )
+            ) from e
 
     def _check_selector_method(self):
         if self.selector is None:
