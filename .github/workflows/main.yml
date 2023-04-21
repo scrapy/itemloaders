@@ -20,6 +20,9 @@ jobs:
         - python-version: 3
           env:
             TOXENV: docs
+        - python-version: 3
+          env:
+            TOXENV: twinecheck
         - python-version: 3.7
           env:
             TOXENV: py
