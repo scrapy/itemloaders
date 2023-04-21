@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.1.0:
 
-itemloaders 1.1.0 (YYYY-MM-DD)
+itemloaders 1.1.0 (2023-04-21)
 ------------------------------
 
 -   Added JMESPath support (:meth:`ItemLoader.add_jmes` etc.), requiring Parsel
@@ -18,6 +18,9 @@ itemloaders 1.1.0 (YYYY-MM-DD)
 -   Removed official support for Python 3.6 (:gh:`61`)
 
 -   Internal code cleanup (:gh:`65`, :gh:`66`)
+
+-   Added ``pre-commit`` support and applied changes from ``black`` and
+    ``flake8`` (:gh:`70`).
 
 -   Improved CI (:gh:`60`)
 
