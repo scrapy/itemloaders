@@ -1,5 +1,5 @@
 default_language_version:
-    python: python3.10
+    python: python3.12
 repos:
   - hooks:
       - id: black
@@ -21,4 +21,4 @@ repos:
           - flake8-docstrings
           - flake8-string-format
     repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+    rev: 6.1.0
