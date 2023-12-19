@@ -5,14 +5,58 @@
 Release notes
 =============
 
+.. _release-1.1.0:
+
+itemloaders 1.1.0 (2023-04-21)
+------------------------------
+
+-   Added JMESPath support (:meth:`ItemLoader.add_jmes` etc.), requiring Parsel
+    1.8.1+ (:gh:`68`)
+
+-   Added official support for Python 3.11 (:gh:`59`)
+
+-   Removed official support for Python 3.6 (:gh:`61`)
+
+-   Internal code cleanup (:gh:`65`, :gh:`66`)
+
+-   Added ``pre-commit`` support and applied changes from ``black`` and
+    ``flake8`` (:gh:`70`).
+
+-   Improved CI (:gh:`60`)
+
+.. _release-1.0.6:
+
+itemloaders 1.0.6 (2022-08-29)
+------------------------------
+
+Fixes a regression introduced in 1.0.5 that would cause the ``re`` parameter of
+:meth:`ItemLoader.add_xpath` and similar methods to be passed to lxml, which
+would trigger an exception when the value of ``re`` was a compiled pattern and
+not a string (:gh:`56`)
+
+.. _release-1.0.5:
+
+itemloaders 1.0.5 (2022-08-25)
+------------------------------
+
+-  Allow additional args to be passed when calling :meth:`ItemLoader.add_xpath` (:gh:`48`)
+
+-  Fixed missing space in an exception message (:gh:`47`)
+
+-  Updated company name in author and copyright sections (:gh:`42`)
+
+-  Added official support for Python 3.9 and improved PyPy compatibility (:gh:`44`)
+
+-  Added official support for Python 3.10 (:gh:`53`)
+
 .. _release-1.0.4:
 
 itemloaders 1.0.4 (2020-11-12)
 ------------------------------
 
--   When adding a :class:`scrapy.item.Item` object as a value into an
+-   When adding a :class:`scrapy.item.scrapy.Item` object as a value into an
     :class:`ItemLoader` object, that item is now added *as is*, instead of
-    becoming a :class:`list` of keys from its :attr:`~scrapy.item.Item.fields`
+    becoming a :class:`list` of keys from its :attr:`scrapy.item.scrapy.Item.fields`
     (:gh:`28`, :gh:`29`)
 
 -   Increased test coverage (:gh:`27`)

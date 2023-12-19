@@ -1,7 +1,0 @@
-w3lib>=1.21.0
-parsel>=1.5.2
-jmespath>=0.9.5
-itemadapter>=0.1.0
-
-pytest==5.4.1
-flake8==3.7.9
