@@ -4,28 +4,24 @@ Refactoring to come later
 """
 import inspect
 from functools import partial
-
-from itemadapter import is_item
-
-_ITERABLE_SINGLE_VALUES = str, bytes
+from typing import Generator
 
 
 def arg_to_iter(arg):
-    """Convert an argument to an iterable. The argument can be a None, single
-    value, or an iterable.
+    """Return an iterable based on *arg*.
 
-    Exception: if arg is a dict, [arg] will be returned
+    If *arg* is a list, a tuple or a generator, it will be returned as is.
+
+    If *arg* is ``None``, an empty list will be returned.
+
+    If *arg* is anything else, a list will be returned with *arg* as its only
+    item, i.e. ``[arg]``.
     """
     if arg is None:
         return []
-    elif (
-        hasattr(arg, "__iter__")
-        and not isinstance(arg, _ITERABLE_SINGLE_VALUES)
-        and not is_item(arg)
-    ):
+    if isinstance(arg, (list, tuple, Generator)):
         return arg
-    else:
-        return [arg]
+    return [arg]
 
 
 def get_func_args(func, stripself=False):
