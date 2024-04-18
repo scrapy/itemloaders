@@ -2,6 +2,7 @@
 Copy/paste from scrapy source at the moment, to ensure tests are working.
 Refactoring to come later
 """
+
 import inspect
 from functools import partial
 from typing import Generator
