@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.2.0:
 
-itemloaders 1.2.0 (YYYY-MM-DD)
+itemloaders 1.2.0 (2024-04-18)
 ------------------------------
 
 -   Added official support for Python 3.12 and PyPy 3.10 (:gh:`75`)
