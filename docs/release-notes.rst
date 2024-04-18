@@ -5,6 +5,21 @@
 Release notes
 =============
 
+.. _release-1.2.0:
+
+itemloaders 1.2.0 (YYYY-MM-DD)
+------------------------------
+
+-   Added official support for Python 3.12 and PyPy 3.10 (:gh:`75`)
+
+-   Removed official support for Python 3.7 (:gh:`72`)
+
+-   Improved performance of ``itemloaders.utils.arg_to_iter`` (:gh:`51`)
+
+-   Fixed test expectations on recent Python versions (:gh:`77`)
+
+-   Improved CI (:gh:`78`)
+
 .. _release-1.1.0:
 
 itemloaders 1.1.0 (2023-04-21)
@@ -29,10 +44,10 @@ itemloaders 1.1.0 (2023-04-21)
 itemloaders 1.0.6 (2022-08-29)
 ------------------------------
 
-Fixes a regression introduced in 1.0.5 that would cause the ``re`` parameter of
-:meth:`ItemLoader.add_xpath` and similar methods to be passed to lxml, which
-would trigger an exception when the value of ``re`` was a compiled pattern and
-not a string (:gh:`56`)
+-   Fixes a regression introduced in 1.0.5 that would cause the ``re`` parameter of
+    :meth:`ItemLoader.add_xpath` and similar methods to be passed to lxml, which
+    would trigger an exception when the value of ``re`` was a compiled pattern and
+    not a string (:gh:`56`)
 
 .. _release-1.0.5:
 
@@ -112,7 +127,7 @@ itemloaders 1.0.1 (2020-07-02)
 itemloaders 1.0.0 (2020-05-18)
 ------------------------------
 
-Initial release, based on a part of the :doc:`Scrapy <scrapy:index>` code base.
+-   Initial release, based on a part of the :doc:`Scrapy <scrapy:index>` code base.
 
 
 .. _itemadapter: https://github.com/scrapy/itemadapter#itemadapter
