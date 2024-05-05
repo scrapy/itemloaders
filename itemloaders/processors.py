@@ -5,6 +5,7 @@ See documentation in docs/topics/loaders.rst
 """
 
 from collections import ChainMap
+from typing import Any, Callable, Iterable, List, MutableMapping, Optional
 
 from itemloaders.common import wrap_loader_context
 from itemloaders.utils import arg_to_iter
@@ -54,19 +55,22 @@ class MapCompose:
     .. _`parsel selectors`: https://parsel.readthedocs.io/en/latest/parsel.html#parsel.selector.Selector.extract
     """  # noqa
 
-    def __init__(self, *functions, **default_loader_context):
+    def __init__(self, *functions: Callable[..., Any], **default_loader_context: Any):
         self.functions = functions
         self.default_loader_context = default_loader_context
 
-    def __call__(self, value, loader_context=None):
+    def __call__(
+        self, value: Any, loader_context: Optional[MutableMapping[str, Any]] = None
+    ) -> Iterable[Any]:
         values = arg_to_iter(value)
+        context: MutableMapping[str, Any]
         if loader_context:
             context = ChainMap(loader_context, self.default_loader_context)
         else:
             context = self.default_loader_context
         wrapped_funcs = [wrap_loader_context(f, context) for f in self.functions]
         for func in wrapped_funcs:
-            next_values = []
+            next_values: List[Any] = []
             for v in values:
                 try:
                     next_values += arg_to_iter(func(v))
@@ -109,12 +113,15 @@ class Compose:
     <itemloaders.ItemLoader.context>` attribute.
     """
 
-    def __init__(self, *functions, **default_loader_context):
+    def __init__(self, *functions: Callable[..., Any], **default_loader_context: Any):
         self.functions = functions
         self.stop_on_none = default_loader_context.get("stop_on_none", True)
         self.default_loader_context = default_loader_context
 
-    def __call__(self, value, loader_context=None):
+    def __call__(
+        self, value: Any, loader_context: Optional[MutableMapping[str, Any]] = None
+    ) -> Any:
+        context: MutableMapping[str, Any]
         if loader_context:
             context = ChainMap(loader_context, self.default_loader_context)
         else:
@@ -148,7 +155,7 @@ class TakeFirst:
     'one'
     """
 
-    def __call__(self, values):
+    def __call__(self, values: Any) -> Any:
         for value in values:
             if value is not None and value != "":
                 return value
@@ -168,7 +175,7 @@ class Identity:
     ['one', 'two', 'three']
     """
 
-    def __call__(self, values):
+    def __call__(self, values: Any) -> Any:
         return values
 
 
@@ -198,13 +205,15 @@ class SelectJmes:
     ['bar']
     """
 
-    def __init__(self, json_path):
-        self.json_path = json_path
-        import jmespath
+    def __init__(self, json_path: str):
+        self.json_path: str = json_path
+        import jmespath.parser
 
-        self.compiled_path = jmespath.compile(self.json_path)
+        self.compiled_path: jmespath.parser.ParsedResult = jmespath.compile(
+            self.json_path
+        )
 
-    def __call__(self, value):
+    def __call__(self, value: Any) -> Any:
         """Query value for the jmespath query and return answer
         :param value: a data structure (dict, list) to extract from
         :return: Element extracted according to jmespath query
@@ -231,8 +240,8 @@ class Join:
     'one<br>two<br>three'
     """
 
-    def __init__(self, separator=" "):
+    def __init__(self, separator: str = " "):
         self.separator = separator
 
-    def __call__(self, values):
+    def __call__(self, values: Any) -> str:
         return self.separator.join(values)
