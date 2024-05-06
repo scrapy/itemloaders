@@ -273,3 +273,19 @@ class SelectortemLoaderTest(unittest.TestCase):
         self.assertEqual(loader.get_output_value("url"), ["http://www.scrapy.org"])
         loader.replace_jmes("url", "website.url", re=r"http://www\.(.+)")
         self.assertEqual(loader.get_output_value("url"), ["scrapy.org"])
+
+    def test_fluent_interface(self):
+        loader = ItemLoader(selector=self.selector)
+        item = (
+            loader.add_xpath("name", "//body/text()")
+            .replace_xpath("name", "//div/text()")
+            .add_css("description", "div::text")
+            .replace_css("description", "p::text")
+            .add_value("url", "http://example.com")
+            .replace_value("url", "http://foo")
+            .load_item()
+        )
+        self.assertEqual(
+            item,
+            {"name": ["marta"], "description": ["paragraph"], "url": ["http://foo"]},
+        )

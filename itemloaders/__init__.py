@@ -191,7 +191,7 @@ class ItemLoader:
         *processors: Callable[..., Any],
         re: Union[str, Pattern[str], None] = None,
         **kw: Any,
-    ) -> None:
+    ) -> Self:
         """
         Process and then add the given ``value`` for the given field.
 
@@ -205,6 +205,9 @@ class ItemLoader:
         multiple fields may be added. And the processed value should be a dict
         with field_name mapped to values.
 
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         Examples::
 
             loader.add_value('name', 'Color TV')
@@ -212,6 +215,7 @@ class ItemLoader:
             loader.add_value('length', '100')
             loader.add_value('name', 'name: foo', TakeFirst(), re='name: (.+)')
             loader.add_value(None, {'name': 'foo', 'sex': 'male'})
+
         """
         value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
@@ -221,6 +225,7 @@ class ItemLoader:
                 self._add_value(k, v)
         else:
             self._add_value(field_name, value)
+        return self
 
     def replace_value(
         self,
@@ -229,10 +234,13 @@ class ItemLoader:
         *processors: Callable[..., Any],
         re: Union[str, Pattern[str], None] = None,
         **kw: Any,
-    ) -> None:
+    ) -> Self:
         """
         Similar to :meth:`add_value` but replaces the collected data with the
         new value instead of adding it.
+
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
         """
         value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
@@ -242,6 +250,7 @@ class ItemLoader:
                 self._replace_value(k, v)
         else:
             self._replace_value(field_name, value)
+        return self
 
     def _add_value(self, field_name: str, value: Any) -> None:
         value = arg_to_iter(value)
@@ -387,7 +396,7 @@ class ItemLoader:
         *processors: Callable[..., Any],
         re: Union[str, Pattern[str], None] = None,
         **kw: Any,
-    ) -> None:
+    ) -> Self:
         """
         Similar to :meth:`ItemLoader.add_value` but receives an XPath instead of a
         value, which is used to extract a list of strings from the
@@ -398,6 +407,9 @@ class ItemLoader:
         :param xpath: the XPath to extract data from
         :type xpath: str
 
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         Examples::
 
             # HTML snippet: <p class="product-name">Color TV</p>
@@ -407,7 +419,7 @@ class ItemLoader:
 
         """
         values = self._get_xpathvalues(xpath, **kw)
-        self.add_value(field_name, values, *processors, re=re, **kw)
+        return self.add_value(field_name, values, *processors, re=re, **kw)
 
     def replace_xpath(
         self,
@@ -416,12 +428,16 @@ class ItemLoader:
         *processors: Callable[..., Any],
         re: Union[str, Pattern[str], None] = None,
         **kw: Any,
-    ) -> None:
+    ) -> Self:
         """
         Similar to :meth:`add_xpath` but replaces collected data instead of adding it.
+
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         """
         values = self._get_xpathvalues(xpath, **kw)
-        self.replace_value(field_name, values, *processors, re=re, **kw)
+        return self.replace_value(field_name, values, *processors, re=re, **kw)
 
     def get_xpath(
         self,
@@ -468,7 +484,7 @@ class ItemLoader:
         *processors: Callable[..., Any],
         re: Union[str, Pattern[str], None] = None,
         **kw: Any,
-    ) -> None:
+    ) -> Self:
         """
         Similar to :meth:`ItemLoader.add_value` but receives a CSS selector
         instead of a value, which is used to extract a list of unicode strings
@@ -479,15 +495,19 @@ class ItemLoader:
         :param css: the CSS selector to extract data from
         :type css: str
 
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         Examples::
 
             # HTML snippet: <p class="product-name">Color TV</p>
             loader.add_css('name', 'p.product-name')
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.add_css('price', 'p#price', re='the price is (.*)')
+
         """
         values = self._get_cssvalues(css)
-        self.add_value(field_name, values, *processors, re=re, **kw)
+        return self.add_value(field_name, values, *processors, re=re, **kw)
 
     def replace_css(
         self,
@@ -496,12 +516,16 @@ class ItemLoader:
         *processors: Callable[..., Any],
         re: Union[str, Pattern[str], None] = None,
         **kw: Any,
-    ) -> None:
+    ) -> Self:
         """
         Similar to :meth:`add_css` but replaces collected data instead of adding it.
+
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         """
         values = self._get_cssvalues(css)
-        self.replace_value(field_name, values, *processors, re=re, **kw)
+        return self.replace_value(field_name, values, *processors, re=re, **kw)
 
     def get_css(
         self,
@@ -545,7 +569,7 @@ class ItemLoader:
         *processors: Callable[..., Any],
         re: Union[str, Pattern[str], None] = None,
         **kw: Any,
-    ) -> None:
+    ) -> Self:
         """
         Similar to :meth:`ItemLoader.add_value` but receives a JMESPath selector
         instead of a value, which is used to extract a list of unicode strings
@@ -556,6 +580,9 @@ class ItemLoader:
         :param jmes: the JMESPath selector to extract data from
         :type jmes: str
 
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         Examples::
 
             # HTML snippet: {"name": "Color TV"}
@@ -564,7 +591,7 @@ class ItemLoader:
             loader.add_jmes('price', TakeFirst(), re='the price is (.*)')
         """
         values = self._get_jmesvalues(jmes)
-        self.add_value(field_name, values, *processors, re=re, **kw)
+        return self.add_value(field_name, values, *processors, re=re, **kw)
 
     def replace_jmes(
         self,
@@ -573,12 +600,15 @@ class ItemLoader:
         *processors: Callable[..., Any],
         re: Union[str, Pattern[str], None] = None,
         **kw: Any,
-    ) -> None:
+    ) -> Self:
         """
         Similar to :meth:`add_jmes` but replaces collected data instead of adding it.
+
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
         """
         values = self._get_jmesvalues(jmes)
-        self.replace_value(field_name, values, *processors, re=re, **kw)
+        return self.replace_value(field_name, values, *processors, re=re, **kw)
 
     def get_jmes(
         self,
