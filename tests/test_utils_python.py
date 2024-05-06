@@ -2,6 +2,7 @@ import functools
 import operator
 import platform
 import unittest
+from typing import Any
 
 from itemloaders.utils import get_func_args
 
@@ -18,7 +19,7 @@ class UtilsPythonTestCase(unittest.TestCase):
             pass
 
         class A:
-            def __init__(self, a, b, c):
+            def __init__(self, a: Any, b: Any, c: Any):
                 pass
 
             def method(self, a, b, c):

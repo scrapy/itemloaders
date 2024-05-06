@@ -4,24 +4,43 @@ Item Loader
 See documentation in docs/topics/loaders.rst
 """
 
+from __future__ import annotations
+
 from contextlib import suppress
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    MutableMapping,
+    Optional,
+    Pattern,
+    Union,
+)
 
 from itemadapter import ItemAdapter
+from parsel import Selector
 from parsel.utils import extract_regex, flatten
 
 from itemloaders.common import wrap_loader_context
 from itemloaders.processors import Identity
 from itemloaders.utils import arg_to_iter
 
+if TYPE_CHECKING:
+    # typing.Self requires Python 3.11
+    from typing_extensions import Self
 
-def unbound_method(method):
+
+def unbound_method(method: Callable[..., Any]) -> Callable[..., Any]:
     """
     Allow to use single-argument functions as input or output processors
     (no need to define an unused first 'self' argument)
     """
     with suppress(AttributeError):
         if "." not in method.__qualname__:
-            return method.__func__
+            return method.__func__  # type: ignore[attr-defined, no-any-return]
     return method
 
 
@@ -96,40 +115,46 @@ class ItemLoader:
     .. _parsel: https://parsel.readthedocs.io/en/latest/
     """
 
-    default_item_class = dict
-    default_input_processor = Identity()
-    default_output_processor = Identity()
+    default_item_class: type = dict
+    default_input_processor: Callable[..., Any] = Identity()
+    default_output_processor: Callable[..., Any] = Identity()
 
-    def __init__(self, item=None, selector=None, parent=None, **context):
-        self.selector = selector
+    def __init__(
+        self,
+        item: Any = None,
+        selector: Optional[Selector] = None,
+        parent: Optional[ItemLoader] = None,
+        **context: Any,
+    ):
+        self.selector: Optional[Selector] = selector
         context.update(selector=selector)
         if item is None:
             item = self.default_item_class()
         self._local_item = item
         context["item"] = item
-        self.context = context
-        self.parent = parent
-        self._local_values = {}
+        self.context: MutableMapping[str, Any] = context
+        self.parent: Optional[ItemLoader] = parent
+        self._local_values: Dict[str, List[Any]] = {}
         # values from initial item
         for field_name, value in ItemAdapter(item).items():
             self._values.setdefault(field_name, [])
             self._values[field_name] += arg_to_iter(value)
 
     @property
-    def _values(self):
+    def _values(self) -> Dict[str, List[Any]]:
         if self.parent is not None:
             return self.parent._values
         else:
             return self._local_values
 
     @property
-    def item(self):
+    def item(self) -> Any:
         if self.parent is not None:
             return self.parent.item
         else:
             return self._local_item
 
-    def nested_xpath(self, xpath, **context):
+    def nested_xpath(self, xpath: str, **context: Any) -> Self:
         """
         Create a nested loader with an xpath selector.
         The supplied selector is applied relative to selector associated
@@ -137,12 +162,14 @@ class ItemLoader:
         with the parent :class:`ItemLoader` so calls to :meth:`add_xpath`,
         :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
         """
+        self._check_selector_method()
+        assert self.selector
         selector = self.selector.xpath(xpath)
         context.update(selector=selector)
         subloader = self.__class__(item=self.item, parent=self, **context)
         return subloader
 
-    def nested_css(self, css, **context):
+    def nested_css(self, css: str, **context: Any) -> Self:
         """
         Create a nested loader with a css selector.
         The supplied selector is applied relative to selector associated
@@ -150,12 +177,21 @@ class ItemLoader:
         with the parent :class:`ItemLoader` so calls to :meth:`add_xpath`,
         :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
         """
+        self._check_selector_method()
+        assert self.selector
         selector = self.selector.css(css)
         context.update(selector=selector)
         subloader = self.__class__(item=self.item, parent=self, **context)
         return subloader
 
-    def add_value(self, field_name, value, *processors, re=None, **kw):
+    def add_value(
+        self,
+        field_name: Optional[str],
+        value: Any,
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> None:
         """
         Process and then add the given ``value`` for the given field.
 
@@ -186,7 +222,14 @@ class ItemLoader:
         else:
             self._add_value(field_name, value)
 
-    def replace_value(self, field_name, value, *processors, re=None, **kw):
+    def replace_value(
+        self,
+        field_name: Optional[str],
+        value: Any,
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> None:
         """
         Similar to :meth:`add_value` but replaces the collected data with the
         new value instead of adding it.
@@ -200,18 +243,24 @@ class ItemLoader:
         else:
             self._replace_value(field_name, value)
 
-    def _add_value(self, field_name, value):
+    def _add_value(self, field_name: str, value: Any) -> None:
         value = arg_to_iter(value)
         processed_value = self._process_input_value(field_name, value)
         if processed_value:
             self._values.setdefault(field_name, [])
             self._values[field_name] += arg_to_iter(processed_value)
 
-    def _replace_value(self, field_name, value):
+    def _replace_value(self, field_name: str, value: Any) -> None:
         self._values.pop(field_name, None)
         self._add_value(field_name, value)
 
-    def get_value(self, value, *processors, re=None, **kw):
+    def get_value(
+        self,
+        value: Any,
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> Any:
         """
         Process the given ``value`` by the given ``processors`` and keyword
         arguments.
@@ -221,7 +270,7 @@ class ItemLoader:
         :param re: a regular expression to use for extracting data from the
             given value using :func:`~parsel.utils.extract_regex` method,
             applied before processors
-        :type re: str or typing.Pattern
+        :type re: str or typing.Pattern[str]
 
         Examples:
 
@@ -249,7 +298,7 @@ class ItemLoader:
                 ) from e
         return value
 
-    def load_item(self):
+    def load_item(self) -> Any:
         """
         Populate the item with the data collected so far, and return it. The
         data collected is first passed through the :ref:`output processors
@@ -263,7 +312,7 @@ class ItemLoader:
 
         return adapter.item
 
-    def get_output_value(self, field_name):
+    def get_output_value(self, field_name: str) -> Any:
         """
         Return the collected values parsed using the output processor, for the
         given field. This method doesn't populate or modify the item at all.
@@ -279,11 +328,11 @@ class ItemLoader:
                 % (field_name, value, type(e).__name__, str(e))
             ) from e
 
-    def get_collected_values(self, field_name):
+    def get_collected_values(self, field_name: str) -> List[Any]:
         """Return the collected values for the given field."""
         return self._values.get(field_name, [])
 
-    def get_input_processor(self, field_name):
+    def get_input_processor(self, field_name: str) -> Callable[..., Any]:
         proc = getattr(self, "%s_in" % field_name, None)
         if not proc:
             proc = self._get_item_field_attr(
@@ -291,7 +340,7 @@ class ItemLoader:
             )
         return unbound_method(proc)
 
-    def get_output_processor(self, field_name):
+    def get_output_processor(self, field_name: str) -> Callable[..., Any]:
         proc = getattr(self, "%s_out" % field_name, None)
         if not proc:
             proc = self._get_item_field_attr(
@@ -299,11 +348,13 @@ class ItemLoader:
             )
         return unbound_method(proc)
 
-    def _get_item_field_attr(self, field_name, key, default=None):
+    def _get_item_field_attr(
+        self, field_name: str, key: Any, default: Any = None
+    ) -> Any:
         field_meta = ItemAdapter(self.item).get_field_meta(field_name)
         return field_meta.get(key, default)
 
-    def _process_input_value(self, field_name, value):
+    def _process_input_value(self, field_name: str, value: Any) -> Any:
         proc = self.get_input_processor(field_name)
         _proc = proc
         proc = wrap_loader_context(proc, self.context)
@@ -322,14 +373,21 @@ class ItemLoader:
                 )
             ) from e
 
-    def _check_selector_method(self):
+    def _check_selector_method(self) -> None:
         if self.selector is None:
             raise RuntimeError(
                 "To use XPath or CSS selectors, %s "
                 "must be instantiated with a selector" % self.__class__.__name__
             )
 
-    def add_xpath(self, field_name, xpath, *processors, re=None, **kw):
+    def add_xpath(
+        self,
+        field_name: Optional[str],
+        xpath: Union[str, Iterable[str]],
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> None:
         """
         Similar to :meth:`ItemLoader.add_value` but receives an XPath instead of a
         value, which is used to extract a list of strings from the
@@ -351,14 +409,27 @@ class ItemLoader:
         values = self._get_xpathvalues(xpath, **kw)
         self.add_value(field_name, values, *processors, re=re, **kw)
 
-    def replace_xpath(self, field_name, xpath, *processors, re=None, **kw):
+    def replace_xpath(
+        self,
+        field_name: Optional[str],
+        xpath: Union[str, Iterable[str]],
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> None:
         """
         Similar to :meth:`add_xpath` but replaces collected data instead of adding it.
         """
         values = self._get_xpathvalues(xpath, **kw)
         self.replace_value(field_name, values, *processors, re=re, **kw)
 
-    def get_xpath(self, xpath, *processors, re=None, **kw):
+    def get_xpath(
+        self,
+        xpath: Union[str, Iterable[str]],
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> Any:
         """
         Similar to :meth:`ItemLoader.get_value` but receives an XPath instead of a
         value, which is used to extract a list of unicode strings from the
@@ -369,7 +440,7 @@ class ItemLoader:
 
         :param re: a regular expression to use for extracting data from the
             selected XPath region
-        :type re: str or typing.Pattern
+        :type re: str or typing.Pattern[str]
 
         Examples::
 
@@ -382,12 +453,22 @@ class ItemLoader:
         values = self._get_xpathvalues(xpath, **kw)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_xpathvalues(self, xpaths, **kw):
+    def _get_xpathvalues(
+        self, xpaths: Union[str, Iterable[str]], **kw: Any
+    ) -> List[Any]:
         self._check_selector_method()
+        assert self.selector
         xpaths = arg_to_iter(xpaths)
         return flatten(self.selector.xpath(xpath, **kw).getall() for xpath in xpaths)
 
-    def add_css(self, field_name, css, *processors, re=None, **kw):
+    def add_css(
+        self,
+        field_name: Optional[str],
+        css: Union[str, Iterable[str]],
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> None:
         """
         Similar to :meth:`ItemLoader.add_value` but receives a CSS selector
         instead of a value, which is used to extract a list of unicode strings
@@ -408,14 +489,27 @@ class ItemLoader:
         values = self._get_cssvalues(css)
         self.add_value(field_name, values, *processors, re=re, **kw)
 
-    def replace_css(self, field_name, css, *processors, re=None, **kw):
+    def replace_css(
+        self,
+        field_name: Optional[str],
+        css: Union[str, Iterable[str]],
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> None:
         """
         Similar to :meth:`add_css` but replaces collected data instead of adding it.
         """
         values = self._get_cssvalues(css)
         self.replace_value(field_name, values, *processors, re=re, **kw)
 
-    def get_css(self, css, *processors, re=None, **kw):
+    def get_css(
+        self,
+        css: Union[str, Iterable[str]],
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> Any:
         """
         Similar to :meth:`ItemLoader.get_value` but receives a CSS selector
         instead of a value, which is used to extract a list of unicode strings
@@ -426,7 +520,7 @@ class ItemLoader:
 
         :param re: a regular expression to use for extracting data from the
             selected CSS region
-        :type re: str or typing.Pattern
+        :type re: str or typing.Pattern[str]
 
         Examples::
 
@@ -438,12 +532,20 @@ class ItemLoader:
         values = self._get_cssvalues(css)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_cssvalues(self, csss):
+    def _get_cssvalues(self, csss: Union[str, Iterable[str]]) -> List[Any]:
         self._check_selector_method()
+        assert self.selector
         csss = arg_to_iter(csss)
         return flatten(self.selector.css(css).getall() for css in csss)
 
-    def add_jmes(self, field_name, jmes, *processors, re=None, **kw):
+    def add_jmes(
+        self,
+        field_name: Optional[str],
+        jmes: str,
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> None:
         """
         Similar to :meth:`ItemLoader.add_value` but receives a JMESPath selector
         instead of a value, which is used to extract a list of unicode strings
@@ -464,14 +566,27 @@ class ItemLoader:
         values = self._get_jmesvalues(jmes)
         self.add_value(field_name, values, *processors, re=re, **kw)
 
-    def replace_jmes(self, field_name, jmes, *processors, re=None, **kw):
+    def replace_jmes(
+        self,
+        field_name: Optional[str],
+        jmes: Union[str, Iterable[str]],
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> None:
         """
         Similar to :meth:`add_jmes` but replaces collected data instead of adding it.
         """
         values = self._get_jmesvalues(jmes)
         self.replace_value(field_name, values, *processors, re=re, **kw)
 
-    def get_jmes(self, jmes, *processors, re=None, **kw):
+    def get_jmes(
+        self,
+        jmes: Union[str, Iterable[str]],
+        *processors: Callable[..., Any],
+        re: Union[str, Pattern[str], None] = None,
+        **kw: Any,
+    ) -> Any:
         """
         Similar to :meth:`ItemLoader.get_value` but receives a JMESPath selector
         instead of a value, which is used to extract a list of unicode strings
@@ -494,8 +609,9 @@ class ItemLoader:
         values = self._get_jmesvalues(jmes)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_jmesvalues(self, jmess):
+    def _get_jmesvalues(self, jmess: Union[str, Iterable[str]]) -> List[Any]:
         self._check_selector_method()
+        assert self.selector
         jmess = arg_to_iter(jmess)
         if not hasattr(self.selector, "jmespath"):
             raise AttributeError(

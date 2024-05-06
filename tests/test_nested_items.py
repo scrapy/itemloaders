@@ -1,4 +1,5 @@
 import unittest
+from typing import Any
 
 from itemloaders import ItemLoader
 
@@ -6,7 +7,7 @@ from itemloaders import ItemLoader
 class NestedItemTest(unittest.TestCase):
     """Test that adding items as values works as expected."""
 
-    def _test_item(self, item):
+    def _test_item(self, item: Any) -> None:
         il = ItemLoader()
         il.add_value("item_list", item)
         self.assertEqual(il.load_item(), {"item_list": [item]})
@@ -44,7 +45,8 @@ class NestedItemTest(unittest.TestCase):
         except ImportError:
             self.skipTest("Cannot import Field or Item from scrapy")
 
-        class TestItem(Item):
+        # needs py.typed in Scrapy
+        class TestItem(Item):  # type: ignore[misc]
             foo = Field()
 
         self._test_item(TestItem(foo="bar"))

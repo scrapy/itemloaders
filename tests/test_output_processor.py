@@ -1,4 +1,5 @@
 import unittest
+from typing import Any, Dict
 
 from itemloaders import ItemLoader
 from itemloaders.processors import Compose, Identity, TakeFirst
@@ -6,7 +7,7 @@ from itemloaders.processors import Compose, Identity, TakeFirst
 
 class TestOutputProcessorDict(unittest.TestCase):
     def test_output_processor(self):
-        class TempDict(dict):
+        class TempDict(Dict[str, Any]):
             def __init__(self, *args, **kwargs):
                 super(TempDict, self).__init__(self, *args, **kwargs)
                 self.setdefault("temp", 0.3)
@@ -28,7 +29,7 @@ class TestOutputProcessorItem(unittest.TestCase):
             default_input_processor = Identity()
             default_output_processor = Compose(TakeFirst())
 
-        item = {}
+        item: Dict[str, Any] = {}
         item.setdefault("temp", 0.3)
         loader = TempLoader(item=item)
         item = loader.load_item()

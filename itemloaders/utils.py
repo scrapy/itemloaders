@@ -5,10 +5,10 @@ Refactoring to come later
 
 import inspect
 from functools import partial
-from typing import Generator
+from typing import Any, Callable, Generator, Iterable, List
 
 
-def arg_to_iter(arg):
+def arg_to_iter(arg: Any) -> Iterable[Any]:
     """Return an iterable based on *arg*.
 
     If *arg* is a list, a tuple or a generator, it will be returned as is.
@@ -25,12 +25,12 @@ def arg_to_iter(arg):
     return [arg]
 
 
-def get_func_args(func, stripself=False):
+def get_func_args(func: Callable[..., Any], stripself: bool = False) -> List[str]:
     """Return the argument name list of a callable object"""
     if not callable(func):
         raise TypeError(f"func must be callable, got {type(func).__name__!r}")
 
-    args = []
+    args: List[str] = []
     try:
         sig = inspect.signature(func)
     except ValueError:
