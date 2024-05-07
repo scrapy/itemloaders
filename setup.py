@@ -18,6 +18,9 @@ setup(
     author_email="opensource@zyte.com",
     license="BSD",
     packages=find_packages(exclude=("tests", "tests.*")),
+    package_data={
+        "itemadapter": ["py.typed"],
+    },
     include_package_data=True,
     zip_safe=False,
     classifiers=[
