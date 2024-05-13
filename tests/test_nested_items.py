@@ -39,6 +39,13 @@ class NestedItemTest(unittest.TestCase):
     def test_dict(self):
         self._test_item({"foo": "bar"})
 
+    def test_set(self):
+        item = {"foo", "bar"}
+        il = ItemLoader()
+        il.add_value("item_list", item)
+
+        self.assertEqual(il.load_item(), {"item_list": list(item)})
+
     def test_scrapy_item(self):
         try:
             from scrapy import Field, Item
