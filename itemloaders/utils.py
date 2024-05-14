@@ -20,7 +20,7 @@ def arg_to_iter(arg: Any) -> Iterable[Any]:
     """
     if arg is None:
         return []
-    if isinstance(arg, (list, tuple, Generator)):
+    if isinstance(arg, (list, tuple, set, Generator)):
         return arg
     return [arg]
 
