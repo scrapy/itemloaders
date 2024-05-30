@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.3.0:
 
-itemloaders 1.3.0 (YYYY-MM-DD)
+itemloaders 1.3.0 (2024-05-30)
 ------------------------------
 
 -   Added support for method chaining to the ``add_*`` and ``replace_*``
