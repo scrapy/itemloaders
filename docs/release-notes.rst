@@ -5,6 +5,20 @@
 Release notes
 =============
 
+.. _release-1.3.0:
+
+itemloaders 1.3.0 (YYYY-MM-DD)
+------------------------------
+
+-   Added support for method chaining to the ``add_*`` and ``replace_*``
+    methods, so you can now write code such as
+    ``loader.add_xpath("name", "//body/text()").add_value("url", "http://example.com")``
+    (:gh:`81`)
+
+-   Added type hints and ``py.typed`` (:gh:`80`, :gh:`83`)
+
+-   Made the docs builds reproducible (:gh:`82`)
+
 .. _release-1.2.0:
 
 itemloaders 1.2.0 (2024-04-18)
