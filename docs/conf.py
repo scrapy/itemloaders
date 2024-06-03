@@ -230,5 +230,4 @@ intersphinx_mapping = {
     "parsel": ("https://parsel.readthedocs.io/en/stable/", None),
     "python": ("https://docs.python.org/3", None),
     "scrapy": ("https://docs.scrapy.org/en/latest/", None),
-    "w3lib": ("https://w3lib.readthedocs.io/en/latest", None),
 }

@@ -135,9 +135,9 @@ itemloaders 1.0.1 (2020-07-02)
 
 -   Lowered some minimum dependency versions (:gh:`10`):
 
-    -   :doc:`parsel <parsel:index>`: 1.5.2 → 1.5.0
+    -   ``parsel``: 1.5.2 → 1.5.0
 
-    -   :doc:`w3lib <w3lib:index>`: 1.21.0 → 1.17.0
+    -   ``w3lib``: 1.21.0 → 1.17.0
 
 -   Improved the README file (:gh:`9`)
 
