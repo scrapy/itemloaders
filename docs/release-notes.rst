@@ -5,6 +5,14 @@
 Release notes
 =============
 
+.. _release-1.3.1:
+
+itemloaders 1.3.1 (YYYY-MM-DD)
+------------------------------
+
+-   Fixed an error when using nested loaders with empty matches that was
+    introduced in 1.3.0 (:gh:`88`)
+
 .. _release-1.3.0:
 
 itemloaders 1.3.0 (2024-05-30)
