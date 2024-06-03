@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.3.1:
 
-itemloaders 1.3.1 (YYYY-MM-DD)
+itemloaders 1.3.1 (2024-06-03)
 ------------------------------
 
 -   Fixed an error when using nested loaders with empty matches that was
