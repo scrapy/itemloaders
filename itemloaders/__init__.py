@@ -163,7 +163,7 @@ class ItemLoader:
         :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
         """
         self._check_selector_method()
-        assert self.selector
+        assert self.selector is not None
         selector = self.selector.xpath(xpath)
         context.update(selector=selector)
         subloader = self.__class__(item=self.item, parent=self, **context)
@@ -178,7 +178,7 @@ class ItemLoader:
         :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
         """
         self._check_selector_method()
-        assert self.selector
+        assert self.selector is not None
         selector = self.selector.css(css)
         context.update(selector=selector)
         subloader = self.__class__(item=self.item, parent=self, **context)
@@ -473,7 +473,7 @@ class ItemLoader:
         self, xpaths: Union[str, Iterable[str]], **kw: Any
     ) -> List[Any]:
         self._check_selector_method()
-        assert self.selector
+        assert self.selector is not None
         xpaths = arg_to_iter(xpaths)
         return flatten(self.selector.xpath(xpath, **kw).getall() for xpath in xpaths)
 
@@ -558,7 +558,7 @@ class ItemLoader:
 
     def _get_cssvalues(self, csss: Union[str, Iterable[str]]) -> List[Any]:
         self._check_selector_method()
-        assert self.selector
+        assert self.selector is not None
         csss = arg_to_iter(csss)
         return flatten(self.selector.css(css).getall() for css in csss)
 
@@ -641,7 +641,7 @@ class ItemLoader:
 
     def _get_jmesvalues(self, jmess: Union[str, Iterable[str]]) -> List[Any]:
         self._check_selector_method()
-        assert self.selector
+        assert self.selector is not None
         jmess = arg_to_iter(jmess)
         if not hasattr(self.selector, "jmespath"):
             raise AttributeError(
