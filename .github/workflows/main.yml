@@ -48,10 +48,13 @@ jobs:
         - python-version: '3.12'
           env:
             TOXENV: py
+        - python-version: '3.13.0-rc.1'
+          env:
+            TOXENV: py
     steps:
       - uses: actions/checkout@v4
       - name: Install system libraries
-        if: contains(matrix.python-version, 'pypy')
+        if: contains(matrix.python-version, 'pypy') || contains(matrix.python-version, 'beta')
         run: |
           sudo apt-get update
           sudo apt-get install libxml2-dev libxslt-dev
