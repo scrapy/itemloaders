@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.3.2:
 
-itemloaders 1.3.2 (YYYY-MM-DD)
+itemloaders 1.3.2 (2024-09-30)
 ------------------------------
 
 -   Added official support for the upcoming Python 3.13 (:gh:`91`)
