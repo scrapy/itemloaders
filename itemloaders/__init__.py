@@ -219,7 +219,7 @@ class ItemLoader:
         """
         value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
-            return
+            return self
         if not field_name:
             for k, v in value.items():
                 self._add_value(k, v)
@@ -244,7 +244,7 @@ class ItemLoader:
         """
         value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
-            return
+            return self
         if not field_name:
             for k, v in value.items():
                 self._replace_value(k, v)
