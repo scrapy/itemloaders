@@ -5,6 +5,18 @@
 Release notes
 =============
 
+.. _release-1.3.2:
+
+itemloaders 1.3.2 (YYYY-MM-DD)
+------------------------------
+
+-   Added official support for the upcoming Python 3.13 (:gh:`91`)
+
+-   Removed ``w3lib`` from direct dependencies (it's not used directly but is
+    an indirect dependency via ``parsel``). (:gh:`90`)
+
+-   Improved CI (:gh:`92`)
+
 .. _release-1.3.1:
 
 itemloaders 1.3.1 (2024-06-03)
