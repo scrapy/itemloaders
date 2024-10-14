@@ -24,6 +24,9 @@ jobs:
         - python-version: '3.13'
           env:
             TOXENV: twinecheck
+        - python-version: '3.13'
+          env:
+            TOXENV: typing
         - python-version: 3.9
           env:
             TOXENV: py
