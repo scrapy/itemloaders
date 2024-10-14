@@ -14,8 +14,6 @@
 import sys
 from os import path
 
-import sphinx_rtd_theme
-
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
@@ -107,13 +105,6 @@ html_theme = "sphinx_rtd_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 # html_theme_options = {}
-
-# Add any paths that contain custom themes here, relative to this directory.
-# Add path to the RTD explicitly to robustify builds (otherwise might
-# fail in a clean Debian build env)
-
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
 
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths
