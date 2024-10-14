@@ -159,6 +159,7 @@ class TakeFirst:
         for value in values:
             if value is not None and value != "":
                 return value
+        return None
 
 
 class Identity:

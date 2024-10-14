@@ -18,8 +18,8 @@ class SelectJmesTestCase(unittest.TestCase):
     }
 
     def test_output(self):
-        for key in self.test_list_equals:
-            expr, test_list, expected = self.test_list_equals[key]
+        for key, value in self.test_list_equals.items():
+            expr, test_list, expected = value
             test = SelectJmes(expr)(test_list)
             self.assertEqual(
                 test, expected, msg=f"test {key!r} got {test} expected {expected}"

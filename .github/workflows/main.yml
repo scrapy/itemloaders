@@ -23,6 +23,9 @@ jobs:
             TOXENV: docs
         - python-version: '3.13'
           env:
+            TOXENV: pylint
+        - python-version: '3.13'
+          env:
             TOXENV: twinecheck
         - python-version: '3.13'
           env:
