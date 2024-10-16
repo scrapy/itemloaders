@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-with open("README.rst") as f:
+with open("README.rst", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
@@ -30,7 +30,6 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
@@ -39,7 +38,7 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=[
         # before updating these versions, be sure they are not higher than
         # scrapy's requirements

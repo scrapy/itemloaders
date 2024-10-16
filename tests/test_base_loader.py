@@ -41,6 +41,7 @@ class BasicItemLoaderTest(unittest.TestCase):
             # Let's assume a SKU is only digits.
             if value.isdigit():
                 return value
+            return None
 
         class MyLoader(ItemLoader):
             name_out = Compose(lambda vs: vs[0])  # take first which allows empty values
@@ -278,10 +279,11 @@ class BasicItemLoaderTest(unittest.TestCase):
 
         il = CustomItemLoader()
         il.add_value("name", ["$10"])
+        expected_exc = None
         try:
             float("$10")
         except Exception as e:
-            expected_exc_str = str(e)
+            expected_exc = e
 
         exc = None
         try:
@@ -293,7 +295,7 @@ class BasicItemLoaderTest(unittest.TestCase):
         assert "name" in s, s
         assert "$10" in s, s
         assert "ValueError" in s, s
-        assert expected_exc_str in s, s
+        assert str(expected_exc) in s, s
 
     def test_output_processor_using_classes(self):
         il = CustomItemLoader()

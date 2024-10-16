@@ -9,7 +9,7 @@ class TestOutputProcessorDict(unittest.TestCase):
     def test_output_processor(self):
         class TempDict(Dict[str, Any]):
             def __init__(self, *args, **kwargs):
-                super(TempDict, self).__init__(self, *args, **kwargs)
+                super().__init__(*args, **kwargs)
                 self.setdefault("temp", 0.3)
 
         class TempLoader(ItemLoader):
