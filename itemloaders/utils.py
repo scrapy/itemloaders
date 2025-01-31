@@ -3,9 +3,12 @@ Copy/paste from scrapy source at the moment, to ensure tests are working.
 Refactoring to come later
 """
 
+from __future__ import annotations
+
 import inspect
+from collections.abc import Generator, Iterable
 from functools import partial
-from typing import Any, Callable, Generator, Iterable, List
+from typing import Any, Callable
 
 
 def arg_to_iter(arg: Any) -> Iterable[Any]:
@@ -25,12 +28,12 @@ def arg_to_iter(arg: Any) -> Iterable[Any]:
     return [arg]
 
 
-def get_func_args(func: Callable[..., Any], stripself: bool = False) -> List[str]:
+def get_func_args(func: Callable[..., Any], stripself: bool = False) -> list[str]:
     """Return the argument name list of a callable object"""
     if not callable(func):
         raise TypeError(f"func must be callable, got {type(func).__name__!r}")
 
-    args: List[str] = []
+    args: list[str] = []
     try:
         sig = inspect.signature(func)
     except ValueError:
