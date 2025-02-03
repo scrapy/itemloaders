@@ -6,19 +6,10 @@ See documentation in docs/topics/loaders.rst
 
 from __future__ import annotations
 
+from collections.abc import Iterable, MutableMapping
 from contextlib import suppress
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    MutableMapping,
-    Optional,
-    Pattern,
-    Union,
-)
+from re import Pattern
+from typing import TYPE_CHECKING, Any, Callable
 
 from itemadapter import ItemAdapter
 from parsel import Selector
@@ -122,26 +113,26 @@ class ItemLoader:
     def __init__(
         self,
         item: Any = None,
-        selector: Optional[Selector] = None,
-        parent: Optional[ItemLoader] = None,
+        selector: Selector | None = None,
+        parent: ItemLoader | None = None,
         **context: Any,
     ):
-        self.selector: Optional[Selector] = selector
+        self.selector: Selector | None = selector
         context.update(selector=selector)
         if item is None:
             item = self.default_item_class()
         self._local_item = item
         context["item"] = item
         self.context: MutableMapping[str, Any] = context
-        self.parent: Optional[ItemLoader] = parent
-        self._local_values: Dict[str, List[Any]] = {}
+        self.parent: ItemLoader | None = parent
+        self._local_values: dict[str, list[Any]] = {}
         # values from initial item
         for field_name, value in ItemAdapter(item).items():
             self._values.setdefault(field_name, [])
             self._values[field_name] += arg_to_iter(value)
 
     @property
-    def _values(self) -> Dict[str, List[Any]]:
+    def _values(self) -> dict[str, list[Any]]:
         if self.parent is not None:
             return self.parent._values
         else:
@@ -186,10 +177,10 @@ class ItemLoader:
 
     def add_value(
         self,
-        field_name: Optional[str],
+        field_name: str | None,
         value: Any,
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Self:
         """
@@ -229,10 +220,10 @@ class ItemLoader:
 
     def replace_value(
         self,
-        field_name: Optional[str],
+        field_name: str | None,
         value: Any,
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Self:
         """
@@ -267,7 +258,7 @@ class ItemLoader:
         self,
         value: Any,
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Any:
         """
@@ -337,7 +328,7 @@ class ItemLoader:
                 % (field_name, value, type(e).__name__, str(e))
             ) from e
 
-    def get_collected_values(self, field_name: str) -> List[Any]:
+    def get_collected_values(self, field_name: str) -> list[Any]:
         """Return the collected values for the given field."""
         return self._values.get(field_name, [])
 
@@ -391,10 +382,10 @@ class ItemLoader:
 
     def add_xpath(
         self,
-        field_name: Optional[str],
-        xpath: Union[str, Iterable[str]],
+        field_name: str | None,
+        xpath: str | Iterable[str],
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Self:
         """
@@ -423,10 +414,10 @@ class ItemLoader:
 
     def replace_xpath(
         self,
-        field_name: Optional[str],
-        xpath: Union[str, Iterable[str]],
+        field_name: str | None,
+        xpath: str | Iterable[str],
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Self:
         """
@@ -441,9 +432,9 @@ class ItemLoader:
 
     def get_xpath(
         self,
-        xpath: Union[str, Iterable[str]],
+        xpath: str | Iterable[str],
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Any:
         """
@@ -469,9 +460,7 @@ class ItemLoader:
         values = self._get_xpathvalues(xpath, **kw)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_xpathvalues(
-        self, xpaths: Union[str, Iterable[str]], **kw: Any
-    ) -> List[Any]:
+    def _get_xpathvalues(self, xpaths: str | Iterable[str], **kw: Any) -> list[Any]:
         self._check_selector_method()
         assert self.selector is not None
         xpaths = arg_to_iter(xpaths)
@@ -479,10 +468,10 @@ class ItemLoader:
 
     def add_css(
         self,
-        field_name: Optional[str],
-        css: Union[str, Iterable[str]],
+        field_name: str | None,
+        css: str | Iterable[str],
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Self:
         """
@@ -511,10 +500,10 @@ class ItemLoader:
 
     def replace_css(
         self,
-        field_name: Optional[str],
-        css: Union[str, Iterable[str]],
+        field_name: str | None,
+        css: str | Iterable[str],
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Self:
         """
@@ -529,9 +518,9 @@ class ItemLoader:
 
     def get_css(
         self,
-        css: Union[str, Iterable[str]],
+        css: str | Iterable[str],
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Any:
         """
@@ -556,7 +545,7 @@ class ItemLoader:
         values = self._get_cssvalues(css)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_cssvalues(self, csss: Union[str, Iterable[str]]) -> List[Any]:
+    def _get_cssvalues(self, csss: str | Iterable[str]) -> list[Any]:
         self._check_selector_method()
         assert self.selector is not None
         csss = arg_to_iter(csss)
@@ -564,10 +553,10 @@ class ItemLoader:
 
     def add_jmes(
         self,
-        field_name: Optional[str],
+        field_name: str | None,
         jmes: str,
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Self:
         """
@@ -595,10 +584,10 @@ class ItemLoader:
 
     def replace_jmes(
         self,
-        field_name: Optional[str],
-        jmes: Union[str, Iterable[str]],
+        field_name: str | None,
+        jmes: str | Iterable[str],
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Self:
         """
@@ -612,9 +601,9 @@ class ItemLoader:
 
     def get_jmes(
         self,
-        jmes: Union[str, Iterable[str]],
+        jmes: str | Iterable[str],
         *processors: Callable[..., Any],
-        re: Union[str, Pattern[str], None] = None,
+        re: str | Pattern[str] | None = None,
         **kw: Any,
     ) -> Any:
         """
@@ -639,7 +628,7 @@ class ItemLoader:
         values = self._get_jmesvalues(jmes)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_jmesvalues(self, jmess: Union[str, Iterable[str]]) -> List[Any]:
+    def _get_jmesvalues(self, jmess: str | Iterable[str]) -> list[Any]:
         self._check_selector_method()
         assert self.selector is not None
         jmess = arg_to_iter(jmess)

@@ -4,8 +4,11 @@ This module provides some commonly used processors for Item Loaders.
 See documentation in docs/topics/loaders.rst
 """
 
+from __future__ import annotations
+
 from collections import ChainMap
-from typing import Any, Callable, Iterable, List, MutableMapping, Optional
+from collections.abc import Iterable, MutableMapping
+from typing import Any, Callable
 
 from itemloaders.common import wrap_loader_context
 from itemloaders.utils import arg_to_iter
@@ -60,7 +63,7 @@ class MapCompose:
         self.default_loader_context = default_loader_context
 
     def __call__(
-        self, value: Any, loader_context: Optional[MutableMapping[str, Any]] = None
+        self, value: Any, loader_context: MutableMapping[str, Any] | None = None
     ) -> Iterable[Any]:
         values = arg_to_iter(value)
         context: MutableMapping[str, Any]
@@ -70,7 +73,7 @@ class MapCompose:
             context = self.default_loader_context
         wrapped_funcs = [wrap_loader_context(f, context) for f in self.functions]
         for func in wrapped_funcs:
-            next_values: List[Any] = []
+            next_values: list[Any] = []
             for v in values:
                 try:
                     next_values += arg_to_iter(func(v))
@@ -119,7 +122,7 @@ class Compose:
         self.default_loader_context = default_loader_context
 
     def __call__(
-        self, value: Any, loader_context: Optional[MutableMapping[str, Any]] = None
+        self, value: Any, loader_context: MutableMapping[str, Any] | None = None
     ) -> Any:
         context: MutableMapping[str, Any]
         if loader_context:

@@ -70,4 +70,4 @@ jobs:
         env: ${{ matrix.env }}
         run: tox
       - name: Publish coverage data
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v5

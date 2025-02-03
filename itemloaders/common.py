@@ -1,7 +1,10 @@
 """Common functions used in Item Loaders code"""
 
+from __future__ import annotations
+
+from collections.abc import MutableMapping
 from functools import partial
-from typing import Any, Callable, MutableMapping
+from typing import Any, Callable
 
 from itemloaders.utils import get_func_args
 
