@@ -47,8 +47,7 @@ class NestedItemTest(unittest.TestCase):
         except ImportError:
             self.skipTest("Cannot import Field or Item from scrapy")
 
-        # needs py.typed in Scrapy
-        class TestItem(Item):  # type: ignore[misc]
+        class TestItem(Item):
             foo = Field()
 
         self._test_item(TestItem(foo="bar"))
