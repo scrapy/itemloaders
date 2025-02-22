@@ -6,6 +6,14 @@ tag = true
 [[tool.bumpversion.files]]
 filename = "setup.py"
 
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+]
+
 [[tool.mypy.overrides]]
 # Allow test functions to be untyped
 module = "tests.*"
