@@ -6,13 +6,11 @@ See documentation in docs/topics/loaders.rst
 
 from __future__ import annotations
 
-from collections.abc import Iterable, MutableMapping
 from contextlib import suppress
-from re import Pattern
 from typing import TYPE_CHECKING, Any, Callable
 
 from itemadapter import ItemAdapter
-from parsel import Selector
+from parsel import Selector  # noqa: TC002  # for sphinx
 from parsel.utils import extract_regex, flatten
 
 from itemloaders.common import wrap_loader_context
@@ -20,6 +18,9 @@ from itemloaders.processors import Identity
 from itemloaders.utils import arg_to_iter
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, MutableMapping
+    from re import Pattern
+
     # typing.Self requires Python 3.11
     from typing_extensions import Self
 
@@ -135,15 +136,13 @@ class ItemLoader:
     def _values(self) -> dict[str, list[Any]]:
         if self.parent is not None:
             return self.parent._values
-        else:
-            return self._local_values
+        return self._local_values
 
     @property
     def item(self) -> Any:
         if self.parent is not None:
             return self.parent.item
-        else:
-            return self._local_item
+        return self._local_item
 
     def nested_xpath(self, xpath: str, **context: Any) -> Self:
         """
@@ -157,8 +156,7 @@ class ItemLoader:
         assert self.selector is not None
         selector = self.selector.xpath(xpath)
         context.update(selector=selector)
-        subloader = self.__class__(item=self.item, parent=self, **context)
-        return subloader
+        return self.__class__(item=self.item, parent=self, **context)
 
     def nested_css(self, css: str, **context: Any) -> Self:
         """
@@ -172,8 +170,7 @@ class ItemLoader:
         assert self.selector is not None
         selector = self.selector.css(css)
         context.update(selector=selector)
-        subloader = self.__class__(item=self.item, parent=self, **context)
-        return subloader
+        return self.__class__(item=self.item, parent=self, **context)
 
     def add_value(
         self,
@@ -288,13 +285,13 @@ class ItemLoader:
             if value is None:
                 break
             _proc = proc
-            proc = wrap_loader_context(proc, self.context)
+            proc = wrap_loader_context(proc, self.context)  # noqa: PLW2901
             try:
                 value = proc(value)
             except Exception as e:
                 raise ValueError(
-                    "Error with processor %s value=%r error='%s: %s'"
-                    % (_proc.__class__.__name__, value, type(e).__name__, str(e))
+                    f"Error with processor {_proc.__class__.__name__} "
+                    f"value={value!r} error='{type(e).__name__}: {e!s}'"
                 ) from e
         return value
 
@@ -324,8 +321,8 @@ class ItemLoader:
             return proc(value)
         except Exception as e:
             raise ValueError(
-                "Error with output processor: field=%r value=%r error='%s: %s'"
-                % (field_name, value, type(e).__name__, str(e))
+                f"Error with output processor: field={field_name!r} "
+                f"value={value!r} error='{type(e).__name__}: {e!s}'"
             ) from e
 
     def get_collected_values(self, field_name: str) -> list[Any]:
@@ -333,7 +330,7 @@ class ItemLoader:
         return self._values.get(field_name, [])
 
     def get_input_processor(self, field_name: str) -> Callable[..., Any]:
-        proc = getattr(self, "%s_in" % field_name, None)
+        proc = getattr(self, f"{field_name}_in", None)
         if not proc:
             proc = self._get_item_field_attr(
                 field_name, "input_processor", self.default_input_processor
@@ -341,7 +338,7 @@ class ItemLoader:
         return unbound_method(proc)
 
     def get_output_processor(self, field_name: str) -> Callable[..., Any]:
-        proc = getattr(self, "%s_out" % field_name, None)
+        proc = getattr(self, f"{field_name}_out", None)
         if not proc:
             proc = self._get_item_field_attr(
                 field_name, "output_processor", self.default_output_processor
@@ -362,22 +359,15 @@ class ItemLoader:
             return proc(value)
         except Exception as e:
             raise ValueError(
-                "Error with input processor %s: field=%r value=%r "
-                "error='%s: %s'"
-                % (
-                    _proc.__class__.__name__,
-                    field_name,
-                    value,
-                    type(e).__name__,
-                    str(e),
-                )
+                f"Error with input processor {_proc.__class__.__name__}:"
+                f" field={field_name!r} value={value!r} error='{type(e).__name__}: {e!s}'"
             ) from e
 
     def _check_selector_method(self) -> None:
         if self.selector is None:
             raise RuntimeError(
-                "To use XPath or CSS selectors, %s "
-                "must be instantiated with a selector" % self.__class__.__name__
+                f"To use XPath or CSS selectors, {self.__class__.__name__} "
+                f"must be instantiated with a selector"
             )
 
     def add_xpath(

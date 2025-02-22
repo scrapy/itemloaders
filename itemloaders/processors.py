@@ -7,11 +7,13 @@ See documentation in docs/topics/loaders.rst
 from __future__ import annotations
 
 from collections import ChainMap
-from collections.abc import Iterable, MutableMapping
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from itemloaders.common import wrap_loader_context
 from itemloaders.utils import arg_to_iter
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, MutableMapping
 
 
 class MapCompose:
@@ -56,7 +58,7 @@ class MapCompose:
     See :class:`Compose` processor for more info.
 
     .. _`parsel selectors`: https://parsel.readthedocs.io/en/latest/parsel.html#parsel.selector.Selector.extract
-    """  # noqa
+    """
 
     def __init__(self, *functions: Callable[..., Any], **default_loader_context: Any):
         self.functions = functions
@@ -79,9 +81,8 @@ class MapCompose:
                     next_values += arg_to_iter(func(v))
                 except Exception as e:
                     raise ValueError(
-                        "Error in MapCompose with "
-                        "%s value=%r error='%s: %s'"
-                        % (str(func), value, type(e).__name__, str(e))
+                        f"Error in MapCompose with "
+                        f"{func!s} value={value!r} error='{type(e).__name__}: {e!s}'"
                     ) from e
             values = next_values
         return values
@@ -137,9 +138,8 @@ class Compose:
                 value = func(value)
             except Exception as e:
                 raise ValueError(
-                    "Error in Compose with "
-                    "%s value=%r error='%s: %s'"
-                    % (str(func), value, type(e).__name__, str(e))
+                    f"Error in Compose with "
+                    f"{func!s} value={value!r} error='{type(e).__name__}: {e!s}'"
                 ) from e
         return value
 

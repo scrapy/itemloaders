@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 from docutils import nodes
 from docutils.parsers.rst.roles import set_classes
@@ -14,11 +14,10 @@ def github_role(
     text,
     lineno,
     inliner,
-    options: Optional[dict] = None,
-    content: Optional[list] = None,
+    options: dict[str, str] | None = None,
+    content=None,
 ):
     options = options or {}
-    content = content or []
     if text.isdigit():
         display_text = f"#{text}"
         url = f"https://github.com/scrapy/itemloaders/issues/{text}"

@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import MutableMapping
 from functools import partial
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from itemloaders.utils import get_func_args
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping
 
 
 def wrap_loader_context(
@@ -17,5 +19,4 @@ def wrap_loader_context(
     """
     if "loader_context" in get_func_args(function):
         return partial(function, loader_context=context)
-    else:
-        return function
+    return function
