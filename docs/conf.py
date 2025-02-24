@@ -11,13 +11,13 @@
 # serve to show the default.
 
 import sys
-from os import path
+from pathlib import Path
 
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
-sys.path.append(path.dirname(__file__))
-sys.path.insert(0, path.dirname(path.dirname(__file__)))
+sys.path.append(str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # General configuration
 # ---------------------
