@@ -10,8 +10,8 @@ itemloaders
    :target: https://pypi.python.org/pypi/itemloaders
    :alt: Supported Python Versions
 
-.. image:: https://github.com/scrapy/itemloaders/workflows/CI/badge.svg?branch=master
-   :target: https://github.com/scrapy/itemloaders/actions?workflow=CI
+.. image:: https://github.com/scrapy/itemloaders/actions/workflows/tests-ubuntu.yml/badge.svg
+   :target: https://github.com/scrapy/itemloaders/actions/workflows/tests-ubuntu.yml
    :alt: CI Status
 
 .. image:: https://codecov.io/github/scrapy/itemloaders/coverage.svg?branch=master
