@@ -16,6 +16,8 @@ def arg_to_iter(arg: Any) -> Iterable[Any]:
 
     If *arg* is a list, a tuple or a generator, it will be returned as is.
 
+    If *arg* is a set, it will be casted to a list.
+
     If *arg* is ``None``, an empty list will be returned.
 
     If *arg* is anything else, a list will be returned with *arg* as its only
@@ -25,6 +27,8 @@ def arg_to_iter(arg: Any) -> Iterable[Any]:
         return []
     if isinstance(arg, (list, tuple, Generator)):
         return arg
+    if isinstance(arg, set):
+        return list(arg)
     return [arg]
 
 
