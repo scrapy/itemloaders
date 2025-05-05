@@ -36,6 +36,9 @@ jobs:
         - python-version: pypy-3.10
           env:
             TOXENV: py
+        - python-version: pypy-3.11
+          env:
+            TOXENV: py
         - python-version: 3.9
           env:
             TOXENV: extra-deps
