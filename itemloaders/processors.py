@@ -211,7 +211,7 @@ class SelectJmes:
 
     def __init__(self, json_path: str):
         self.json_path: str = json_path
-        import jmespath.parser
+        import jmespath.parser  # noqa: PLC0415
 
         self.compiled_path: jmespath.parser.ParsedResult = jmespath.compile(
             self.json_path
