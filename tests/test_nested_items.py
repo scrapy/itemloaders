@@ -16,7 +16,7 @@ class NestedItemTest(unittest.TestCase):
 
     def test_attrs(self):
         try:
-            import attr
+            import attr  # noqa: PLC0415
         except ImportError:
             self.skipTest("Cannot import attr")
 
@@ -28,7 +28,7 @@ class NestedItemTest(unittest.TestCase):
 
     def test_dataclass(self):
         try:
-            from dataclasses import dataclass
+            from dataclasses import dataclass  # noqa: PLC0415
         except ImportError:
             self.skipTest("Cannot import dataclasses.dataclass")
 
@@ -43,7 +43,7 @@ class NestedItemTest(unittest.TestCase):
 
     def test_scrapy_item(self):
         try:
-            from scrapy import Field, Item
+            from scrapy import Field, Item  # noqa: PLC0415
         except ImportError:
             self.skipTest("Cannot import Field or Item from scrapy")
 
