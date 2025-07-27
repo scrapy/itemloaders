@@ -414,7 +414,12 @@ class TestItemLoaderBasic:
             name_in = MapCompose(float)
 
         il = CustomItemLoader()
-        with pytest.raises(ValueError, match="could not convert string to float"):
+        with pytest.raises(
+            ValueError,
+            match="Error with input processor MapCompose: .* "
+            "error='ValueError: Error in MapCompose .* "
+            "error='ValueError: could not convert",
+        ):
             il.add_value("name", ["marta", "other"])
 
     def test_error_output_processor(self):
@@ -423,14 +428,21 @@ class TestItemLoaderBasic:
 
         il = CustomItemLoader()
         il.add_value("name", "marta")
-        with pytest.raises(ValueError, match="could not convert string to float"):
+        with pytest.raises(
+            ValueError,
+            match="Error with output processor: .* "
+            "error='ValueError: Error in Compose .* "
+            "error='ValueError: could not convert",
+        ):
             il.load_item()
 
     def test_error_processor_as_argument(self):
         il = CustomItemLoader()
         with pytest.raises(
             ValueError,
-            match=r"float\(\) argument must be a string or a real number, not 'list'",
+            match=r"Error with processor Compose .* "
+            r"error='ValueError: Error in Compose .* "
+            r"error='TypeError: float\(\) argument",
         ):
             il.add_value("name", ["marta", "other"], Compose(float))
 
