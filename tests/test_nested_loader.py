@@ -1,11 +1,9 @@
-import unittest
-
 from parsel import Selector
 
 from itemloaders import ItemLoader
 
 
-class SubselectorLoaderTest(unittest.TestCase):
+class TestSubselectorLoader:
     selector = Selector(
         text="""
     <html>
@@ -31,18 +29,14 @@ class SubselectorLoaderTest(unittest.TestCase):
         assert nl.selector
         nl.add_value("name_value", nl.selector.xpath('div[@id = "id"]/text()').getall())
 
-        self.assertEqual(loader.get_output_value("name"), ["marta"])
-        self.assertEqual(
-            loader.get_output_value("name_div"), ['<div id="id">marta</div>']
-        )
-        self.assertEqual(loader.get_output_value("name_value"), ["marta"])
+        assert loader.get_output_value("name") == ["marta"]
+        assert loader.get_output_value("name_div") == ['<div id="id">marta</div>']
+        assert loader.get_output_value("name_value") == ["marta"]
 
-        self.assertEqual(loader.get_output_value("name"), nl.get_output_value("name"))
-        self.assertEqual(
-            loader.get_output_value("name_div"), nl.get_output_value("name_div")
-        )
-        self.assertEqual(
-            loader.get_output_value("name_value"), nl.get_output_value("name_value")
+        assert loader.get_output_value("name") == nl.get_output_value("name")
+        assert loader.get_output_value("name_div") == nl.get_output_value("name_div")
+        assert loader.get_output_value("name_value") == nl.get_output_value(
+            "name_value"
         )
 
     def test_nested_css(self):
@@ -53,18 +47,14 @@ class SubselectorLoaderTest(unittest.TestCase):
         assert nl.selector
         nl.add_value("name_value", nl.selector.xpath('div[@id = "id"]/text()').getall())
 
-        self.assertEqual(loader.get_output_value("name"), ["marta"])
-        self.assertEqual(
-            loader.get_output_value("name_div"), ['<div id="id">marta</div>']
-        )
-        self.assertEqual(loader.get_output_value("name_value"), ["marta"])
+        assert loader.get_output_value("name") == ["marta"]
+        assert loader.get_output_value("name_div") == ['<div id="id">marta</div>']
+        assert loader.get_output_value("name_value") == ["marta"]
 
-        self.assertEqual(loader.get_output_value("name"), nl.get_output_value("name"))
-        self.assertEqual(
-            loader.get_output_value("name_div"), nl.get_output_value("name_div")
-        )
-        self.assertEqual(
-            loader.get_output_value("name_value"), nl.get_output_value("name_value")
+        assert loader.get_output_value("name") == nl.get_output_value("name")
+        assert loader.get_output_value("name_div") == nl.get_output_value("name_div")
+        assert loader.get_output_value("name_value") == nl.get_output_value(
+            "name_value"
         )
 
     def test_nested_replace(self):
@@ -73,11 +63,11 @@ class SubselectorLoaderTest(unittest.TestCase):
         nl2 = nl1.nested_xpath("a")
 
         loader.add_xpath("url", "//footer/a/@href")
-        self.assertEqual(loader.get_output_value("url"), ["http://www.scrapy.org"])
+        assert loader.get_output_value("url") == ["http://www.scrapy.org"]
         nl1.replace_xpath("url", "img/@src")
-        self.assertEqual(loader.get_output_value("url"), ["/images/logo.png"])
+        assert loader.get_output_value("url") == ["/images/logo.png"]
         nl2.replace_xpath("url", "@href")
-        self.assertEqual(loader.get_output_value("url"), ["http://www.scrapy.org"])
+        assert loader.get_output_value("url") == ["http://www.scrapy.org"]
 
     def test_nested_ordering(self):
         loader = ItemLoader(selector=self.selector)
@@ -89,15 +79,12 @@ class SubselectorLoaderTest(unittest.TestCase):
         nl2.add_xpath("url", "text()")
         loader.add_xpath("url", "//footer/a/@href")
 
-        self.assertEqual(
-            loader.get_output_value("url"),
-            [
-                "/images/logo.png",
-                "http://www.scrapy.org",
-                "homepage",
-                "http://www.scrapy.org",
-            ],
-        )
+        assert loader.get_output_value("url") == [
+            "/images/logo.png",
+            "http://www.scrapy.org",
+            "homepage",
+            "http://www.scrapy.org",
+        ]
 
     def test_nested_load_item(self):
         loader = ItemLoader(selector=self.selector)
@@ -114,9 +101,9 @@ class SubselectorLoaderTest(unittest.TestCase):
         assert item is nl1.item
         assert item is nl2.item
 
-        self.assertEqual(item["name"], ["marta"])
-        self.assertEqual(item["url"], ["http://www.scrapy.org"])
-        self.assertEqual(item["image"], ["/images/logo.png"])
+        assert item["name"] == ["marta"]
+        assert item["url"] == ["http://www.scrapy.org"]
+        assert item["image"] == ["/images/logo.png"]
 
     def test_nested_empty_selector(self):
         loader = ItemLoader(selector=self.selector)
