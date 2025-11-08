@@ -59,16 +59,13 @@ tag = true
 [tool.coverage.run]
 branch = true
 
-[tool.coverage.report]
-exclude_also = [
-    "if TYPE_CHECKING:",
-]
+[tool.mypy]
+strict = true
 
 [[tool.mypy.overrides]]
 # Allow test functions to be untyped
 module = "tests.*"
 allow_untyped_defs = true
-check_untyped_defs = true
 
 [tool.pylint.MASTER]
 persistent = "no"
@@ -226,8 +223,6 @@ ignore = [
     "RUF012",
     # Use of `assert` detected
     "S101",
-
-    "UP038",
 ]
 
 [tool.ruff.lint.isort]
