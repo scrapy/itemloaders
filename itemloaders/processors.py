@@ -7,13 +7,13 @@ See documentation in docs/topics/loaders.rst
 from __future__ import annotations
 
 from collections import ChainMap
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from itemloaders.common import wrap_loader_context
 from itemloaders.utils import arg_to_iter
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, MutableMapping
+    from collections.abc import Callable, Iterable, MutableMapping
 
 
 class MapCompose:
