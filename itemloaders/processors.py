@@ -1,7 +1,7 @@
 """
 This module provides some commonly used processors for Item Loaders.
 
-See documentation in docs/topics/loaders.rst
+See documentation in :ref:`declaring-loaders`.
 """
 
 from __future__ import annotations
@@ -185,9 +185,13 @@ class Identity:
 
 class SelectJmes:
     """
-    Query the input string for the jmespath (given at instantiation), and return the answer
-    Requires : jmespath(https://github.com/jmespath/jmespath)
-    Note: SelectJmes accepts only one input element at a time.
+    Query the input string for a *JMESPath* expression (given at instantiation), and return the answer.
+
+    *Requires*: `JMESPath <https://github.com/jmespath/jmespath>`__
+
+    .. note::
+
+        ``SelectJmes`` accepts only one input element at a time.
 
     Example:
 
@@ -198,7 +202,7 @@ class SelectJmes:
     >>> proc({'foo': {'bar': 'baz'}})
     {'bar': 'baz'}
 
-    Working with Json:
+    Working with JSON:
 
     >>> import json
     >>> proc_single_json_str = Compose(json.loads, SelectJmes("foo"))
@@ -218,9 +222,9 @@ class SelectJmes:
         )
 
     def __call__(self, value: Any) -> Any:
-        """Query value for the jmespath query and return answer
+        """Query value for the JMESPath query and return answer
         :param value: a data structure (dict, list) to extract from
-        :return: Element extracted according to jmespath query
+        :return: Element extracted according to JMESPath query
         """
         return self.compiled_path.search(value)
 
