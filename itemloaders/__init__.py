@@ -1,7 +1,7 @@
 """
 Item Loader
 
-See documentation in docs/topics/loaders.rst
+See documentation in :ref:`declaring-loaders`.
 """
 
 from __future__ import annotations
@@ -624,6 +624,6 @@ class ItemLoader:
         jmess = arg_to_iter(jmess)
         if not hasattr(self.selector, "jmespath"):
             raise AttributeError(
-                "Please install parsel >= 1.8.1 to get jmespath support"
+                "Please install parsel >= 1.8.1 to get JMESPath support"
             )
         return flatten(self.selector.jmespath(jmes).getall() for jmes in jmess)

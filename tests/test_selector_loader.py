@@ -211,7 +211,7 @@ class TestSelectorItemLoader:
             loader.add_jmes("name", "name", re="ma")
 
         assert (
-            str(err.value) == "Please install parsel >= 1.8.1 to get jmespath support"
+            str(err.value) == "Please install parsel >= 1.8.1 to get JMESPath support"
         )
 
     def test_add_jmes_re(self):
