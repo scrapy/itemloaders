@@ -416,9 +416,9 @@ class TestItemLoaderBasic:
         il = CustomItemLoader()
         with pytest.raises(
             ValueError,
-            match="Error with input processor MapCompose: .* "
-            "error='ValueError: Error in MapCompose .* "
-            "error='ValueError: could not convert",
+            match=r"Error with input processor MapCompose: .* "
+            r"error='ValueError: Error in MapCompose .* "
+            r"error='ValueError: could not convert",
         ):
             il.add_value("name", ["marta", "other"])
 
@@ -430,9 +430,9 @@ class TestItemLoaderBasic:
         il.add_value("name", "marta")
         with pytest.raises(
             ValueError,
-            match="Error with output processor: .* "
-            "error='ValueError: Error in Compose .* "
-            "error='ValueError: could not convert",
+            match=r"Error with output processor: .* "
+            r"error='ValueError: Error in Compose .* "
+            r"error='ValueError: could not convert",
         ):
             il.load_item()
 

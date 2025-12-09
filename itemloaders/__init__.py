@@ -7,7 +7,7 @@ See documentation in docs/topics/loaders.rst
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from itemadapter import ItemAdapter
 from parsel import Selector  # noqa: TC002  # for sphinx
@@ -18,7 +18,7 @@ from itemloaders.processors import Identity
 from itemloaders.utils import arg_to_iter
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, MutableMapping
+    from collections.abc import Callable, Iterable, MutableMapping
     from re import Pattern
 
     # typing.Self requires Python 3.11

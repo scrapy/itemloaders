@@ -6,9 +6,9 @@ Refactoring to come later
 from __future__ import annotations
 
 import inspect
-from collections.abc import Generator, Iterable
+from collections.abc import Callable, Generator, Iterable
 from functools import partial
-from typing import Any, Callable
+from typing import Any
 
 
 def arg_to_iter(arg: Any) -> Iterable[Any]:

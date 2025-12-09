@@ -19,17 +19,17 @@ dependencies = [
     "jmespath>=0.9.5",
     "parsel>=1.5.0",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Operating System :: OS Independent",
@@ -60,16 +60,13 @@ tag = true
 [tool.coverage.run]
 branch = true
 
-[tool.coverage.report]
-exclude_also = [
-    "if TYPE_CHECKING:",
-]
+[tool.mypy]
+strict = true
 
 [[tool.mypy.overrides]]
 # Allow test functions to be untyped
 module = "tests.*"
 allow_untyped_defs = true
-check_untyped_defs = true
 
 [tool.pylint.MASTER]
 persistent = "no"
