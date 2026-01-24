@@ -6,7 +6,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - uses: actions/setup-python@v6
       with:
         python-version: "3.14"
@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - python-version: '3.13'  # Keep in sync with .readthedocs.yml
+        - python-version: '3.14'  # Keep in sync with .readthedocs.yml
           env:
             TOXENV: docs
         - python-version: '3.14'
@@ -54,7 +54,7 @@ jobs:
           env:
             TOXENV: py
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install system libraries
         if: contains(matrix.python-version, 'pypy')
         run: |
