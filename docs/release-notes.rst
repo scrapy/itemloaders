@@ -5,6 +5,22 @@
 Release notes
 =============
 
+.. _release-1.4.0:
+
+itemloaders 1.4.0 (unreleased)
+------------------------------
+
+-   Dropped support for Python 3.8-3.9 and PyPy 3.9-3.10 (:gh:`94`, :gh:`104`)
+
+-   Added support for Python 3.14 and PyPy 3.11 (:gh:`98`, :gh:`104`)
+
+-   Switched the build system to ``hatchling`` (:gh:`100`)
+
+-   Documentation improvements (:gh:`106`)
+
+-   CI improvements (:gh:`95`, :gh:`96`, :gh:`97`, :gh:`99`, :gh:`102`,
+    :gh:`103`, :gh:`107`)
+
 .. _release-1.3.2:
 
 itemloaders 1.3.2 (2024-09-30)
