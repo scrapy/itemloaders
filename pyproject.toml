@@ -57,6 +57,12 @@ include = [
 commit = true
 tag = true
 
+[[tool.bumpversion.files]]
+filename = "docs/release-notes.rst"
+search = "\\(unreleased\\)$"
+replace = "({now:%Y-%m-%d})"
+regex = true
+
 [tool.coverage.run]
 branch = true
 

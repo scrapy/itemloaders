@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.4.0:
 
-itemloaders 1.4.0 (unreleased)
+itemloaders 1.4.0 (2026-01-29)
 ------------------------------
 
 -   Dropped support for Python 3.8-3.9 and PyPy 3.9-3.10 (:gh:`94`, :gh:`104`)
