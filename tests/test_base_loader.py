@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Any
 
 import pytest
 
@@ -23,7 +24,7 @@ def processor_with_args(value, other=None, loader_context=None):
 
 class TestItemLoaderBasic:
     def test_load_item_using_default_loader(self):
-        i = {"summary": "lala"}
+        i: dict[str, Any] = {"summary": "lala"}
         il = ItemLoader(item=i)
         il.add_value("name", "marta")
         item = il.load_item()

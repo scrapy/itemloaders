@@ -41,7 +41,7 @@ class MapCompose:
     :class:`MapCompose` processor is typically used as input processor, since
     data is often extracted using the
     :meth:`~parsel.selector.Selector.extract` method of `parsel selectors`_,
-    which returns a list of unicode strings.
+    which returns a list of strings.
 
     The example below should clarify how it works:
 
@@ -185,7 +185,7 @@ class Identity:
 
 class SelectJmes:
     """
-    Query the input string for a *JMESPath* expression (given at instantiation), and return the answer.
+    Query the data structure for a *JMESPath* expression (given at instantiation), and return the answer.
 
     *Requires*: `JMESPath <https://github.com/jmespath/jmespath>`__
 

@@ -4,7 +4,6 @@ test_list_equals = {
     "simple": ("foo.bar", {"foo": {"bar": "baz"}}, "baz"),
     "invalid": ("foo.bar.baz", {"foo": {"bar": "baz"}}, None),
     "top_level": ("foo", {"foo": {"bar": "baz"}}, {"bar": "baz"}),
-    "double_vs_single_quote_string": ("foo.bar", {"foo": {"bar": "baz"}}, "baz"),
     "dict": (
         "foo.bar[*].name",
         {"foo": {"bar": [{"name": "one"}, {"name": "two"}]}},

@@ -210,7 +210,7 @@ def maybe_skip_member(app, what, name, obj, skip, options):
     if not skip:
         # autodocs was generating a text "alias of" for the following members
         # https://github.com/sphinx-doc/sphinx/issues/4422
-        return name in {"default_item_class", "default_selector_class"}
+        return name == "default_item_class"
     return skip
 
 
