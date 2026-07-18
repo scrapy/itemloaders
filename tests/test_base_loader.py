@@ -110,6 +110,22 @@ class TestItemLoaderBasic:
         il.add_value("name", None)
         assert il.get_collected_values("name") == []
 
+
+    def test_add_value_empty_field_name(self):
+        # Empty string is a field name; only None expands a multi-field dict.
+        il = ItemLoader()
+        il.add_value("", "plain")
+        assert il.get_collected_values("") == ["plain"]
+        il.add_value("", ["a", "b"])
+        assert il.get_collected_values("") == ["plain", "a", "b"]
+
+    def test_replace_value_empty_field_name(self):
+        il = ItemLoader()
+        il.replace_value("", "first")
+        assert il.get_collected_values("") == ["first"]
+        il.replace_value("", "second")
+        assert il.get_collected_values("") == ["second"]
+
     def test_replace_value(self):
         il = CustomItemLoader()
         il.replace_value("name", "marta")

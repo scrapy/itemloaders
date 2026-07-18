@@ -208,7 +208,8 @@ class ItemLoader:
         value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
             return self
-        if not field_name:
+        # Only None means multi-field dict; empty string is a normal field name.
+        if field_name is None:
             for k, v in value.items():
                 self._add_value(k, v)
         else:
@@ -233,7 +234,7 @@ class ItemLoader:
         value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
             return self
-        if not field_name:
+        if field_name is None:
             for k, v in value.items():
                 self._replace_value(k, v)
         else:
