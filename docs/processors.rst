@@ -7,7 +7,8 @@ Input and Output processors
 
 An Item Loader contains one input processor and one output processor for each
 (item) field. The input processor processes the extracted data as soon as it's
-received (through the :meth:`~ItemLoader.add_xpath`, :meth:`~ItemLoader.add_css` or
+received (through the :meth:`~ItemLoader.add_xpath`,
+:meth:`~ItemLoader.add_css`, :meth:`~ItemLoader.add_jmes` or
 :meth:`~ItemLoader.add_value` methods) and the result of the input processor is
 collected and kept inside the ItemLoader. After collecting all data, the
 :meth:`ItemLoader.load_item` method is called to populate and get the populated

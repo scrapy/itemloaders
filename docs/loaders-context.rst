@@ -8,7 +8,7 @@ Item Loader Context
 The Item Loader Context is a mechanism that allows to change the input/ouput processors behavior.
 It's just a ``dict`` of arbitrary key/values which is shared among all processors.
 By default, the context contains the ``selector`` and any other `keyword arguments`
-sent to the Loaders's ``__init__``.
+sent to the Loader's ``__init__``.
 The context can be passed when declaring, instantiating or using Item Loader.
 
 For example, suppose you have a function ``parse_length`` which receives a text

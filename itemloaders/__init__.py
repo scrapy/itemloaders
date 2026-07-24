@@ -42,7 +42,7 @@ class ItemLoader:
     given, one is instantiated automatically using the class in
     :attr:`default_item_class`.
 
-    When instantiated with a :param ``selector`` parameter the :class:`ItemLoader` class
+    When instantiated with a ``selector`` parameter the :class:`ItemLoader` class
     provides convenient mechanisms for extracting data from web pages
     using parsel_ selectors.
 
@@ -68,7 +68,7 @@ class ItemLoader:
     .. attribute:: context
 
         The currently active :ref:`Context <loaders-context>` of this Item Loader.
-        Refer to <loaders-context> for more information about the Loader Context.
+        Refer to :ref:`loaders-context` for more information about the Loader Context.
 
     .. attribute:: default_item_class
 
@@ -429,7 +429,7 @@ class ItemLoader:
     ) -> Any:
         """
         Similar to :meth:`ItemLoader.get_value` but receives an XPath instead of a
-        value, which is used to extract a list of unicode strings from the
+        value, which is used to extract a list of strings from the
         selector associated with this :class:`ItemLoader`.
 
         :param xpath: the XPath to extract data from
@@ -466,7 +466,7 @@ class ItemLoader:
     ) -> Self:
         """
         Similar to :meth:`ItemLoader.add_value` but receives a CSS selector
-        instead of a value, which is used to extract a list of unicode strings
+        instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
         See :meth:`get_css` for ``kwargs``.
@@ -515,7 +515,7 @@ class ItemLoader:
     ) -> Any:
         """
         Similar to :meth:`ItemLoader.get_value` but receives a CSS selector
-        instead of a value, which is used to extract a list of unicode strings
+        instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
         :param css: the CSS selector to extract data from
@@ -551,7 +551,7 @@ class ItemLoader:
     ) -> Self:
         """
         Similar to :meth:`ItemLoader.add_value` but receives a JMESPath selector
-        instead of a value, which is used to extract a list of unicode strings
+        instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
         See :meth:`get_jmes` for ``kwargs``.
@@ -564,10 +564,10 @@ class ItemLoader:
 
         Examples::
 
-            # HTML snippet: {"name": "Color TV"}
-            loader.add_jmes('name')
-            # HTML snippet: {"price": the price is $1200"}
-            loader.add_jmes('price', TakeFirst(), re='the price is (.*)')
+            # JSON snippet: {"name": "Color TV"}
+            loader.add_jmes('name', 'name')
+            # JSON snippet: {"price": "the price is $1200"}
+            loader.add_jmes('price', 'price', TakeFirst(), re='the price is (.*)')
         """
         values = self._get_jmesvalues(jmes)
         return self.add_value(field_name, values, *processors, re=re, **kw)
@@ -598,7 +598,7 @@ class ItemLoader:
     ) -> Any:
         """
         Similar to :meth:`ItemLoader.get_value` but receives a JMESPath selector
-        instead of a value, which is used to extract a list of unicode strings
+        instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
         :param jmes: the JMESPath selector to extract data from
@@ -610,9 +610,9 @@ class ItemLoader:
 
         Examples::
 
-            # HTML snippet: {"name": "Color TV"}
+            # JSON snippet: {"name": "Color TV"}
             loader.get_jmes('name')
-            # HTML snippet: {"price": the price is $1200"}
+            # JSON snippet: {"price": "the price is $1200"}
             loader.get_jmes('price', TakeFirst(), re='the price is (.*)')
         """
         values = self._get_jmesvalues(jmes)

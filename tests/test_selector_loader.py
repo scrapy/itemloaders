@@ -58,6 +58,12 @@ class TestSelectorItemLoader:
             loader.replace_css("name", "#name::text")
         with pytest.raises(RuntimeError):
             loader.get_css("#name::text")
+        with pytest.raises(RuntimeError):
+            loader.add_jmes("name", "name")
+        with pytest.raises(RuntimeError):
+            loader.replace_jmes("name", "name")
+        with pytest.raises(RuntimeError):
+            loader.get_jmes("name")
 
     def test_init_method_with_selector(self):
         loader = CustomItemLoader(selector=self.selector)

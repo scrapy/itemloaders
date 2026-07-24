@@ -97,5 +97,5 @@ class TestInitializationBase(ABC):
         assert il._values.get("name") == ["foo", "bar"]
 
 
-class InitializationFromDictTest(TestInitializationBase):
+class TestInitializationFromDict(TestInitializationBase):
     item_class = dict
