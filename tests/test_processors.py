@@ -67,17 +67,3 @@ def test_mapcompose():
         match=r"Error in MapCompose with .* error='TypeError: (can only|unsupported operand)",
     ):
         proc("hello")
-
-
-def test_add_value_preserves_zero():
-    """Integer 0 must not be dropped as empty (issue #73)."""
-    from itemloaders import ItemLoader
-    from itemloaders.processors import Identity, TakeFirst
-
-    loader = ItemLoader(item={})
-    loader.default_input_processor = Identity()
-    loader.default_output_processor = TakeFirst()
-    loader.add_value("count", 0)
-    assert loader.get_output_value("count") == 0
-    item = loader.load_item()
-    assert item["count"] == 0

@@ -242,14 +242,10 @@ class ItemLoader:
 
     def _add_value(self, field_name: str, value: Any) -> None:
         value = arg_to_iter(value)
-        processed_value = self._process_input_value(field_name, value)
-        # Do not use truthiness: 0 / False are valid field values (issue #73).
-        if processed_value is None:
-            return
-        if isinstance(processed_value, (list, tuple)) and len(processed_value) == 0:
-            return
-        self._values.setdefault(field_name, [])
-        self._values[field_name] += arg_to_iter(processed_value)
+        processed_value = arg_to_iter(self._process_input_value(field_name, value))
+        if processed_value:
+            self._values.setdefault(field_name, [])
+            self._values[field_name] += processed_value
 
     def _replace_value(self, field_name: str, value: Any) -> None:
         self._values.pop(field_name, None)
