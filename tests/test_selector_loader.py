@@ -7,6 +7,10 @@ from parsel import Selector
 from itemloaders import ItemLoader
 from itemloaders.processors import MapCompose, TakeFirst
 
+needs_parsel_jmespath = pytest.mark.skipif(
+    not hasattr(Selector, "jmespath"), reason="parsel < 1.8.1"
+)
+
 
 class CustomItemLoader(ItemLoader):
     name_in = MapCompose(lambda v: v.title())
@@ -220,6 +224,7 @@ class TestSelectorItemLoader:
             str(err.value) == "Please install parsel >= 1.8.1 to get JMESPath support"
         )
 
+    @needs_parsel_jmespath
     def test_add_jmes_re(self):
         loader = CustomItemLoader(selector=self.jmes_selector)
         loader.add_jmes("name", "name", re="ma")
@@ -235,6 +240,7 @@ class TestSelectorItemLoader:
         loader.add_jmes("url", "website.url", re=re.compile("http://(.+)"))
         assert loader.get_output_value("url") == ["www.scrapy.org"]
 
+    @needs_parsel_jmespath
     def test_get_jmes(self):
         loader = CustomItemLoader(selector=self.jmes_selector)
         assert loader.get_jmes("description") == ["paragraph"]
@@ -247,6 +253,7 @@ class TestSelectorItemLoader:
             "/images/logo.png",
         ]
 
+    @needs_parsel_jmespath
     def test_replace_jmes(self):
         loader = CustomItemLoader(selector=self.jmes_selector)
         assert loader.selector
@@ -263,6 +270,7 @@ class TestSelectorItemLoader:
         loader.replace_jmes("url", "logo")
         assert loader.get_output_value("url") == ["/images/logo.png"]
 
+    @needs_parsel_jmespath
     def test_replace_jmes_multi_fields(self):
         loader = CustomItemLoader(selector=self.jmes_selector)
         loader.add_jmes(None, "name", TakeFirst(), lambda x: {"name": x})
@@ -275,6 +283,7 @@ class TestSelectorItemLoader:
         loader.replace_jmes(None, "logo", TakeFirst(), lambda x: {"url": x})
         assert loader.get_output_value("url") == ["/images/logo.png"]
 
+    @needs_parsel_jmespath
     def test_replace_jmes_re(self):
         loader = CustomItemLoader(selector=self.jmes_selector)
         assert loader.selector
