@@ -1,0 +1,24 @@
+name: Publish on PyPI
+on:
+  release:
+    types: [created]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/itemloaders
+    permissions:
+      id-token: write
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+    - name: Build
+      run: |
+        pip install --upgrade build
+        python -m build
+    - name: Upload
+      uses: pypa/gh-action-pypi-publish@release/v1

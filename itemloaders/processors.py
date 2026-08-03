@@ -1,12 +1,19 @@
 """
 This module provides some commonly used processors for Item Loaders.
 
-See documentation in docs/topics/loaders.rst
+See documentation in :ref:`declaring-loaders`.
 """
-from collections import ChainMap
 
-from itemloaders.utils import arg_to_iter
+from __future__ import annotations
+
+from collections import ChainMap
+from typing import TYPE_CHECKING, Any
+
 from itemloaders.common import wrap_loader_context
+from itemloaders.utils import arg_to_iter
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, MutableMapping
 
 
 class MapCompose:
@@ -34,7 +41,7 @@ class MapCompose:
     :class:`MapCompose` processor is typically used as input processor, since
     data is often extracted using the
     :meth:`~parsel.selector.Selector.extract` method of `parsel selectors`_,
-    which returns a list of unicode strings.
+    which returns a list of strings.
 
     The example below should clarify how it works:
 
@@ -53,27 +60,30 @@ class MapCompose:
     .. _`parsel selectors`: https://parsel.readthedocs.io/en/latest/parsel.html#parsel.selector.Selector.extract
     """
 
-    def __init__(self, *functions, **default_loader_context):
+    def __init__(self, *functions: Callable[..., Any], **default_loader_context: Any):
         self.functions = functions
         self.default_loader_context = default_loader_context
 
-    def __call__(self, value, loader_context=None):
+    def __call__(
+        self, value: Any, loader_context: MutableMapping[str, Any] | None = None
+    ) -> Iterable[Any]:
         values = arg_to_iter(value)
+        context: MutableMapping[str, Any]
         if loader_context:
             context = ChainMap(loader_context, self.default_loader_context)
         else:
             context = self.default_loader_context
         wrapped_funcs = [wrap_loader_context(f, context) for f in self.functions]
         for func in wrapped_funcs:
-            next_values = []
+            next_values: list[Any] = []
             for v in values:
                 try:
                     next_values += arg_to_iter(func(v))
                 except Exception as e:
-                    raise ValueError("Error in MapCompose with "
-                                     "%s value=%r error='%s: %s'" %
-                                     (str(func), value, type(e).__name__,
-                                      str(e)))
+                    raise ValueError(
+                        f"Error in MapCompose with "
+                        f"{func!s} value={value!r} error='{type(e).__name__}: {e!s}'"
+                    ) from e
             values = next_values
         return values
 
@@ -107,12 +117,15 @@ class Compose:
     <itemloaders.ItemLoader.context>` attribute.
     """
 
-    def __init__(self, *functions, **default_loader_context):
+    def __init__(self, *functions: Callable[..., Any], **default_loader_context: Any):
         self.functions = functions
-        self.stop_on_none = default_loader_context.get('stop_on_none', True)
+        self.stop_on_none = default_loader_context.get("stop_on_none", True)
         self.default_loader_context = default_loader_context
 
-    def __call__(self, value, loader_context=None):
+    def __call__(
+        self, value: Any, loader_context: MutableMapping[str, Any] | None = None
+    ) -> Any:
+        context: MutableMapping[str, Any]
         if loader_context:
             context = ChainMap(loader_context, self.default_loader_context)
         else:
@@ -124,9 +137,10 @@ class Compose:
             try:
                 value = func(value)
             except Exception as e:
-                raise ValueError("Error in Compose with "
-                                 "%s value=%r error='%s: %s'" %
-                                 (str(func), value, type(e).__name__, str(e)))
+                raise ValueError(
+                    f"Error in Compose with "
+                    f"{func!s} value={value!r} error='{type(e).__name__}: {e!s}'"
+                ) from e
         return value
 
 
@@ -144,10 +158,11 @@ class TakeFirst:
     'one'
     """
 
-    def __call__(self, values):
+    def __call__(self, values: Any) -> Any:
         for value in values:
-            if value is not None and value != '':
+            if value is not None and value != "":
                 return value
+        return None
 
 
 class Identity:
@@ -164,15 +179,19 @@ class Identity:
     ['one', 'two', 'three']
     """
 
-    def __call__(self, values):
+    def __call__(self, values: Any) -> Any:
         return values
 
 
 class SelectJmes:
     """
-    Query the input string for the jmespath (given at instantiation), and return the answer
-    Requires : jmespath(https://github.com/jmespath/jmespath)
-    Note: SelectJmes accepts only one input element at a time.
+    Query the data structure for a *JMESPath* expression (given at instantiation), and return the answer.
+
+    *Requires*: `JMESPath <https://github.com/jmespath/jmespath>`__
+
+    .. note::
+
+        ``SelectJmes`` accepts only one input element at a time.
 
     Example:
 
@@ -183,7 +202,7 @@ class SelectJmes:
     >>> proc({'foo': {'bar': 'baz'}})
     {'bar': 'baz'}
 
-    Working with Json:
+    Working with JSON:
 
     >>> import json
     >>> proc_single_json_str = Compose(json.loads, SelectJmes("foo"))
@@ -194,15 +213,18 @@ class SelectJmes:
     ['bar']
     """
 
-    def __init__(self, json_path):
-        self.json_path = json_path
-        import jmespath
-        self.compiled_path = jmespath.compile(self.json_path)
+    def __init__(self, json_path: str):
+        self.json_path: str = json_path
+        import jmespath.parser  # noqa: PLC0415
 
-    def __call__(self, value):
-        """Query value for the jmespath query and return answer
+        self.compiled_path: jmespath.parser.ParsedResult = jmespath.compile(
+            self.json_path
+        )
+
+    def __call__(self, value: Any) -> Any:
+        """Query value for the JMESPath query and return answer
         :param value: a data structure (dict, list) to extract from
-        :return: Element extracted according to jmespath query
+        :return: Element extracted according to JMESPath query
         """
         return self.compiled_path.search(value)
 
@@ -226,8 +248,8 @@ class Join:
     'one<br>two<br>three'
     """
 
-    def __init__(self, separator=' '):
+    def __init__(self, separator: str = " "):
         self.separator = separator
 
-    def __call__(self, values):
+    def __call__(self, values: Any) -> str:
         return self.separator.join(values)

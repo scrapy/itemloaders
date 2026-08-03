@@ -1,21 +1,17 @@
-import unittest
+from __future__ import annotations
+
+from typing import Any
 
 from itemloaders import ItemLoader
-from itemloaders.processors import Identity, Compose, TakeFirst
+from itemloaders.processors import Compose, Identity, TakeFirst
 
 
-def take_first(value):
-    return value[0]
-
-
-class TestOutputProcessor(unittest.TestCase):
-
-    def test_item_class(self):
-
-        class TempDict(dict):
+class TestOutputProcessorDict:
+    def test_output_processor(self):
+        class TempDict(dict[str, Any]):
             def __init__(self, *args, **kwargs):
-                super(TempDict, self).__init__(self, *args, **kwargs)
-                self.setdefault('temp', 0.3)
+                super().__init__(*args, **kwargs)
+                self.setdefault("temp", 0.3)
 
         class TempLoader(ItemLoader):
             default_item_class = TempDict
@@ -24,29 +20,35 @@ class TestOutputProcessor(unittest.TestCase):
 
         loader = TempLoader()
         item = loader.load_item()
-        self.assertIsInstance(item, TempDict)
-        self.assertEqual(dict(item), {'temp': 0.3})
+        assert isinstance(item, TempDict)
+        assert dict(item) == {"temp": 0.3}
 
-    def test_item_object(self):
 
+class TestOutputProcessorItem:
+    def test_output_processor(self):
         class TempLoader(ItemLoader):
             default_input_processor = Identity()
             default_output_processor = Compose(TakeFirst())
 
-        item = dict()
-        item.setdefault('temp', 0.3)
+        item: dict[str, Any] = {}
+        item.setdefault("temp", 0.3)
         loader = TempLoader(item=item)
         item = loader.load_item()
-        self.assertIsInstance(item, dict)
-        self.assertEqual(dict(item), {'temp': 0.3})
+        assert isinstance(item, dict)
+        assert dict(item) == {"temp": 0.3}
 
-    def test_unbound_processor(self):
-        """Ensure that a processor not taking a `self` parameter does not break
-        anything"""
 
-        class TempLoader(ItemLoader):
-            default_output_processor = take_first
+def take_first(value):
+    return value[0]
 
-        loader = TempLoader()
-        loader.add_value('foo', 'bar')
-        self.assertEqual(loader.load_item(), {'foo': 'bar'})
+
+def test_unbound_processor():
+    """Ensure that a processor not taking a `self` parameter does not break
+    anything"""
+
+    class TempLoader(ItemLoader):
+        default_output_processor = take_first
+
+    loader = TempLoader()
+    loader.add_value("foo", "bar")
+    assert loader.load_item() == {"foo": "bar"}

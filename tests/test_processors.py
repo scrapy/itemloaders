@@ -1,47 +1,69 @@
-import unittest
+import pytest
 
-from itemloaders.processors import (Compose, Identity, Join,
-                                    MapCompose, TakeFirst)
+from itemloaders.processors import Compose, Identity, Join, MapCompose, TakeFirst
 
 
-class ProcessorsTest(unittest.TestCase):
+def test_take_first():
+    proc = TakeFirst()
+    assert proc([None, "", "hello", "world"]) == "hello"
+    assert proc([None, "", 0, "hello", "world"]) == 0
 
-    def test_take_first(self):
-        proc = TakeFirst()
-        self.assertEqual(proc([None, '', 'hello', 'world']), 'hello')
-        self.assertEqual(proc([None, '', 0, 'hello', 'world']), 0)
 
-    def test_identity(self):
-        proc = Identity()
-        self.assertEqual(proc([None, '', 'hello', 'world']),
-                         [None, '', 'hello', 'world'])
+def test_identity():
+    proc = Identity()
+    assert proc([None, "", "hello", "world"]) == [None, "", "hello", "world"]
 
-    def test_join(self):
-        proc = Join()
-        self.assertRaises(TypeError, proc, [None, '', 'hello', 'world'])
-        self.assertEqual(proc(['', 'hello', 'world']), u' hello world')
-        self.assertEqual(proc(['hello', 'world']), u'hello world')
-        self.assertIsInstance(proc(['hello', 'world']), str)
 
-    def test_compose(self):
-        proc = Compose(lambda v: v[0], str.upper)
-        self.assertEqual(proc(['hello', 'world']), 'HELLO')
-        proc = Compose(str.upper)
-        self.assertEqual(proc(None), None)
-        proc = Compose(str.upper, stop_on_none=False)
-        self.assertRaises(ValueError, proc, None)
-        proc = Compose(str.upper, lambda x: x + 1)
-        self.assertRaises(ValueError, proc, 'hello')
+def test_join():
+    proc = Join()
+    with pytest.raises(TypeError):
+        proc([None, "", "hello", "world"])
+    assert proc(["", "hello", "world"]) == " hello world"
+    assert proc(["hello", "world"]) == "hello world"
+    assert isinstance(proc(["hello", "world"]), str)
 
-    def test_mapcompose(self):
-        def filter_world(x):
-            return None if x == 'world' else x
-        proc = MapCompose(filter_world, str.upper)
-        self.assertEqual(proc([u'hello', u'world', u'this', u'is', u'scrapy']),
-                         [u'HELLO', u'THIS', u'IS', u'SCRAPY'])
-        proc = MapCompose(filter_world, str.upper)
-        self.assertEqual(proc(None), [])
-        proc = MapCompose(filter_world, str.upper)
-        self.assertRaises(ValueError, proc, [1])
-        proc = MapCompose(filter_world, lambda x: x + 1)
-        self.assertRaises(ValueError, proc, 'hello')
+
+def test_compose():
+    proc = Compose(lambda v: v[0], str.upper)
+    assert proc(["hello", "world"]) == "HELLO"
+    proc = Compose(str.upper)
+    assert proc(None) is None
+    proc = Compose(str.upper, stop_on_none=False)
+    with pytest.raises(
+        ValueError,
+        match=r"Error in Compose with .* error='TypeError: (descriptor 'upper'|'str' object expected)",
+    ):
+        proc(None)
+    proc = Compose(str.upper, lambda x: x + 1)
+    with pytest.raises(
+        ValueError,
+        match=r"Error in Compose with .* error='TypeError: (can only|unsupported operand)",
+    ):
+        proc("hello")
+
+
+def test_mapcompose():
+    def filter_world(x):
+        return None if x == "world" else x
+
+    proc = MapCompose(filter_world, str.upper)
+    assert proc(["hello", "world", "this", "is", "scrapy"]) == [
+        "HELLO",
+        "THIS",
+        "IS",
+        "SCRAPY",
+    ]
+    proc = MapCompose(filter_world, str.upper)
+    assert proc(None) == []
+    proc = MapCompose(filter_world, str.upper)
+    with pytest.raises(
+        ValueError,
+        match=r"Error in MapCompose with .* error='TypeError: (descriptor 'upper'|'str' object expected)",
+    ):
+        proc([1])
+    proc = MapCompose(filter_world, lambda x: x + 1)
+    with pytest.raises(
+        ValueError,
+        match=r"Error in MapCompose with .* error='TypeError: (can only|unsupported operand)",
+    ):
+        proc("hello")

@@ -49,7 +49,7 @@ The precedence order, for both input and output processors, is as follows:
 
     .. versionadded:: 1.0.1
 
-3. Item Loader defaults: :meth:`ItemLoader.default_input_processor` and
-   :meth:`ItemLoader.default_output_processor` (least precedence)
+3. Item Loader defaults: :attr:`ItemLoader.default_input_processor` and
+   :attr:`ItemLoader.default_output_processor` (least precedence)
 
 See also: :ref:`extending-loaders`.

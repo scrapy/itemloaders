@@ -10,9 +10,9 @@ itemloaders
    :target: https://pypi.python.org/pypi/itemloaders
    :alt: Supported Python Versions
 
-.. image:: https://travis-ci.com/scrapy/itemloaders.svg?branch=master
-   :target: https://travis-ci.com/scrapy/itemloaders
-   :alt: Build Status
+.. image:: https://github.com/scrapy/itemloaders/actions/workflows/tests-ubuntu.yml/badge.svg
+   :target: https://github.com/scrapy/itemloaders/actions/workflows/tests-ubuntu.yml
+   :alt: CI Status
 
 .. image:: https://codecov.io/github/scrapy/itemloaders/coverage.svg?branch=master
    :target: https://codecov.io/gh/scrapy/itemloaders
@@ -73,4 +73,5 @@ All contributions are welcome!
    * File an `issue here <https://github.com/scrapy/itemloaders/issues>`_, if there isn't one yet
    * Fork this repository
    * Create a branch to work on your changes
+   * Run `pre-commit install` to install pre-commit hooks
    * Push your local branch and submit a Pull Request

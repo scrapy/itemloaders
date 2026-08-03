@@ -19,10 +19,6 @@ To install ``itemloaders``, run::
     `itemadapter <https://github.com/scrapy/itemadapter>`_ as a common interface.
     This means you can use any of the types supported by ``itemadapter`` here.
 
-.. warning:: ``dataclasses`` and ``attrs`` support is still experimental.
-    Please, refer to :attr:`~ItemLoader.default_item_class` in the
-    :ref:`api-reference` for more information.
-
 
 Getting Started with ``itemloaders``
 ====================================
@@ -81,7 +77,7 @@ locations, using the :meth:`~ItemLoader.add_xpath` method. This is the
 data that will be assigned to the ``name`` field later.
 
 Afterwards, similar calls are used for ``price`` field using a CSS selector with
-the :meth:`~ItemLoader.add_css` method, and finally the ``last_update`` field is 
+the :meth:`~ItemLoader.add_css` method, and finally the ``last_update`` field is
 populated directly with a literal value
 (``today``) using a different method: :meth:`~ItemLoader.add_value`.
 

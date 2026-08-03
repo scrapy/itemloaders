@@ -1,37 +1,50 @@
 """
 Item Loader
 
-See documentation in docs/topics/loaders.rst
+See documentation in :ref:`declaring-loaders`.
 """
-from contextlib import suppress
 
-from itemadapter import get_field_meta_from_class, ItemAdapter
+from __future__ import annotations
+
+from contextlib import suppress
+from typing import TYPE_CHECKING, Any
+
+from itemadapter import ItemAdapter, get_field_meta_from_class
+from parsel import Selector  # noqa: TC002  # for sphinx
 from parsel.utils import extract_regex, flatten
 
 from itemloaders.common import wrap_loader_context
 from itemloaders.processors import Identity
 from itemloaders.utils import arg_to_iter
 
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, MutableMapping
+    from re import Pattern
 
-def unbound_method(method):
+    # typing.Self requires Python 3.11
+    from typing_extensions import Self
+
+
+def unbound_method(method: Callable[..., Any]) -> Callable[..., Any]:
     """
     Allow to use single-argument functions as input or output processors
     (no need to define an unused first 'self' argument)
     """
     with suppress(AttributeError):
-        if '.' not in method.__qualname__:
-            return method.__func__
+        if "." not in method.__qualname__:
+            return method.__func__  # type: ignore[attr-defined, no-any-return]
     return method
 
 
-class _Context(dict):
-    def __init__(self, item_loader, *args, **kwargs):
+class _Context(dict[str, Any]):
+    def __init__(self, item_loader: ItemLoader, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._item_loader = item_loader
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         value = super().__getitem__(key)
-        if key == 'item' and value is None:
+        if key == "item" and value is None:
+            # Reading the item from the context creates it if needed.
             value = self[key] = self._item_loader.item
         return value
 
@@ -42,18 +55,18 @@ class ItemLoader:
     given, one is instantiated automatically using the class in
     :attr:`default_item_class`.
 
-    When instantiated with a :param ``selector`` parameter the :class:`ItemLoader` class
+    When instantiated with a ``selector`` parameter the :class:`ItemLoader` class
     provides convenient mechanisms for extracting data from web pages
     using parsel_ selectors.
 
     :param item: The item instance to populate using subsequent calls to
         :meth:`~ItemLoader.add_xpath`, :meth:`~ItemLoader.add_css`,
-        or :meth:`~ItemLoader.add_value`.
+        :meth:`~ItemLoader.add_jmes` or :meth:`~ItemLoader.add_value`.
     :type item: :class:`dict` object
 
     :param selector: The selector to extract data from, when using the
-        :meth:`add_xpath` (resp. :meth:`add_css`) or :meth:`replace_xpath`
-        (resp. :meth:`replace_css`) method.
+        :meth:`add_xpath` (resp. :meth:`add_css`, :meth:`add_jmes`) or :meth:`replace_xpath`
+        (resp. :meth:`replace_css`, :meth:`replace_jmes`) method.
     :type selector: :class:`~parsel.selector.Selector` object
 
     The item, selector and the remaining keyword arguments are
@@ -68,7 +81,7 @@ class ItemLoader:
     .. attribute:: context
 
         The currently active :ref:`Context <loaders-context>` of this Item Loader.
-        Refer to <loaders-context> for more information about the Loader Context.
+        Refer to :ref:`loaders-context` for more information about the Loader Context.
 
     .. attribute:: default_item_class
 
@@ -107,60 +120,83 @@ class ItemLoader:
     .. _parsel: https://parsel.readthedocs.io/en/latest/
     """
 
-    default_item_class = dict
-    default_input_processor = Identity()
-    default_output_processor = Identity()
+    default_item_class: type = dict
+    default_input_processor: Callable[..., Any] = Identity()
+    default_output_processor: Callable[..., Any] = Identity()
 
-    def __init__(self, item=None, selector=None, parent=None, **context):
-        self.selector = selector
+    def __init__(
+        self,
+        item: Any = None,
+        selector: Selector | None = None,
+        parent: ItemLoader | None = None,
+        **context: Any,
+    ):
+        self.selector: Selector | None = selector
         context.update(selector=selector)
-        self._item = item
-        context['item'] = item
-        self.context = _Context(parent or self, **context)
-        self.parent = parent
-        self._local_values = {}
+        self._local_item = item
+        context["item"] = item
+        self.context: MutableMapping[str, Any] = _Context(parent or self, **context)
+        self.parent: ItemLoader | None = parent
+        self._local_values: dict[str, list[Any]] = {}
         if item is not None:
+            # values from initial item
             for field_name, value in ItemAdapter(item).items():
                 self._values.setdefault(field_name, [])
                 self._values[field_name] += arg_to_iter(value)
 
     @property
-    def _values(self):
+    def _values(self) -> dict[str, list[Any]]:
         if self.parent is not None:
             return self.parent._values
-        else:
-            return self._local_values
+        return self._local_values
 
     @property
-    def item(self):
+    def _item(self) -> Any:
+        """Item being populated, or ``None`` if it has not been created yet."""
+        if self.parent is not None:
+            return self.parent._item
+        return self._local_item
+
+    @property
+    def item(self) -> Any:
         if self.parent is not None:
             return self.parent.item
-        else:
-            if self._item is None:
-                self._item = self.default_item_class(**self._values)
-            return self._item
+        if self._local_item is None:
+            self._local_item = self.default_item_class(**self._values)
+        return self._local_item
 
-    def nested_xpath(self, xpath, **context):
+    def nested_xpath(self, xpath: str, **context: Any) -> Self:
         """
         Create a nested loader with an xpath selector.
         The supplied selector is applied relative to selector associated
         with this :class:`ItemLoader`.
         """
+        self._check_selector_method()
+        assert self.selector is not None
         selector = self.selector.xpath(xpath)
         context.update(selector=selector)
         return self.__class__(parent=self, **context)
 
-    def nested_css(self, css, **context):
+    def nested_css(self, css: str, **context: Any) -> Self:
         """
         Create a nested loader with a css selector.
         The supplied selector is applied relative to selector associated
         with this :class:`ItemLoader`.
         """
+        self._check_selector_method()
+        assert self.selector is not None
         selector = self.selector.css(css)
         context.update(selector=selector)
         return self.__class__(parent=self, **context)
 
-    def add_value(self, field_name, value, *processors, **kw):
+    def add_value(
+        self,
+        field_name: str | None,
+        value: Any,
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Self:
         """
         Process and then add the given ``value`` for the given field.
 
@@ -174,6 +210,9 @@ class ItemLoader:
         multiple fields may be added. And the processed value should be a dict
         with field_name mapped to values.
 
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         Examples::
 
             loader.add_value('name', 'Color TV')
@@ -181,42 +220,61 @@ class ItemLoader:
             loader.add_value('length', '100')
             loader.add_value('name', 'name: foo', TakeFirst(), re='name: (.+)')
             loader.add_value(None, {'name': 'foo', 'sex': 'male'})
+
         """
-        value = self.get_value(value, *processors, **kw)
+        value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
-            return
+            return self
         if not field_name:
             for k, v in value.items():
                 self._add_value(k, v)
         else:
             self._add_value(field_name, value)
+        return self
 
-    def replace_value(self, field_name, value, *processors, **kw):
+    def replace_value(
+        self,
+        field_name: str | None,
+        value: Any,
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Self:
         """
         Similar to :meth:`add_value` but replaces the collected data with the
         new value instead of adding it.
+
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
         """
-        value = self.get_value(value, *processors, **kw)
+        value = self.get_value(value, *processors, re=re, **kw)
         if value is None:
-            return
+            return self
         if not field_name:
             for k, v in value.items():
                 self._replace_value(k, v)
         else:
             self._replace_value(field_name, value)
+        return self
 
-    def _add_value(self, field_name, value):
+    def _add_value(self, field_name: str, value: Any) -> None:
         value = arg_to_iter(value)
         processed_value = self._process_input_value(field_name, value)
         if processed_value:
             self._values.setdefault(field_name, [])
             self._values[field_name] += arg_to_iter(processed_value)
 
-    def _replace_value(self, field_name, value):
+    def _replace_value(self, field_name: str, value: Any) -> None:
         self._values.pop(field_name, None)
         self._add_value(field_name, value)
 
-    def get_value(self, value, *processors, **kw):
+    def get_value(
+        self,
+        value: Any,
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Any:
         """
         Process the given ``value`` by the given ``processors`` and keyword
         arguments.
@@ -226,7 +284,7 @@ class ItemLoader:
         :param re: a regular expression to use for extracting data from the
             given value using :func:`~parsel.utils.extract_regex` method,
             applied before processors
-        :type re: str or typing.Pattern
+        :type re: str or typing.Pattern[str]
 
         Examples:
 
@@ -236,25 +294,25 @@ class ItemLoader:
         >>> loader.get_value('name: foo', TakeFirst(), str.upper, re='name: (.+)')
         'FOO'
         """
-        regex = kw.get('re', None)
-        if regex:
+        if re:
             value = arg_to_iter(value)
-            value = flatten(extract_regex(regex, x) for x in value)
+            value = flatten(extract_regex(re, x) for x in value)
 
         for proc in processors:
             if value is None:
                 break
             _proc = proc
-            proc = wrap_loader_context(proc, self.context)
+            proc = wrap_loader_context(proc, self.context)  # noqa: PLW2901
             try:
                 value = proc(value)
             except Exception as e:
-                raise ValueError("Error with processor %s value=%r error='%s: %s'" %
-                                 (_proc.__class__.__name__, value,
-                                  type(e).__name__, str(e)))
+                raise ValueError(
+                    f"Error with processor {_proc.__class__.__name__} "
+                    f"value={value!r} error='{type(e).__name__}: {e!s}'"
+                ) from e
         return value
 
-    def load_item(self):
+    def load_item(self) -> Any:
         """
         Populate the item with the data collected so far, and return it. The
         data collected is first passed through the :ref:`output processors
@@ -268,7 +326,7 @@ class ItemLoader:
 
         return adapter.item
 
-    def get_output_value(self, field_name):
+    def get_output_value(self, field_name: str) -> Any:
         """
         Return the collected values parsed using the output processor, for the
         given field. This method doesn't populate or modify the item at all.
@@ -279,46 +337,43 @@ class ItemLoader:
         try:
             return proc(value)
         except Exception as e:
-            raise ValueError("Error with output processor: field=%r value=%r error='%s: %s'" %
-                             (field_name, value, type(e).__name__, str(e)))
+            raise ValueError(
+                f"Error with output processor: field={field_name!r} "
+                f"value={value!r} error='{type(e).__name__}: {e!s}'"
+            ) from e
 
-    def get_collected_values(self, field_name):
+    def get_collected_values(self, field_name: str) -> list[Any]:
         """Return the collected values for the given field."""
         return self._values.get(field_name, [])
 
-    def get_input_processor(self, field_name):
-        proc = getattr(self, '%s_in' % field_name, None)
+    def get_input_processor(self, field_name: str) -> Callable[..., Any]:
+        proc = getattr(self, f"{field_name}_in", None)
         if not proc:
             proc = self._get_item_field_attr(
-                field_name,
-                'input_processor',
-                self.default_input_processor
+                field_name, "input_processor", self.default_input_processor
             )
         return unbound_method(proc)
 
-    def get_output_processor(self, field_name):
-        proc = getattr(self, '%s_out' % field_name, None)
+    def get_output_processor(self, field_name: str) -> Callable[..., Any]:
+        proc = getattr(self, f"{field_name}_out", None)
         if not proc:
             proc = self._get_item_field_attr(
-                field_name,
-                'output_processor',
-                self.default_output_processor
+                field_name, "output_processor", self.default_output_processor
             )
         return unbound_method(proc)
 
-    def _get_item_field_attr(self, field_name, key, default=None):
-        if self.parent is not None and self.parent._item is not None:
-            item_adapter = ItemAdapter(self.parent._item)
-            field_meta = item_adapter.get_field_meta(field_name)
-        if self._item is not None:
-            item_adapter = ItemAdapter(self._item)
-            field_meta = item_adapter.get_field_meta(field_name)
-        else:
-            item_class = self.default_item_class
-            field_meta = get_field_meta_from_class(item_class, field_name)
+    def _get_item_field_attr(
+        self, field_name: str, key: Any, default: Any = None
+    ) -> Any:
+        item = self._item
+        field_meta = (
+            get_field_meta_from_class(self.default_item_class, field_name)
+            if item is None
+            else ItemAdapter(item).get_field_meta(field_name)
+        )
         return field_meta.get(key, default)
 
-    def _process_input_value(self, field_name, value):
+    def _process_input_value(self, field_name: str, value: Any) -> Any:
         proc = self.get_input_processor(field_name)
         _proc = proc
         proc = wrap_loader_context(proc, self.context)
@@ -326,18 +381,25 @@ class ItemLoader:
             return proc(value)
         except Exception as e:
             raise ValueError(
-                "Error with input processor %s: field=%r value=%r "
-                "error='%s: %s'" % (_proc.__class__.__name__, field_name,
-                                    value, type(e).__name__, str(e)))
+                f"Error with input processor {_proc.__class__.__name__}:"
+                f" field={field_name!r} value={value!r} error='{type(e).__name__}: {e!s}'"
+            ) from e
 
-    def _check_selector_method(self):
+    def _check_selector_method(self) -> None:
         if self.selector is None:
             raise RuntimeError(
-                "To use XPath or CSS selectors, %s"
-                "must be instantiated with a selector" % self.__class__.__name__
+                f"To use XPath or CSS selectors, {self.__class__.__name__} "
+                f"must be instantiated with a selector"
             )
 
-    def add_xpath(self, field_name, xpath, *processors, **kw):
+    def add_xpath(
+        self,
+        field_name: str | None,
+        xpath: str | Iterable[str],
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Self:
         """
         Similar to :meth:`ItemLoader.add_value` but receives an XPath instead of a
         value, which is used to extract a list of strings from the
@@ -348,6 +410,9 @@ class ItemLoader:
         :param xpath: the XPath to extract data from
         :type xpath: str
 
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         Examples::
 
             # HTML snippet: <p class="product-name">Color TV</p>
@@ -357,19 +422,36 @@ class ItemLoader:
 
         """
         values = self._get_xpathvalues(xpath, **kw)
-        self.add_value(field_name, values, *processors, **kw)
+        return self.add_value(field_name, values, *processors, re=re, **kw)
 
-    def replace_xpath(self, field_name, xpath, *processors, **kw):
+    def replace_xpath(
+        self,
+        field_name: str | None,
+        xpath: str | Iterable[str],
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Self:
         """
         Similar to :meth:`add_xpath` but replaces collected data instead of adding it.
+
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         """
         values = self._get_xpathvalues(xpath, **kw)
-        self.replace_value(field_name, values, *processors, **kw)
+        return self.replace_value(field_name, values, *processors, re=re, **kw)
 
-    def get_xpath(self, xpath, *processors, **kw):
+    def get_xpath(
+        self,
+        xpath: str | Iterable[str],
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Any:
         """
         Similar to :meth:`ItemLoader.get_value` but receives an XPath instead of a
-        value, which is used to extract a list of unicode strings from the
+        value, which is used to extract a list of strings from the
         selector associated with this :class:`ItemLoader`.
 
         :param xpath: the XPath to extract data from
@@ -377,7 +459,7 @@ class ItemLoader:
 
         :param re: a regular expression to use for extracting data from the
             selected XPath region
-        :type re: str or typing.Pattern
+        :type re: str or typing.Pattern[str]
 
         Examples::
 
@@ -388,17 +470,25 @@ class ItemLoader:
 
         """
         values = self._get_xpathvalues(xpath, **kw)
-        return self.get_value(values, *processors, **kw)
+        return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_xpathvalues(self, xpaths, **kw):
+    def _get_xpathvalues(self, xpaths: str | Iterable[str], **kw: Any) -> list[Any]:
         self._check_selector_method()
+        assert self.selector is not None
         xpaths = arg_to_iter(xpaths)
-        return flatten(self.selector.xpath(xpath).getall() for xpath in xpaths)
+        return flatten(self.selector.xpath(xpath, **kw).getall() for xpath in xpaths)
 
-    def add_css(self, field_name, css, *processors, **kw):
+    def add_css(
+        self,
+        field_name: str | None,
+        css: str | Iterable[str],
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Self:
         """
         Similar to :meth:`ItemLoader.add_value` but receives a CSS selector
-        instead of a value, which is used to extract a list of unicode strings
+        instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
         See :meth:`get_css` for ``kwargs``.
@@ -406,27 +496,48 @@ class ItemLoader:
         :param css: the CSS selector to extract data from
         :type css: str
 
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
         Examples::
 
             # HTML snippet: <p class="product-name">Color TV</p>
             loader.add_css('name', 'p.product-name')
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.add_css('price', 'p#price', re='the price is (.*)')
-        """
-        values = self._get_cssvalues(css, **kw)
-        self.add_value(field_name, values, *processors, **kw)
 
-    def replace_css(self, field_name, css, *processors, **kw):
+        """
+        values = self._get_cssvalues(css)
+        return self.add_value(field_name, values, *processors, re=re, **kw)
+
+    def replace_css(
+        self,
+        field_name: str | None,
+        css: str | Iterable[str],
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Self:
         """
         Similar to :meth:`add_css` but replaces collected data instead of adding it.
-        """
-        values = self._get_cssvalues(css, **kw)
-        self.replace_value(field_name, values, *processors, **kw)
 
-    def get_css(self, css, *processors, **kw):
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
+        """
+        values = self._get_cssvalues(css)
+        return self.replace_value(field_name, values, *processors, re=re, **kw)
+
+    def get_css(
+        self,
+        css: str | Iterable[str],
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Any:
         """
         Similar to :meth:`ItemLoader.get_value` but receives a CSS selector
-        instead of a value, which is used to extract a list of unicode strings
+        instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
         :param css: the CSS selector to extract data from
@@ -434,7 +545,7 @@ class ItemLoader:
 
         :param re: a regular expression to use for extracting data from the
             selected CSS region
-        :type re: str or typing.Pattern
+        :type re: str or typing.Pattern[str]
 
         Examples::
 
@@ -443,10 +554,98 @@ class ItemLoader:
             # HTML snippet: <p id="price">the price is $1200</p>
             loader.get_css('p#price', TakeFirst(), re='the price is (.*)')
         """
-        values = self._get_cssvalues(css, **kw)
-        return self.get_value(values, *processors, **kw)
+        values = self._get_cssvalues(css)
+        return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_cssvalues(self, csss, **kw):
+    def _get_cssvalues(self, csss: str | Iterable[str]) -> list[Any]:
         self._check_selector_method()
+        assert self.selector is not None
         csss = arg_to_iter(csss)
         return flatten(self.selector.css(css).getall() for css in csss)
+
+    def add_jmes(
+        self,
+        field_name: str | None,
+        jmes: str,
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Self:
+        """
+        Similar to :meth:`ItemLoader.add_value` but receives a JMESPath selector
+        instead of a value, which is used to extract a list of strings
+        from the selector associated with this :class:`ItemLoader`.
+
+        See :meth:`get_jmes` for ``kwargs``.
+
+        :param jmes: the JMESPath selector to extract data from
+        :type jmes: str
+
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+
+        Examples::
+
+            # JSON snippet: {"name": "Color TV"}
+            loader.add_jmes('name', 'name')
+            # JSON snippet: {"price": "the price is $1200"}
+            loader.add_jmes('price', 'price', TakeFirst(), re='the price is (.*)')
+        """
+        values = self._get_jmesvalues(jmes)
+        return self.add_value(field_name, values, *processors, re=re, **kw)
+
+    def replace_jmes(
+        self,
+        field_name: str | None,
+        jmes: str | Iterable[str],
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Self:
+        """
+        Similar to :meth:`add_jmes` but replaces collected data instead of adding it.
+
+        :returns: The current ItemLoader instance for method chaining.
+        :rtype: ItemLoader
+        """
+        values = self._get_jmesvalues(jmes)
+        return self.replace_value(field_name, values, *processors, re=re, **kw)
+
+    def get_jmes(
+        self,
+        jmes: str | Iterable[str],
+        *processors: Callable[..., Any],
+        re: str | Pattern[str] | None = None,
+        **kw: Any,
+    ) -> Any:
+        """
+        Similar to :meth:`ItemLoader.get_value` but receives a JMESPath selector
+        instead of a value, which is used to extract a list of strings
+        from the selector associated with this :class:`ItemLoader`.
+
+        :param jmes: the JMESPath selector to extract data from
+        :type jmes: str
+
+        :param re: a regular expression to use for extracting data from the
+            selected JMESPath
+        :type re: str or typing.Pattern
+
+        Examples::
+
+            # JSON snippet: {"name": "Color TV"}
+            loader.get_jmes('name')
+            # JSON snippet: {"price": "the price is $1200"}
+            loader.get_jmes('price', TakeFirst(), re='the price is (.*)')
+        """
+        values = self._get_jmesvalues(jmes)
+        return self.get_value(values, *processors, re=re, **kw)
+
+    def _get_jmesvalues(self, jmess: str | Iterable[str]) -> list[Any]:
+        self._check_selector_method()
+        assert self.selector is not None
+        jmess = arg_to_iter(jmess)
+        if not hasattr(self.selector, "jmespath"):
+            raise AttributeError(
+                "Please install parsel >= 1.8.1 to get JMESPath support"
+            )
+        return flatten(self.selector.jmespath(jmes).getall() for jmes in jmess)
