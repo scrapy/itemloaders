@@ -1,0 +1,44 @@
+name: codspeed
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    paths:
+    - itemloaders/**
+    - tests/benchmarks/**
+    - .github/workflows/codspeed.yml
+    - tox.ini
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # OIDC authentication with CodSpeed
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Install dependencies
+        # tox must stay on PATH for the CodSpeed action to invoke it.
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade tox
+          tox -n -e benchmark
+      - name: Run benchmarks
+        uses: CodSpeedHQ/action@0ca9cbbf4623b599a6c3ed4fc8a922942705d9f1 # v5.0.2
+        with:
+          mode: simulation
+          run: tox -e benchmark
