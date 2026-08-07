@@ -383,10 +383,10 @@ class ItemLoader:
         value, which is used to extract a list of strings from the
         selector associated with this :class:`ItemLoader`.
 
-        See :meth:`get_xpath` for ``kwargs``.
+        *xpath* may also be an iterable of XPath expressions, in which case the
+        strings extracted by all of them are collected.
 
-        :param xpath: the XPath to extract data from
-        :type xpath: str
+        See :meth:`get_xpath` for ``kwargs``.
 
         :returns: The current ItemLoader instance for method chaining.
         :rtype: ItemLoader
@@ -432,12 +432,11 @@ class ItemLoader:
         value, which is used to extract a list of strings from the
         selector associated with this :class:`ItemLoader`.
 
-        :param xpath: the XPath to extract data from
-        :type xpath: str
+        *xpath* may also be an iterable of XPath expressions, in which case the
+        strings extracted by all of them are collected.
 
-        :param re: a regular expression to use for extracting data from the
-            selected XPath region
-        :type re: str or typing.Pattern[str]
+        *re* is a regular expression, as a string or a compiled pattern, used to
+        further extract data from the selected XPath region.
 
         Examples::
 
@@ -469,10 +468,10 @@ class ItemLoader:
         instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
-        See :meth:`get_css` for ``kwargs``.
+        *css* may also be an iterable of CSS selectors, in which case the
+        strings extracted by all of them are collected.
 
-        :param css: the CSS selector to extract data from
-        :type css: str
+        See :meth:`get_css` for ``kwargs``.
 
         :returns: The current ItemLoader instance for method chaining.
         :rtype: ItemLoader
@@ -518,12 +517,11 @@ class ItemLoader:
         instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
-        :param css: the CSS selector to extract data from
-        :type css: str
+        *css* may also be an iterable of CSS selectors, in which case the
+        strings extracted by all of them are collected.
 
-        :param re: a regular expression to use for extracting data from the
-            selected CSS region
-        :type re: str or typing.Pattern[str]
+        *re* is a regular expression, as a string or a compiled pattern, used to
+        further extract data from the selected CSS region.
 
         Examples::
 
@@ -544,7 +542,7 @@ class ItemLoader:
     def add_jmes(
         self,
         field_name: str | None,
-        jmes: str,
+        jmes: str | Iterable[str],
         *processors: Callable[..., Any],
         re: str | Pattern[str] | None = None,
         **kw: Any,
@@ -554,10 +552,10 @@ class ItemLoader:
         instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
-        See :meth:`get_jmes` for ``kwargs``.
+        *jmes* may also be an iterable of JMESPath selectors, in which case the
+        strings extracted by all of them are collected.
 
-        :param jmes: the JMESPath selector to extract data from
-        :type jmes: str
+        See :meth:`get_jmes` for ``kwargs``.
 
         :returns: The current ItemLoader instance for method chaining.
         :rtype: ItemLoader
@@ -601,12 +599,11 @@ class ItemLoader:
         instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
-        :param jmes: the JMESPath selector to extract data from
-        :type jmes: str
+        *jmes* may also be an iterable of JMESPath selectors, in which case the
+        strings extracted by all of them are collected.
 
-        :param re: a regular expression to use for extracting data from the
-            selected JMESPath
-        :type re: str or typing.Pattern
+        *re* is a regular expression, as a string or a compiled pattern, used to
+        further extract data from the selected JMESPath.
 
         Examples::
 

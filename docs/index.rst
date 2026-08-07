@@ -76,6 +76,12 @@ In other words, data is being collected by extracting it from two XPath
 locations, using the :meth:`~ItemLoader.add_xpath` method. This is the
 data that will be assigned to the ``name`` field later.
 
+Instead of one call per location, you can pass an iterable of XPath
+expressions::
+
+    l.add_xpath('name', ['//div[@class="product_name"]/text()',
+                         '//div[@class="product_title"]/text()'])
+
 Afterwards, similar calls are used for ``price`` field using a CSS selector with
 the :meth:`~ItemLoader.add_css` method, and finally the ``last_update`` field is
 populated directly with a literal value
