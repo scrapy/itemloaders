@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from parsel import Selector
 
@@ -47,6 +47,26 @@ class ProductLoader(ItemLoader):
     price_in = MapCompose(str.strip, float)
 
 
+def strip_with_context(value: str, loader_context: dict[str, Any]) -> str:
+    return value.strip(loader_context.get("chars"))
+
+
+class ContextProductLoader(ProductLoader):
+    name_in = MapCompose(strip_with_context, str.title)
+
+
+class DynamicProductLoader(ProductLoader):
+    """Loader that builds its processors per instance, so that every item gets
+    a different processor object."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.name_in = MapCompose(str.strip, self.title)
+
+    def title(self, value: str) -> str:
+        return value.title()
+
+
 def test_selector(benchmark: BenchmarkFixture) -> None:
     """Load an item out of a page, the way a spider callback does."""
 
@@ -81,6 +101,26 @@ def test_many_values(benchmark: BenchmarkFixture) -> None:
     @benchmark
     def factory() -> None:
         loader = ProductLoader()
+        loader.add_value("name", NAMES)
+        loader.load_item()
+
+
+def test_loader_context(benchmark: BenchmarkFixture) -> None:
+    """Load a field whose processor takes the loader context."""
+
+    @benchmark
+    def factory() -> None:
+        loader = ContextProductLoader()
+        loader.add_value("name", NAMES)
+        loader.load_item()
+
+
+def test_dynamic_processors(benchmark: BenchmarkFixture) -> None:
+    """Load a field whose processors are built per loader instance."""
+
+    @benchmark
+    def factory() -> None:
+        loader = DynamicProductLoader()
         loader.add_value("name", NAMES)
         loader.load_item()
 
