@@ -104,7 +104,7 @@ class TestInitializationFromDict(TestInitializationBase):
 
 @dataclass
 class DefaultItem:
-    name: str = "default"
+    name: Any = "default"
 
 
 def test_ignore_field_defaults_of_the_built_item() -> None:
