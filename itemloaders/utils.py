@@ -6,7 +6,8 @@ Refactoring to come later
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Generator, Iterable
+from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Set as AbstractSet
 from functools import partial
 from typing import Any
 
@@ -14,7 +15,9 @@ from typing import Any
 def arg_to_iter(arg: Any) -> Iterable[Any]:
     """Return an iterable based on *arg*.
 
-    If *arg* is a list, a tuple or a generator, it will be returned as is.
+    If *arg* is a :class:`list`, a :class:`tuple`, a
+    :class:`~collections.abc.Set` or an :class:`~collections.abc.Iterator`, it
+    will be returned as is.
 
     If *arg* is ``None``, an empty list will be returned.
 
@@ -23,7 +26,7 @@ def arg_to_iter(arg: Any) -> Iterable[Any]:
     """
     if arg is None:
         return []
-    if isinstance(arg, (list, tuple, Generator)):
+    if isinstance(arg, (list, tuple, Iterator, AbstractSet)):
         return arg
     return [arg]
 
