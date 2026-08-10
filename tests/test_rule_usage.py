@@ -4,6 +4,7 @@ import pytest
 from parsel import Selector
 
 from itemloaders import ItemLoader
+from tests.test_selector_loader import needs_parsel_jmespath
 
 
 class Stats:
@@ -40,6 +41,7 @@ def test_xpath(loader, stats):
     assert stats.values == {"parser/name/xpath///h1/text()": 1}
 
 
+@needs_parsel_jmespath
 def test_jmes(stats):
     loader = ItemLoader(selector=Selector(text='{"name": "Color TV"}'), stats=stats)
     loader.add_jmes("name", "name")
