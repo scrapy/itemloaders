@@ -101,6 +101,11 @@ class TestItemLoaderBasic:
         il.add_value(None, "Jim", lambda x: {"name": x})
         assert il.get_collected_values("name") == ["Marta", "Pepe", "Jim"]
 
+    def test_add_set(self):
+        il = ItemLoader()
+        il.add_value("name", {"marta", "pepe"})
+        assert sorted(il.get_collected_values("name")) == ["marta", "pepe"]
+
     def test_add_zero(self):
         il = ItemLoader()
         il.add_value("name", 0)
