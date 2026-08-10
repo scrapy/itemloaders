@@ -95,6 +95,7 @@ Contents
     loaders-context
     nested-loaders
     extending-loaders
+    rule-usage
     built-in-processors
     api-reference
     release-notes
