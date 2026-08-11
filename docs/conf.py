@@ -215,6 +215,7 @@ def maybe_skip_member(app, what, name, obj, skip, options):
 
 
 nitpicky = True
+nitpick_ignore = [("py:class", "itemloaders._StatsCollector")]
 
 intersphinx_mapping = {
     "parsel": ("https://parsel.readthedocs.io/en/stable/", None),
