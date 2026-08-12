@@ -172,6 +172,8 @@ extend-select = [
     "YTT",
 ]
 ignore = [
+    # Do not catch blind exception
+    "BLE001",
     # Trailing comma missing
     "COM812",
     # Missing docstring in public module
@@ -218,6 +220,8 @@ ignore = [
     "PLR0913",
     # Too many statements
     "PLR0915",
+    # Too many positional arguments
+    "PLR0917",
     # Magic value used in comparison
     "PLR2004",
     # String contains ambiguous {}.
