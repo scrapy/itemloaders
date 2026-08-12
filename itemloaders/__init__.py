@@ -9,7 +9,7 @@ from __future__ import annotations
 from contextlib import suppress
 from typing import TYPE_CHECKING, Any, Protocol
 
-from itemadapter import ItemAdapter
+from itemadapter import ItemAdapter, get_field_meta_from_class
 from parsel import Selector  # noqa: TC002  # for sphinx
 from parsel.utils import extract_regex, flatten
 
@@ -38,6 +38,19 @@ def unbound_method(method: Callable[..., Any]) -> Callable[..., Any]:
         if "." not in method.__qualname__:
             return method.__func__  # type: ignore[attr-defined, no-any-return]
     return method
+
+
+class _Context(dict[str, Any]):
+    def __init__(self, item_loader: ItemLoader, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self._item_loader = item_loader
+
+    def __getitem__(self, key: str) -> Any:
+        value = super().__getitem__(key)
+        if key == "item" and value is None:
+            # Reading the item from the context creates it if needed.
+            value = self[key] = self._item_loader.item
+        return value
 
 
 class ItemLoader:
@@ -135,17 +148,13 @@ class ItemLoader:
             stats if stats is not None or parent is None else parent.stats
         )
         context.update(selector=selector)
-        # An item built here has no data, only the field defaults of its class,
-        # which must not be mistaken for loaded values.
-        has_initial_values = item is not None
-        if item is None:
-            item = self.default_item_class()
         self._local_item = item
         context["item"] = item
-        self.context: MutableMapping[str, Any] = context
+        self.context: MutableMapping[str, Any] = _Context(parent or self, **context)
         self.parent: ItemLoader | None = parent
         self._local_values: dict[str, list[Any]] = {}
-        if has_initial_values:
+        if item is not None:
+            # values from initial item
             for field_name, value in ItemAdapter(item).items():
                 self._values.setdefault(field_name, [])
                 self._values[field_name] += arg_to_iter(value)
@@ -157,38 +166,43 @@ class ItemLoader:
         return self._local_values
 
     @property
+    def _item(self) -> Any:
+        """Item being populated, or ``None`` if it has not been created yet."""
+        if self.parent is not None:
+            return self.parent._item
+        return self._local_item
+
+    @property
     def item(self) -> Any:
         if self.parent is not None:
             return self.parent.item
+        if self._local_item is None:
+            self._local_item = self.default_item_class(**self._values)
         return self._local_item
 
     def nested_xpath(self, xpath: str, **context: Any) -> Self:
         """
         Create a nested loader with an xpath selector.
         The supplied selector is applied relative to selector associated
-        with this :class:`ItemLoader`. The nested loader shares the item
-        with the parent :class:`ItemLoader` so calls to :meth:`add_xpath`,
-        :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
+        with this :class:`ItemLoader`.
         """
         self._check_selector_method()
         assert self.selector is not None
         selector = self.selector.xpath(xpath)
         context.update(selector=selector)
-        return self.__class__(item=self.item, parent=self, **context)
+        return self.__class__(parent=self, **context)
 
     def nested_css(self, css: str, **context: Any) -> Self:
         """
         Create a nested loader with a css selector.
         The supplied selector is applied relative to selector associated
-        with this :class:`ItemLoader`. The nested loader shares the item
-        with the parent :class:`ItemLoader` so calls to :meth:`add_xpath`,
-        :meth:`add_value`, :meth:`replace_value`, etc. will behave as expected.
+        with this :class:`ItemLoader`.
         """
         self._check_selector_method()
         assert self.selector is not None
         selector = self.selector.css(css)
         context.update(selector=selector)
-        return self.__class__(item=self.item, parent=self, **context)
+        return self.__class__(parent=self, **context)
 
     def add_value(
         self,
@@ -366,7 +380,12 @@ class ItemLoader:
     def _get_item_field_attr(
         self, field_name: str, key: Any, default: Any = None
     ) -> Any:
-        field_meta = ItemAdapter(self.item).get_field_meta(field_name)
+        item = self._item
+        field_meta = (
+            get_field_meta_from_class(self.default_item_class, field_name)
+            if item is None
+            else ItemAdapter(item).get_field_meta(field_name)
+        )
         return field_meta.get(key, default)
 
     def _process_input_value(self, field_name: str, value: Any) -> Any:

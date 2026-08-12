@@ -105,6 +105,29 @@ class TestSubselectorLoader:
         assert item["url"] == ["http://www.scrapy.org"]
         assert item["image"] == ["/images/logo.png"]
 
+    def test_nested_from_item(self):
+        """Check that everything works as usual when the nested selector has a
+        parent item"""
+        item = {"foo": "bar"}
+        loader = ItemLoader(selector=self.selector, item=item)
+        nl1 = loader.nested_xpath("//footer")
+        nl2 = nl1.nested_xpath("img")
+
+        loader.add_xpath("name", "//header/div/text()")
+        nl1.add_xpath("url", "a/@href")
+        nl2.add_xpath("image", "@src")
+
+        item = loader.load_item()
+
+        assert item is loader.item
+        assert item is nl1.item
+        assert item is nl2.item
+
+        assert item["foo"] == ["bar"]
+        assert item["name"] == ["marta"]
+        assert item["url"] == ["http://www.scrapy.org"]
+        assert item["image"] == ["/images/logo.png"]
+
     def test_nested_empty_selector(self):
         loader = ItemLoader(selector=self.selector)
         nested_xpath = loader.nested_xpath("//bar")
