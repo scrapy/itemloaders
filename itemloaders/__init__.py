@@ -7,7 +7,7 @@ See documentation in :ref:`declaring-loaders`.
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 from itemadapter import ItemAdapter
 from parsel import Selector  # noqa: TC002  # for sphinx
@@ -23,6 +23,10 @@ if TYPE_CHECKING:
 
     # typing.Self requires Python 3.11
     from typing_extensions import Self
+
+
+class _StatsCollector(Protocol):
+    def inc_value(self, key: str, count: int = 1) -> None: ...
 
 
 def unbound_method(method: Callable[..., Any]) -> Callable[..., Any]:
@@ -58,6 +62,9 @@ class ItemLoader:
 
     The item, selector and the remaining keyword arguments are
     assigned to the Loader context (accessible through the :attr:`context` attribute).
+
+    Pass *stats* to keep track of which parsing rules are being used, as
+    described in :ref:`rule-usage`.
 
     .. attribute:: item
 
@@ -120,9 +127,13 @@ class ItemLoader:
         item: Any = None,
         selector: Selector | None = None,
         parent: ItemLoader | None = None,
+        stats: _StatsCollector | None = None,
         **context: Any,
     ):
         self.selector: Selector | None = selector
+        self.stats: _StatsCollector | None = (
+            stats if stats is not None or parent is None else parent.stats
+        )
         context.update(selector=selector)
         # An item built here has no data, only the field defaults of its class,
         # which must not be mistaken for loaded values.
@@ -370,6 +381,14 @@ class ItemLoader:
                 f" field={field_name!r} value={value!r} error='{type(e).__name__}: {e!s}'"
             ) from e
 
+    def _track_rule(
+        self, field_name: str | None, rule_type: str, rule: str, values: list[Any]
+    ) -> list[Any]:
+        if self.stats is not None:
+            key = f"parser/{field_name or '<none>'}/{rule_type}/{rule}"
+            self.stats.inc_value(key, 1 if values else 0)
+        return values
+
     def _check_selector_method(self) -> None:
         if self.selector is None:
             raise RuntimeError(
@@ -390,10 +409,10 @@ class ItemLoader:
         value, which is used to extract a list of strings from the
         selector associated with this :class:`ItemLoader`.
 
-        See :meth:`get_xpath` for ``kwargs``.
+        *xpath* may also be an iterable of XPath expressions, in which case the
+        strings extracted by all of them are collected.
 
-        :param xpath: the XPath to extract data from
-        :type xpath: str
+        See :meth:`get_xpath` for ``kwargs``.
 
         :returns: The current ItemLoader instance for method chaining.
         :rtype: ItemLoader
@@ -406,7 +425,7 @@ class ItemLoader:
             loader.add_xpath('price', '//p[@id="price"]', re='the price is (.*)')
 
         """
-        values = self._get_xpathvalues(xpath, **kw)
+        values = self._get_xpathvalues(xpath, field_name, **kw)
         return self.add_value(field_name, values, *processors, re=re, **kw)
 
     def replace_xpath(
@@ -424,7 +443,7 @@ class ItemLoader:
         :rtype: ItemLoader
 
         """
-        values = self._get_xpathvalues(xpath, **kw)
+        values = self._get_xpathvalues(xpath, field_name, **kw)
         return self.replace_value(field_name, values, *processors, re=re, **kw)
 
     def get_xpath(
@@ -439,12 +458,11 @@ class ItemLoader:
         value, which is used to extract a list of strings from the
         selector associated with this :class:`ItemLoader`.
 
-        :param xpath: the XPath to extract data from
-        :type xpath: str
+        *xpath* may also be an iterable of XPath expressions, in which case the
+        strings extracted by all of them are collected.
 
-        :param re: a regular expression to use for extracting data from the
-            selected XPath region
-        :type re: str or typing.Pattern[str]
+        *re* is a regular expression, as a string or a compiled pattern, used to
+        further extract data from the selected XPath region.
 
         Examples::
 
@@ -457,11 +475,21 @@ class ItemLoader:
         values = self._get_xpathvalues(xpath, **kw)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_xpathvalues(self, xpaths: str | Iterable[str], **kw: Any) -> list[Any]:
+    def _get_xpathvalues(
+        self,
+        xpaths: str | Iterable[str],
+        field_name: str | None = None,
+        **kw: Any,
+    ) -> list[Any]:
         self._check_selector_method()
         assert self.selector is not None
         xpaths = arg_to_iter(xpaths)
-        return flatten(self.selector.xpath(xpath, **kw).getall() for xpath in xpaths)
+        return flatten(
+            self._track_rule(
+                field_name, "xpath", xpath, self.selector.xpath(xpath, **kw).getall()
+            )
+            for xpath in xpaths
+        )
 
     def add_css(
         self,
@@ -476,10 +504,10 @@ class ItemLoader:
         instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
-        See :meth:`get_css` for ``kwargs``.
+        *css* may also be an iterable of CSS selectors, in which case the
+        strings extracted by all of them are collected.
 
-        :param css: the CSS selector to extract data from
-        :type css: str
+        See :meth:`get_css` for ``kwargs``.
 
         :returns: The current ItemLoader instance for method chaining.
         :rtype: ItemLoader
@@ -492,7 +520,7 @@ class ItemLoader:
             loader.add_css('price', 'p#price', re='the price is (.*)')
 
         """
-        values = self._get_cssvalues(css)
+        values = self._get_cssvalues(css, field_name)
         return self.add_value(field_name, values, *processors, re=re, **kw)
 
     def replace_css(
@@ -510,7 +538,7 @@ class ItemLoader:
         :rtype: ItemLoader
 
         """
-        values = self._get_cssvalues(css)
+        values = self._get_cssvalues(css, field_name)
         return self.replace_value(field_name, values, *processors, re=re, **kw)
 
     def get_css(
@@ -525,12 +553,11 @@ class ItemLoader:
         instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
-        :param css: the CSS selector to extract data from
-        :type css: str
+        *css* may also be an iterable of CSS selectors, in which case the
+        strings extracted by all of them are collected.
 
-        :param re: a regular expression to use for extracting data from the
-            selected CSS region
-        :type re: str or typing.Pattern[str]
+        *re* is a regular expression, as a string or a compiled pattern, used to
+        further extract data from the selected CSS region.
 
         Examples::
 
@@ -542,16 +569,21 @@ class ItemLoader:
         values = self._get_cssvalues(css)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_cssvalues(self, csss: str | Iterable[str]) -> list[Any]:
+    def _get_cssvalues(
+        self, csss: str | Iterable[str], field_name: str | None = None
+    ) -> list[Any]:
         self._check_selector_method()
         assert self.selector is not None
         csss = arg_to_iter(csss)
-        return flatten(self.selector.css(css).getall() for css in csss)
+        return flatten(
+            self._track_rule(field_name, "css", css, self.selector.css(css).getall())
+            for css in csss
+        )
 
     def add_jmes(
         self,
         field_name: str | None,
-        jmes: str,
+        jmes: str | Iterable[str],
         *processors: Callable[..., Any],
         re: str | Pattern[str] | None = None,
         **kw: Any,
@@ -561,10 +593,10 @@ class ItemLoader:
         instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
-        See :meth:`get_jmes` for ``kwargs``.
+        *jmes* may also be an iterable of JMESPath selectors, in which case the
+        strings extracted by all of them are collected.
 
-        :param jmes: the JMESPath selector to extract data from
-        :type jmes: str
+        See :meth:`get_jmes` for ``kwargs``.
 
         :returns: The current ItemLoader instance for method chaining.
         :rtype: ItemLoader
@@ -576,7 +608,7 @@ class ItemLoader:
             # JSON snippet: {"price": "the price is $1200"}
             loader.add_jmes('price', 'price', TakeFirst(), re='the price is (.*)')
         """
-        values = self._get_jmesvalues(jmes)
+        values = self._get_jmesvalues(jmes, field_name)
         return self.add_value(field_name, values, *processors, re=re, **kw)
 
     def replace_jmes(
@@ -593,7 +625,7 @@ class ItemLoader:
         :returns: The current ItemLoader instance for method chaining.
         :rtype: ItemLoader
         """
-        values = self._get_jmesvalues(jmes)
+        values = self._get_jmesvalues(jmes, field_name)
         return self.replace_value(field_name, values, *processors, re=re, **kw)
 
     def get_jmes(
@@ -608,12 +640,11 @@ class ItemLoader:
         instead of a value, which is used to extract a list of strings
         from the selector associated with this :class:`ItemLoader`.
 
-        :param jmes: the JMESPath selector to extract data from
-        :type jmes: str
+        *jmes* may also be an iterable of JMESPath selectors, in which case the
+        strings extracted by all of them are collected.
 
-        :param re: a regular expression to use for extracting data from the
-            selected JMESPath
-        :type re: str or typing.Pattern
+        *re* is a regular expression, as a string or a compiled pattern, used to
+        further extract data from the selected JMESPath.
 
         Examples::
 
@@ -625,7 +656,9 @@ class ItemLoader:
         values = self._get_jmesvalues(jmes)
         return self.get_value(values, *processors, re=re, **kw)
 
-    def _get_jmesvalues(self, jmess: str | Iterable[str]) -> list[Any]:
+    def _get_jmesvalues(
+        self, jmess: str | Iterable[str], field_name: str | None = None
+    ) -> list[Any]:
         self._check_selector_method()
         assert self.selector is not None
         jmess = arg_to_iter(jmess)
@@ -633,4 +666,9 @@ class ItemLoader:
             raise AttributeError(
                 "Please install parsel >= 1.8.1 to get JMESPath support"
             )
-        return flatten(self.selector.jmespath(jmes).getall() for jmes in jmess)
+        return flatten(
+            self._track_rule(
+                field_name, "jmes", jmes, self.selector.jmespath(jmes).getall()
+            )
+            for jmes in jmess
+        )
