@@ -40,6 +40,12 @@ using a proper processing function.
    each of the item's values will be stored as-is if it's already
    an iterable, or wrapped with a list if it's a single value.
 
+   .. versionchanged:: VERSION
+      An Item Loader that instantiates the item itself starts with no
+      collected data. The field defaults of the item class still reach the
+      loaded item, but only for fields that get no data, and without going
+      through :ref:`processors <processors>`.
+
 Here is a typical Item Loader usage::
 
     from itemloaders import ItemLoader
@@ -76,6 +82,12 @@ In other words, data is being collected by extracting it from two XPath
 locations, using the :meth:`~ItemLoader.add_xpath` method. This is the
 data that will be assigned to the ``name`` field later.
 
+Instead of one call per location, you can pass an iterable of XPath
+expressions::
+
+    l.add_xpath('name', ['//div[@class="product_name"]/text()',
+                         '//div[@class="product_title"]/text()'])
+
 Afterwards, similar calls are used for ``price`` field using a CSS selector with
 the :meth:`~ItemLoader.add_css` method, and finally the ``last_update`` field is
 populated directly with a literal value
@@ -95,6 +107,7 @@ Contents
     loaders-context
     nested-loaders
     extending-loaders
+    rule-usage
     built-in-processors
     api-reference
     release-notes
