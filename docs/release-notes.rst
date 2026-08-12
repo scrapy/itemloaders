@@ -5,6 +5,16 @@
 Release notes
 =============
 
+.. _release-VERSION:
+
+itemloaders VERSION (unreleased)
+--------------------------------
+
+-   **Backward-incompatible change**, which should determine the version
+    number of this release: when an Item Loader instantiates the item itself,
+    the field defaults of that item are no longer treated as collected data
+    (:gh:`117`)
+
 .. _release-1.4.0:
 
 itemloaders 1.4.0 (2026-01-29)
