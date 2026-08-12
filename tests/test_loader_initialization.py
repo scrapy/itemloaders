@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any
 
 from itemloaders import ItemLoader
@@ -99,3 +100,23 @@ class TestInitializationBase(ABC):
 
 class TestInitializationFromDict(TestInitializationBase):
     item_class = dict
+
+
+@dataclass
+class DefaultItem:
+    name: Any = "default"
+
+
+def test_ignore_field_defaults_of_the_built_item() -> None:
+    class DefaultItemLoader(ItemLoader):
+        default_item_class = DefaultItem
+
+    il = DefaultItemLoader()
+    il.add_value("name", "foo")
+    assert il.load_item() == DefaultItem(name=["foo"])
+
+
+def test_keep_field_defaults_of_the_given_item() -> None:
+    il = ItemLoader(item=DefaultItem())
+    il.add_value("name", "foo")
+    assert il.load_item() == DefaultItem(name=["default", "foo"])

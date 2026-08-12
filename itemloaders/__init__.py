@@ -82,6 +82,10 @@ class ItemLoader:
         An Item class (or factory), used to instantiate items when not given in
         the ``__init__`` method.
 
+        .. versionchanged:: VERSION
+            The field defaults of an item instantiated this way are no longer
+            treated as loaded values.
+
         .. warning:: Currently, this factory/class needs to be
             callable/instantiated without any arguments.
             If you are using ``dataclasses``, please consider the following
@@ -131,6 +135,9 @@ class ItemLoader:
             stats if stats is not None or parent is None else parent.stats
         )
         context.update(selector=selector)
+        # An item built here has no data, only the field defaults of its class,
+        # which must not be mistaken for loaded values.
+        has_initial_values = item is not None
         if item is None:
             item = self.default_item_class()
         self._local_item = item
@@ -138,10 +145,10 @@ class ItemLoader:
         self.context: MutableMapping[str, Any] = context
         self.parent: ItemLoader | None = parent
         self._local_values: dict[str, list[Any]] = {}
-        # values from initial item
-        for field_name, value in ItemAdapter(item).items():
-            self._values.setdefault(field_name, [])
-            self._values[field_name] += arg_to_iter(value)
+        if has_initial_values:
+            for field_name, value in ItemAdapter(item).items():
+                self._values.setdefault(field_name, [])
+                self._values[field_name] += arg_to_iter(value)
 
     @property
     def _values(self) -> dict[str, list[Any]]:
