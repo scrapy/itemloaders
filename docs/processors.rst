@@ -72,3 +72,26 @@ processors to populate the fields.
 
 Last, but not least, ``itemloaders`` comes with some :ref:`commonly used processors
 <built-in-processors>` built-in for convenience.
+
+.. _empty-values:
+
+Empty values
+------------
+
+A field is only assigned to the item if at least one value was collected for
+it, and ``None`` is never collected. It is ignored both when passed directly
+and when returned by a processor, as are extractions that match nothing::
+
+    l = ItemLoader(selector=selector)
+    l.add_value('name', None)
+    l.add_xpath('price', '//nonexistent/text()')
+    l.load_item()
+    # {}
+
+The loaded item has neither field, so reading them raises :exc:`KeyError` on
+item types where unassigned fields are absent, such as :class:`dict` or
+:class:`scrapy.Item <scrapy.item.Item>`.
+
+For a field to be present regardless of what is collected, use an item class
+that gives its fields a default value, such as a :mod:`dataclasses` or
+``attrs`` class.
