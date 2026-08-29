@@ -86,10 +86,6 @@ class ItemLoader:
             The field defaults of an item instantiated this way are no longer
             treated as loaded values.
 
-        .. versionchanged:: VERSION
-            The field defaults of an item instantiated this way are no longer
-            treated as loaded values.
-
         .. warning:: Currently, this factory/class needs to be
             callable/instantiated without any arguments.
             If you are using ``dataclasses``, please consider the following
