@@ -80,7 +80,11 @@ class ItemLoader:
     .. attribute:: default_item_class
 
         An Item class (or factory), used to instantiate items when not given in
-        the ``__init__`` method.
+        the ``__init__` method.
+
+        .. versionchanged:: VERSION
+            The field defaults of an item instantiated this way are no longer
+            treated as loaded values.
 
         .. versionchanged:: VERSION
             The field defaults of an item instantiated this way are no longer
@@ -112,7 +116,7 @@ class ItemLoader:
     .. attribute:: selector
 
         The :class:`~parsel.selector.Selector` object to extract data from.
-        It's the selector given in the ``__init__`` method.
+        It's the selector given in the ``__init__` method.
         This attribute is meant to be read-only.
 
     .. _parsel: https://parsel.readthedocs.io/en/latest/
@@ -419,10 +423,10 @@ class ItemLoader:
 
         Examples::
 
-            # HTML snippet: <p class="product-name">Color TV</p>
-            loader.add_xpath('name', '//p[@class="product-name"]')
-            # HTML snippet: <p id="price">the price is $1200</p>
-            loader.add_xpath('price', '//p[@id="price"]', re='the price is (.*)')
+            # HTML snippet: <p class=\"product-name\">Color TV</p>
+            loader.add_xpath('name', '//p[@class=\"product-name\"]')
+            # HTML snippet: <p id=\"price\">the price is $1200</p>
+            loader.add_xpath('price', '//p[@id=\"price\"]', re='the price is (.*)')
 
         """
         values = self._get_xpathvalues(xpath, field_name, **kw)
@@ -466,10 +470,10 @@ class ItemLoader:
 
         Examples::
 
-            # HTML snippet: <p class="product-name">Color TV</p>
-            loader.get_xpath('//p[@class="product-name"]')
-            # HTML snippet: <p id="price">the price is $1200</p>
-            loader.get_xpath('//p[@id="price"]', TakeFirst(), re='the price is (.*)')
+            # HTML snippet: <p class=\"product-name\">Color TV</p>
+            loader.get_xpath('//p[@class=\"product-name\"]')
+            # HTML snippet: <p id=\"price\">the price is $1200</p>
+            loader.get_xpath('//p[@id=\"price\"]', TakeFirst(), re='the price is (.*)')
 
         """
         values = self._get_xpathvalues(xpath, **kw)
@@ -514,9 +518,9 @@ class ItemLoader:
 
         Examples::
 
-            # HTML snippet: <p class="product-name">Color TV</p>
+            # HTML snippet: <p class=\"product-name\">Color TV</p>
             loader.add_css('name', 'p.product-name')
-            # HTML snippet: <p id="price">the price is $1200</p>
+            # HTML snippet: <p id=\"price\">the price is $1200</p>
             loader.add_css('price', 'p#price', re='the price is (.*)')
 
         """
@@ -561,9 +565,9 @@ class ItemLoader:
 
         Examples::
 
-            # HTML snippet: <p class="product-name">Color TV</p>
+            # HTML snippet: <p class=\"product-name\">Color TV</p>
             loader.get_css('p.product-name')
-            # HTML snippet: <p id="price">the price is $1200</p>
+            # HTML snippet: <p id=\"price\">the price is $1200</p>
             loader.get_css('p#price', TakeFirst(), re='the price is (.*)')
         """
         values = self._get_cssvalues(css)
@@ -603,9 +607,9 @@ class ItemLoader:
 
         Examples::
 
-            # JSON snippet: {"name": "Color TV"}
+            # JSON snippet: {\"name\": \"Color TV\"}
             loader.add_jmes('name', 'name')
-            # JSON snippet: {"price": "the price is $1200"}
+            # JSON snippet: {\"price\": \"the price is $1200\"}
             loader.add_jmes('price', 'price', TakeFirst(), re='the price is (.*)')
         """
         values = self._get_jmesvalues(jmes, field_name)
@@ -648,9 +652,9 @@ class ItemLoader:
 
         Examples::
 
-            # JSON snippet: {"name": "Color TV"}
+            # JSON snippet: {\"name\": \"Color TV\"}
             loader.get_jmes('name')
-            # JSON snippet: {"price": "the price is $1200"}
+            # JSON snippet: {\"price\": \"the price is $1200\"}
             loader.get_jmes('price', TakeFirst(), re='the price is (.*)')
         """
         values = self._get_jmesvalues(jmes)
