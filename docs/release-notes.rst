@@ -15,10 +15,6 @@ itemloaders VERSION (unreleased)
     the field defaults of that item are no longer treated as collected data
     (:gh:`117`)
 
--   Fixed :meth:`ItemLoader.add_value` dropping falsy values when an input
-    processor returned them as scalars. Empty processor results continue to be
-    ignored. (:gh:`73`, :gh:`113`)
-
 .. _release-1.4.0:
 
 itemloaders 1.4.0 (2026-01-29)
