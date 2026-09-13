@@ -59,3 +59,12 @@ def test_get_func_args():
             [],
             ["args", "kwargs"],
         ]
+
+
+def test_partial_argument_values_are_not_parameter_names():
+    def function(value, loader_context):
+        return value, loader_context
+
+    assert get_func_args(functools.partial(function, "loader_context")) == [
+        "loader_context"
+    ]

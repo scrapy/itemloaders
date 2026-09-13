@@ -80,12 +80,9 @@ def get_func_args(func: Callable[..., Any], stripself: bool = False) -> list[str
         return args
 
     if isinstance(func, partial):
-        partial_args = func.args
         partial_kw = func.keywords
 
         for name, param in sig.parameters.items():
-            if param.name in partial_args:
-                continue
             if partial_kw and param.name in partial_kw:
                 continue
             args.append(name)

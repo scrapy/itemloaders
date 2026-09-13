@@ -1,3 +1,5 @@
+from functools import partial
+
 import pytest
 
 from itemloaders.processors import Compose, Identity, Join, MapCompose, TakeFirst
@@ -67,3 +69,16 @@ def test_mapcompose():
         match=r"Error in MapCompose with .* error='TypeError: (can only|unsupported operand)",
     ):
         proc("hello")
+
+
+@pytest.mark.parametrize("processor", [Compose, MapCompose])
+def test_partial_processor_keeps_context_with_matching_value(processor):
+    def prefix_text(prefix, value, loader_context):
+        return prefix + value + loader_context["suffix"]
+
+    proc = processor(partial(prefix_text, "loader_context"))
+    value = ["text"] if processor is MapCompose else "text"
+    expected = (
+        ["loader_contexttext!"] if processor is MapCompose else "loader_contexttext!"
+    )
+    assert proc(value, {"suffix": "!"}) == expected
