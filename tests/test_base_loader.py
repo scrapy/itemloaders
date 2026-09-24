@@ -125,6 +125,14 @@ class TestItemLoaderBasic:
         il.add_value("name", 0)
         assert il.get_collected_values("name") == [0]
 
+    def test_add_zero_from_input_processor(self):
+        class TakeFirstItemLoader(ItemLoader):
+            name_in = TakeFirst()
+
+        il = TakeFirstItemLoader()
+        il.add_value("name", [0])
+        assert il.get_collected_values("name") == [0]
+
     def test_add_none(self):
         il = ItemLoader()
         il.add_value("name", None)
