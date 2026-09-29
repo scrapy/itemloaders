@@ -7,7 +7,7 @@ Release notes
 
 .. _release-1.5.0:
 
-itemloaders 1.5.0 (unreleased)
+itemloaders 1.5.0 (2026-09-29)
 ------------------------------
 
 -   **Backward-incompatible change:** when an Item Loader instantiates the
