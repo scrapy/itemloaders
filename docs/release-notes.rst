@@ -5,15 +5,47 @@
 Release notes
 =============
 
-.. _release-VERSION:
+.. _release-1.5.0:
 
-itemloaders VERSION (unreleased)
---------------------------------
+itemloaders 1.5.0 (unreleased)
+------------------------------
 
--   **Backward-incompatible change**, which should determine the version
-    number of this release: when an Item Loader instantiates the item itself,
-    the field defaults of that item are no longer treated as collected data
-    (:gh:`117`)
+-   **Backward-incompatible change:** when an Item Loader instantiates the
+    item itself, from :attr:`~ItemLoader.default_item_class`, the field
+    defaults of that item are no longer treated as collected data, so they no
+    longer go through processors and no longer get combined with the values
+    you add. They still reach the loaded item for fields that get no data.
+
+    To get the old behavior, pass the item yourself, e.g.
+    ``ItemLoader(item=MyItem())``. (:gh:`117`)
+
+-   **Backward-incompatible change:** sets and iterators other than generators,
+    such as the result of :func:`map`, are now collected value by value, like
+    lists, tuples and generators already were, instead of as a single value.
+
+    To collect one of them as a single value, wrap it in a list, e.g.
+    ``loader.add_value("tags", [{"a", "b"}])``. (:gh:`120`)
+
+-   Added a *stats* parameter to :class:`ItemLoader` to count how often each
+    parsing rule matches, to find rules that are no longer needed. See
+    :ref:`rule-usage`. (:gh:`121`)
+
+-   :ref:`Nested loaders <nested-loaders>` now inherit the
+    :ref:`context <loaders-context>` of their parent loader, with keyword
+    arguments passed to :meth:`~ItemLoader.nested_xpath` and
+    :meth:`~ItemLoader.nested_css` taking precedence. (:gh:`34`, :gh:`124`)
+
+-   Fixed :func:`functools.partial` processors missing their
+    ``loader_context`` when the value of a positionally-bound argument matched
+    the name of an unbound parameter, e.g. ``partial(func, "loader_context")``.
+    (:gh:`125`, :gh:`126`)
+
+-   Improved performance. (:gh:`119`, :gh:`120`)
+
+-   Documentation improvements. (:gh:`111`, :gh:`116`, :gh:`118`)
+
+-   CI and test improvements. (:gh:`114`, :gh:`115`, :gh:`122`, :gh:`123`,
+    :gh:`127`)
 
 .. _release-1.4.0:
 
