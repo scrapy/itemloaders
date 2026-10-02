@@ -36,3 +36,19 @@ class TestOutputProcessorItem:
         item = loader.load_item()
         assert isinstance(item, dict)
         assert dict(item) == {"temp": 0.3}
+
+
+def take_first(value):
+    return value[0]
+
+
+def test_unbound_processor():
+    """Ensure that a processor not taking a `self` parameter does not break
+    anything"""
+
+    class TempLoader(ItemLoader):
+        default_output_processor = take_first
+
+    loader = TempLoader()
+    loader.add_value("foo", "bar")
+    assert loader.load_item() == {"foo": "bar"}
