@@ -15,7 +15,7 @@ license-files = ["LICENSE"]
 dependencies = [
     # before updating these versions, be sure they are not higher than
     # scrapy's requirements
-    "itemadapter>=0.1.0",
+    "itemadapter>=0.1.1",
     "jmespath>=0.9.5",
     "parsel>=1.5.0",
 ]
