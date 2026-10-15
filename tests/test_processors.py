@@ -1,8 +1,17 @@
+from collections.abc import Iterator
 from functools import partial
 
 import pytest
 
-from itemloaders.processors import Compose, Identity, Join, MapCompose, TakeFirst
+from itemloaders import ItemLoader
+from itemloaders.processors import (
+    Compose,
+    Identity,
+    Join,
+    MapCompose,
+    TakeFirst,
+    TakeFirstN,
+)
 
 
 def test_take_first():
@@ -14,6 +23,51 @@ def test_take_first():
 def test_identity():
     proc = Identity()
     assert proc([None, "", "hello", "world"]) == [None, "", "hello", "world"]
+
+
+@pytest.mark.parametrize(
+    ("n", "values", "expected"),
+    [
+        (2, [None, "", "hello", "world", "extra"], ["hello", "world"]),
+        (3, [None, "", 0, False, "hello"], [0, False, "hello"]),
+        (1, ["hello", "world"], ["hello"]),
+        (3, ["hello"], ["hello"]),
+        (2, [None, ""], []),
+        (2, [], []),
+        (0, ["hello"], []),
+    ],
+)
+def test_take_first_n(n, values, expected):
+    assert TakeFirstN(n)(values) == expected
+
+
+def test_take_first_n_does_not_overconsume():
+    values = iter([None, "first", "", "second", "third"])
+    assert TakeFirstN(2)(values) == ["first", "second"]
+    assert next(values) == "third"
+    assert TakeFirstN(0)(values) == []
+
+
+def test_take_first_n_empty_limit_does_not_iterate():
+    def values() -> Iterator[None]:
+        pytest.fail("zero limit must not consume values")
+        yield
+
+    assert TakeFirstN(0)(values()) == []
+
+
+def test_take_first_n_invalid_limit():
+    with pytest.raises(ValueError, match="non-negative"):
+        TakeFirstN(-1)
+    with pytest.raises(TypeError):
+        TakeFirstN(1.5)  # type: ignore[arg-type]
+
+
+def test_take_first_n_output_processor():
+    loader = ItemLoader()
+    loader.default_output_processor = TakeFirstN(2)
+    loader.add_value("tags", ["one", "two", "three"])
+    assert loader.load_item() == {"tags": ["one", "two"]}
 
 
 def test_join():

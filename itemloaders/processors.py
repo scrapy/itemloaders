@@ -7,6 +7,8 @@ See documentation in :ref:`declaring-loaders`.
 from __future__ import annotations
 
 from collections import ChainMap
+from itertools import islice
+from operator import index
 from typing import TYPE_CHECKING, Any
 
 from itemloaders.common import wrap_loader_context
@@ -163,6 +165,38 @@ class TakeFirst:
             if value is not None and value != "":
                 return value
         return None
+
+
+class TakeFirstN:
+    """
+    Returns a list of at most ``n`` non-null/non-empty values, in input order.
+    Like :class:`TakeFirst`, only ``None`` and the empty string are skipped;
+    values such as ``0`` and ``False`` are kept.
+
+    ``n`` must be a non-negative integer. The return value is always a list,
+    including when ``n`` is one or no values are found. Input iterators are
+    consumed only until ``n`` accepted values have been collected. A zero
+    limit returns an empty list without consuming any values.
+
+    Example:
+
+    >>> from itemloaders.processors import TakeFirstN
+    >>> proc = TakeFirstN(2)
+    >>> proc(['', 'one', None, 'two', 'three'])
+    ['one', 'two']
+    """
+
+    def __init__(self, n: int):
+        self.n = index(n)
+        if self.n < 0:
+            raise ValueError("n must be non-negative")
+
+    def __call__(self, values: Iterable[Any]) -> list[Any]:
+        return list(
+            islice(
+                (value for value in values if value is not None and value != ""), self.n
+            )
+        )
 
 
 class Identity:
