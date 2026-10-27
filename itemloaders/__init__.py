@@ -20,9 +20,7 @@ from itemloaders.utils import arg_to_iter
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, MutableMapping
     from re import Pattern
-
-    # typing.Self requires Python 3.11
-    from typing_extensions import Self
+    from typing import Self
 
 
 class _StatsCollector(Protocol):
