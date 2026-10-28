@@ -7,7 +7,7 @@ See documentation in :ref:`declaring-loaders`.
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, Self
 
 from itemadapter import ItemAdapter
 from parsel import Selector  # noqa: TC002  # for sphinx
@@ -20,9 +20,6 @@ from itemloaders.utils import arg_to_iter
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, MutableMapping
     from re import Pattern
-
-    # typing.Self requires Python 3.11
-    from typing_extensions import Self
 
 
 class _StatsCollector(Protocol):
