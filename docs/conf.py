@@ -16,7 +16,6 @@ from pathlib import Path
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
-sys.path.append(str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # General configuration
@@ -25,11 +24,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
-    "_ext.github",
-    "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.viewcode",
+    "sphinx_scrapy",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -217,8 +213,4 @@ def maybe_skip_member(app, what, name, obj, skip, options):
 nitpicky = True
 nitpick_ignore = [("py:class", "itemloaders._StatsCollector")]
 
-intersphinx_mapping = {
-    "parsel": ("https://parsel.readthedocs.io/en/stable/", None),
-    "python": ("https://docs.python.org/3", None),
-    "scrapy": ("https://docs.scrapy.org/en/latest/", None),
-}
+scrapy_intersphinx_enable = ["parsel"]

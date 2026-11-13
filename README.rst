@@ -18,8 +18,8 @@ itemloaders
    :target: https://codecov.io/gh/scrapy/itemloaders
    :alt: Coverage report
 
-.. image:: https://readthedocs.org/projects/itemloaders/badge/?version=latest
-   :target: https://itemloaders.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/itemloaders/badge/?version=stable
+   :target: https://itemloaders.readthedocs.io/en/stable/?badge=stable
    :alt: Documentation Status
 
 
@@ -58,7 +58,7 @@ Here is an example to get you started::
     item
     # {'name': ['Some random product page'], 'price': ['$ 100.12'], 'last_updated': ['today']}
 
-For more information, check out the `documentation <https://itemloaders.readthedocs.io/en/latest/>`_.
+For more information, check out the `documentation <https://itemloaders.readthedocs.io/en/stable/>`_.
 
 Contributing
 ============

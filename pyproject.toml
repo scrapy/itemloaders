@@ -44,7 +44,10 @@ Homepage = "https://github.com/scrapy/itemloaders"
 Documentation = "https://itemloaders.readthedocs.io/"
 Source = "https://github.com/scrapy/itemloaders"
 Tracker = "https://github.com/scrapy/itemloaders/issues"
-"Release notes" = "https://itemloaders.readthedocs.io/en/latest/release-notes.html"
+"Release notes" = "https://itemloaders.readthedocs.io/en/stable/release-notes.html"
+
+[dependency-groups]
+docs = ["sphinx-rtd-theme"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -63,6 +66,10 @@ filename = "docs/release-notes.rst"
 search = "\\(unreleased\\)$"
 replace = "({now:%Y-%m-%d})"
 regex = true
+
+[tool.sphinx-scrapy]
+# Keep in sync with .github/workflows/tests-ubuntu.yml
+python-version = "3.14"
 
 [tool.coverage.run]
 branch = true

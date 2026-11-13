@@ -211,7 +211,7 @@ itemloaders 1.0.1 (2020-07-02)
 
 -   Improved the README file (:gh:`9`)
 
--   Improved continuous integration (:gh:`e62d95b`)
+-   Improved continuous integration (`e62d95b <https://github.com/scrapy/itemloaders/commit/e62d95b>`_)
 
 
 .. _release-1.0.0:
